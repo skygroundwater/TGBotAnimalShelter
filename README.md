@@ -22,6 +22,16 @@
 
 **4. Соколов Глеб**
 
+### Development tools:
+* IntelliJ IDEA
+* Java 17
+* org.springframework.boot 3.1.0
+* com.github.pengrad 6.5.0
+* org.springframework.data 3.1.0
+* org.liquibase 4.20.0
+* org.junit.jupiter 5.9.3
+* Build with org.apache.maven
+
 # Telegram bot "Animal Shelter"
 
 ## Функционал для пользователя
