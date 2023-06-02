@@ -32,6 +32,7 @@ public class Config {
     }
 
     @Bean
+    @Scope(scopeName = "prototype")
     public Logger getLogger(){
         return LoggerFactory.getLogger(AnimalShelterBotListener.class);
     }

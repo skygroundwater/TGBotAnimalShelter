@@ -37,18 +37,21 @@ public class AnimalShelterBotListener implements UpdatesListener {
 
     private final Part1 part1;
 
+    private final Part2 part2;
+
     @Autowired
     public AnimalShelterBotListener(TelegramBot telegramBot,
                                     @Qualifier("catsServiceImpl") PetService catsService,
                                     @Qualifier("dogsServiceImpl") PetService dogsService,
                                     PetOwnersService petOwnersService,
-                                    Logger logger, Part1 part1) {
+                                    Logger logger, Part1 part1, Part2 part2) {
         this.telegramBot = telegramBot;
         this.catsService = catsService;
         this.dogsService = dogsService;
         this.petOwnersService = petOwnersService;
         this.logger = logger;
         this.part1 = part1;
+        this.part2 = part2;
     }
 
     @PostConstruct
@@ -122,7 +125,27 @@ public class AnimalShelterBotListener implements UpdatesListener {
         if ((dogShelterName + "_contacts").equals(data)) part1.potentialOwnerContactsRequest(id, dogShelter);
         if ((catShelterName + "_contacts").equals(data)) part1.potentialOwnerContactsRequest(id, catShelter);
 
+        if((dogShelterName + "_acquaintance").equals(data)) part2.
+        if((catShelterName + "_acquaintance").equals(data)) part2.
 
+        if((dogShelterName + "_documents").equals(data)) part2.
+        if((catShelterName + "_documents").equals(data)) part2.
+
+        if((dogShelterName + "_transportation").equals(data)) part2.
+        if((catShelterName + "_transportation").equals(data)) part2.
+
+        if((dogShelterName + "_home_for_little").equals(data)) part2.
+        if((catShelterName + "_home_for_little").equals(data)) part2.
+
+        if((dogShelterName + "_home_for_adult").equals(data)) part2.
+        if((catShelterName + "_home_for_adult").equals(data)) part2.
+
+        if((dogShelterName + "_home_for_restricted").equals(data)) part2.
+        if((catShelterName + "_home_for_restricted").equals(data)) part2.
+
+        if("first_meeting".equals(data)) part2.
+        if("proven_cynologist".equals(data)) part2.
+        if("reasons_for_refusal".equals(data)) part2.
     }
 
     private void sendMessage(Long chatId, String message) {
