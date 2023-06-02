@@ -4,6 +4,7 @@ import com.telegrambotanimalshelter.models.Shelter;
 import jakarta.persistence.Column;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.MappedSuperclass;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @RequiredArgsConstructor
+@MappedSuperclass
 public abstract class Animal {
 
     @Column(name = "nickname")
@@ -24,9 +26,5 @@ public abstract class Animal {
 
     @Column(name = "registered_at")
     private LocalDateTime registeredAt;
-
-    @Column(name = "shelter")
-    @Enumerated(EnumType.STRING)
-    private Shelter shelter;
 
 }

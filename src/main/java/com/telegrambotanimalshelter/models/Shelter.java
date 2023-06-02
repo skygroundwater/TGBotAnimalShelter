@@ -13,9 +13,15 @@ import java.util.List;
 @RequiredArgsConstructor
 public class Shelter {
 
-    private String name;
+    private final String name;
 
     private String description;
+
+    private String workingHours;
+
+    private String safetyPrecautions;
+
+    private String securityContacts;
 
     private List<? extends Animal> animals;
 

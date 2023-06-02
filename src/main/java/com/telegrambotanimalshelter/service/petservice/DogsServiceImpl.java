@@ -2,6 +2,7 @@ package com.telegrambotanimalshelter.service.petservice;
 
 
 import com.telegrambotanimalshelter.models.Shelter;
+import com.telegrambotanimalshelter.models.animals.Cat;
 import com.telegrambotanimalshelter.repositories.DogsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -21,6 +22,11 @@ public class DogsServiceImpl implements PetService {
         this.shelter = shelter;
     }
 
+
+    @Override
+    public String addNewPet(Cat cat) {
+        return null;
+    }
 
     @Override
     public Shelter getShelter() {

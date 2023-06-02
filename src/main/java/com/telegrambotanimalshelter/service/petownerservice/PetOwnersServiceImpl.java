@@ -24,5 +24,10 @@ public class PetOwnersServiceImpl implements PetOwnersService{
         return "Новый владелец не добавлен";
     }
 
+    @Override
+    public PetOwner findPetOwnerById(Long id){
+        return petOwnersRepository.findById(id).orElseThrow(RuntimeException::new);
+    }
+
 
 }

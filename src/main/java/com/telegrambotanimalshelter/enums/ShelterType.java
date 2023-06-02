@@ -4,5 +4,4 @@ public enum ShelterType {
 
     DOGS_SHELTER, CATS_SHELTER;
 
-
 }
