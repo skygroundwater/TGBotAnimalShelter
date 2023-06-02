@@ -2,6 +2,7 @@ package com.telegrambotanimalshelter.service.petservice;
 
 
 import com.telegrambotanimalshelter.models.Shelter;
+import com.telegrambotanimalshelter.models.animals.Cat;
 import com.telegrambotanimalshelter.repositories.CatsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -19,6 +20,12 @@ public class CatsServiceImpl implements PetService {
         shelter.getAllAnimalsFromDB(catsRepository.findAll());
         this.catsRepository = catsRepository;
         this.shelter = shelter;
+    }
+
+    @Override
+    public String addNewPet(Cat cat){
+        catsRepository.save(cat);
+        return "Кот добавлен";
     }
 
     @Override

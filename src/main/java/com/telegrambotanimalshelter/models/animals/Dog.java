@@ -24,9 +24,12 @@ public class Dog extends Animal {
     @JoinColumn(referencedColumnName = "petowner_id")
     private PetOwner petOwner;
 
-    public Dog(Long id, String nickname, boolean isChipped, LocalDateTime registeredAt, Shelter dogShelter, PetOwner petOwner) {
-        super(nickname, isChipped, registeredAt, dogShelter);
-        this.id = id;
+    @Column(name = "shelter")
+    private String shelter;
+
+    public Dog(String nickname, boolean isChipped, LocalDateTime registeredAt, Shelter dogShelter, PetOwner petOwner) {
+        super(nickname, isChipped, registeredAt);
+        this.shelter = dogShelter.getShelterType().name();
         this.petOwner = petOwner;
     }
 }
