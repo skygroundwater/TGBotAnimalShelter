@@ -22,13 +22,6 @@ public class Part1 {
         this.logger = logger;
     }
 
-    public void sendResponse(SendMessage sendMessage) {
-        SendResponse sendResponse = telegramBot.execute(sendMessage);
-        if (!sendResponse.isOk()) {
-            logger.error("Error during sending message: {}", sendResponse.message());
-        }
-    }
-
     public void part1(Long chatId, Shelter shelter) {
         sendResponse(sendMessagePart1(chatId, "Здравствуйте!", part1Markup(shelter)));
     }
@@ -50,11 +43,21 @@ public class Part1 {
     }
 
     public void potentialOwnerContactsRequest(Long id, Shelter shelter) {
+
         SendMessage sendMessage = new SendMessage(id, "Введите ваши контактные данные");
         sendResponse(sendMessage);
+
+
     }
 
-    public SendMessage sendMessagePart1(Long id, String message, InlineKeyboardMarkup inlineKeyboardMarkup) {
+    private void sendResponse(SendMessage sendMessage) {
+        SendResponse sendResponse = telegramBot.execute(sendMessage);
+        if (!sendResponse.isOk()) {
+            logger.error("Error during sending message: {}", sendResponse.message());
+        }
+    }
+
+    private SendMessage sendMessagePart1(Long id, String message, InlineKeyboardMarkup inlineKeyboardMarkup) {
         return new SendMessage(id, message).replyMarkup(inlineKeyboardMarkup);
     }
 

@@ -16,6 +16,8 @@ import org.springframework.context.annotation.Scope;
 
 import java.util.ArrayList;
 
+import static com.telegrambotanimalshelter.utils.Constants.*;
+
 @Configuration
 @Data
 public class Config {
@@ -32,7 +34,8 @@ public class Config {
     }
 
     @Bean
-    public Logger getLogger(){
+    @Scope(scopeName = "prototype")
+    public Logger getLogger() {
         return LoggerFactory.getLogger(AnimalShelterBotListener.class);
     }
 
@@ -42,17 +45,16 @@ public class Config {
         ArrayList<Dog> dogs = new ArrayList<>();
         return new Shelter(
                 "Halfway Home",
-                "Приют работает с 2019 года. В приоритете — спасение сбитых машинами и больных животных. \n" +
-                        "За период своей деятельности волонтеры спасли более 80 собак, но удалось пристроить только четверых.\n" +
-                        " Остальные ждут свой дом, где они будут считаться членами семьи. \n" +
-                        "Все собаки в приюте имеют паспорта, привиты и кастрированы. В социальных сетях приют старается повышать\n" +
-                        " осведомленность людей о важности вакцинации, стерилизации, гуманного отношения к животным. \n" +
-                        "Приют старается повысить осведомленность людей о важности содержания собак в вольерах,\n" +
-                        " так как на цепи собака становится дикой, раздражительной, недоверчивой,\n" +
-                        " подавленной и агрессивной по отношению к хозяину.",
-                "Мы работаем круглосуточно и без выходных. Найти нас можно по адресу: город Астана, Улица Жұмекен Нәжімеденов, 4, КВ 1803",
-                "На территории приюта будьте осторожны",
-                "Контактные номера для предварительного оформления пропуска: 43545234657",
+                DOG_SHELTER_DESCRIPTION,
+                DOG_SHELTER_WORKING_HOURS,
+                DOG_SHELTER_SAFETY,
+                DOG_SHELTER_SECURITY_CONTACTS,
+                DOG_ACQUAINTANCE,
+                CONTRACT_DOCUMENTS,
+                DOG_TRANSPORTATION,
+                HOME_FOR_PUPPY,
+                HOME_FOR_ADULT_DOG,
+                HOME_FOR_RESTRICTED_DOG,
                 dogs, ShelterType.DOGS_SHELTER
         );
     }
@@ -62,14 +64,16 @@ public class Config {
     public Shelter catShelter() {
         ArrayList<Cat> cats = new ArrayList<>();
         return new Shelter("Ковчег",
-                "В столице появился настоящий «кошкин дом», где живут около 60 пушистых питомцев.\n" +
-                        " Все обитатели приюта с трудной судьбой: одних нашли на улице, других подобрали в подвале,\n" +
-                        " есть и те, от которых отказались хозяева. Здесь за представителями семейства кошачьих не только\n" +
-                        " ухаживают и кормят, но и лечат, ставят прививки, а также подыскивают им новых хозяев.\n" +
-                        " Всего за один месяц работы приюта свой новый дом нашли 20 животных.",
-                "Мы работаем Вт-Вс: с 13.00 до 20.00ч, понедельник выходной. Найти нас можно по адресу: Г.АСТАНА, РАЙОН САРЫАРКА, улица Степан Разин, дом 15",
-                "На территории приюта будьте осторожны",
-                "Контактные номера для предварительного оформления пропуска: 8 705 763 87 76",
+                CAT_SHELTER_DESCRIPTION,
+                CAT_SHELTER_WORKING_HOURS,
+                CAT_SHELTER_SAFETY,
+                CAT_SHELTER_SECURITY_CONTACTS,
+                CAT_ACQUAINTANCE,
+                CONTRACT_DOCUMENTS,
+                CAT_TRANSPORTATION,
+                HOME_FOR_KITTY,
+                HOME_FOR_ADULT_CAT,
+                HOME_FOR_RESTRICTED_CAT,
                 cats, ShelterType.CATS_SHELTER);
     }
 }
