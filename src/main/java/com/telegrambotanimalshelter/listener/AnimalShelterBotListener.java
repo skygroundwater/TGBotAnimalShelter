@@ -71,12 +71,16 @@ public class AnimalShelterBotListener implements UpdatesListener {
                             Message message = update.message();
                             Long chatId = message.chat().id();
                             String text = message.text();
-                            switch (text) {
+                            String preFix = text.split(" ")[0];
+                            String info = text.substring(preFix.length()-1);
+                            switch (preFix) {
                                 case "/start":
                                     sendStartMessage(chatId);
                                     break;
-                                case "/break":
-
+                                case "Контакт:":
+                                    sendConfirmMessage(chatId, info);
+                                    sendStartMessage(chatId);
+                                    break;
                                 default:
                                     sendMessage(chatId, "Бот не может корректно прочесть ваше сообщение. Повторите снова");
                                     break;
@@ -122,8 +126,8 @@ public class AnimalShelterBotListener implements UpdatesListener {
         if ((dogShelterName + "_safety").equals(data)) part1.shelterSafety(id, dogShelter);
         if ((catShelterName + "_safety").equals(data)) part1.shelterSafety(id, catShelter);
 
-        if ((dogShelterName + "_contacts").equals(data)) part1.potentialOwnerContactsRequest(id, dogShelter);
-        if ((catShelterName + "_contacts").equals(data)) part1.potentialOwnerContactsRequest(id, catShelter);
+        if ((dogShelterName + "_contacts").equals(data)) sendMessageToTakeContacts(id, dogShelter);
+        if ((catShelterName + "_contacts").equals(data)) sendMessageToTakeContacts(id, catShelter);
 
         if ((dogShelterName + "_shelter_consultation").equals(data)) part2.part2(id, dogShelter);
         if ((catShelterName + "_shelter_consultation").equals(data)) part2.part2(id, catShelter);
@@ -171,6 +175,13 @@ public class AnimalShelterBotListener implements UpdatesListener {
                 new InlineKeyboardButton("Приют для собак ").callbackData("dog_shelter"),
                 new InlineKeyboardButton("Приют для кошек ").callbackData("cat_shelter")));
         sendResponse(sendMessage);
+    }
+    private void sendConfirmMessage(Long chatId, String info){
+        sendMessage(chatId, "Ваши контакты успешно записаны. Можете продолжить работу с нашим ботом.");
+    }
+
+    private void sendMessageToTakeContacts(Long chatId, Shelter shelter){
+        sendMessage(chatId, "Начните вводить свои контакты после того как введёте префикс <Контакт: >. И не забудьте пробел \uD83D\uDE09");
     }
 
     private void shelterMenu(Long chatId, Shelter shelter) {
