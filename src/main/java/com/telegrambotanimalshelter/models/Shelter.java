@@ -23,6 +23,18 @@ public class Shelter {
 
     private String securityContacts;
 
+    private String acquaintance;
+
+    private String contractDocuments;
+
+    private String transportation;
+
+    private String homeForLittle;
+
+    private String homeForAdult;
+
+    private String homeForRestricted;
+
     private List<? extends Animal> animals;
 
     private ShelterType shelterType;

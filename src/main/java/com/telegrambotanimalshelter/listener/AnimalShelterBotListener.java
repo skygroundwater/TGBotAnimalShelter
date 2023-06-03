@@ -125,27 +125,31 @@ public class AnimalShelterBotListener implements UpdatesListener {
         if ((dogShelterName + "_contacts").equals(data)) part1.potentialOwnerContactsRequest(id, dogShelter);
         if ((catShelterName + "_contacts").equals(data)) part1.potentialOwnerContactsRequest(id, catShelter);
 
-        if((dogShelterName + "_acquaintance").equals(data)) part2.
-        if((catShelterName + "_acquaintance").equals(data)) part2.
+        if ((dogShelterName + "_shelter_consultation").equals(data)) part2.part2(id, dogShelter);
+        if ((catShelterName + "_shelter_consultation").equals(data)) part2.part2(id, catShelter);
 
-        if((dogShelterName + "_documents").equals(data)) part2.
-        if((catShelterName + "_documents").equals(data)) part2.
+        if ((dogShelterName + "_acquaintance").equals(data)) part2.acquaintanceWithPet(id, dogShelter);
+        if ((catShelterName + "_acquaintance").equals(data)) part2.acquaintanceWithPet(id, catShelter);
 
-        if((dogShelterName + "_transportation").equals(data)) part2.
-        if((catShelterName + "_transportation").equals(data)) part2.
+        if ((dogShelterName + "_documents").equals(data)) part2.documentsForPetOwner(id, dogShelter);
+        if ((catShelterName + "_documents").equals(data)) part2.documentsForPetOwner(id, catShelter);
 
-        if((dogShelterName + "_home_for_little").equals(data)) part2.
-        if((catShelterName + "_home_for_little").equals(data)) part2.
+        if ((dogShelterName + "_transportation").equals(data)) part2.transportation(id, dogShelter);
+        if ((catShelterName + "_transportation").equals(data)) part2.transportation(id, catShelter);
 
-        if((dogShelterName + "_home_for_adult").equals(data)) part2.
-        if((catShelterName + "_home_for_adult").equals(data)) part2.
+        if ((dogShelterName + "_little").equals(data)) part2.homeForLittlePet(id, dogShelter);
+        if ((catShelterName + "_little").equals(data)) part2.homeForLittlePet(id, catShelter);
 
-        if((dogShelterName + "_home_for_restricted").equals(data)) part2.
-        if((catShelterName + "_home_for_restricted").equals(data)) part2.
+        if ((dogShelterName + "_adult").equals(data)) part2.homeForAdultPet(id, dogShelter);
+        if ((catShelterName + "_adult").equals(data)) part2.homeForAdultPet(id, catShelter);
 
-        if("first_meeting".equals(data)) part2.
-        if("proven_cynologist".equals(data)) part2.
-        if("reasons_for_refusal".equals(data)) part2.
+        if ((dogShelterName + "_restricted").equals(data)) part2.homeForRestrictedPet(id, dogShelter);
+        if ((catShelterName + "_restricted").equals(data)) part2.homeForRestrictedPet(id, catShelter);
+
+        if ((dogShelterName + "_reasons_for_refusal").equals(data)) part2.reasonsForRefusal(id, dogShelter);
+        if ((catShelterName + "_reasons_for_refusal").equals(data)) part2.reasonsForRefusal(id, catShelter);
+
+        if ("first_meeting".equals(data)) part2.firstMeetingWithDog(id, dogShelter);
     }
 
     private void sendMessage(Long chatId, String message) {
