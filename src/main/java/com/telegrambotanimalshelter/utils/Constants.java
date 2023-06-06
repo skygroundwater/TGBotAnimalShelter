@@ -1,5 +1,11 @@
 package com.telegrambotanimalshelter.utils;
 
+/**
+ * Список констант для вывода сопровождающих информационных сообщений при взаимодействии пользователя с кнопками
+ * @see com.telegrambotanimalshelter.listener.AnimalShelterBotListener
+ * @see com.telegrambotanimalshelter.listener.Part1
+ * @see com.telegrambotanimalshelter.listener.Part2
+ */
 public class Constants {
 
     public static String DOG_SHELTER_DESCRIPTION = """
