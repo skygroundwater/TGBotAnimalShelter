@@ -8,9 +8,7 @@ import com.pengrad.telegrambot.response.SendResponse;
 import com.telegrambotanimalshelter.enums.ShelterType;
 import com.telegrambotanimalshelter.models.Shelter;
 import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import static com.telegrambotanimalshelter.utils.Constants.FIRST_MEETING_WITH_DOG;
 import static com.telegrambotanimalshelter.utils.Constants.REASONS_FOR_REFUSAL;

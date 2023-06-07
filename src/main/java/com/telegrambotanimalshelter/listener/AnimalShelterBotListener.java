@@ -12,7 +12,7 @@ import com.telegrambotanimalshelter.models.PetOwner;
 import com.telegrambotanimalshelter.models.Shelter;
 import com.telegrambotanimalshelter.listener.parts.Part1;
 import com.telegrambotanimalshelter.listener.parts.Part2;
-import com.telegrambotanimalshelter.listener.parts.Part3;
+import com.telegrambotanimalshelter.listener.parts.ReportPart;
 import com.telegrambotanimalshelter.models.animals.Cat;
 import com.telegrambotanimalshelter.models.animals.Dog;
 import com.telegrambotanimalshelter.services.petownerservice.PetOwnersService;
@@ -44,7 +44,7 @@ public class AnimalShelterBotListener implements UpdatesListener {
 
     private final Part2 part2;
 
-    private final Part3 part3;
+    private final ReportPart reportPart;
 
     private static boolean contactsRequest;
 
@@ -52,10 +52,10 @@ public class AnimalShelterBotListener implements UpdatesListener {
 
     @Autowired
     public AnimalShelterBotListener(TelegramBot telegramBot,
-                                    @Qualifier("catsServiceImpl") PetService catsService,
-                                    @Qualifier("dogsServiceImpl") PetService dogsService,
+                                    @Qualifier("catsServiceImpl") PetService<Cat> catsService,
+                                    @Qualifier("dogsServiceImpl") PetService<Dog> dogsService,
                                     PetOwnersService petOwnersService,
-                                    Logger logger, Part1 part1, Part2 part2, Part3 part3) {
+                                    Logger logger, Part1 part1, Part2 part2, ReportPart reportPart) {
         this.telegramBot = telegramBot;
         this.catsService = catsService;
         this.dogsService = dogsService;
@@ -63,7 +63,7 @@ public class AnimalShelterBotListener implements UpdatesListener {
         this.logger = logger;
         this.part1 = part1;
         this.part2 = part2;
-        this.part3 = part3;
+        this.reportPart = reportPart;
     }
 
     @PostConstruct
@@ -87,7 +87,9 @@ public class AnimalShelterBotListener implements UpdatesListener {
                                 String preFix = text.split(" ")[0];
                                 String info = text.substring(preFix.length() - 1);
                                 contactsRequest(chatId, preFix, info);
-                            } else
+                            } else if(reportRequest){
+
+                            }
                                 switch (text) {
                                     case "/start" -> {
                                         savePotentialPetOwner(update);
@@ -163,10 +165,10 @@ public class AnimalShelterBotListener implements UpdatesListener {
         if ((dogShelterName + "_reasons_for_refusal").equals(data)) part2.reasonsForRefusal(id, dogShelter);
         if ((catShelterName + "_reasons_for_refusal").equals(data)) part2.reasonsForRefusal(id, catShelter);
 
-        if ((dogShelterName + "_report").equals(data))
-            if ((catShelterName + "_report").equals(data))
+        if ((dogShelterName + "_report").equals(data)) reportFromPetOwner(id, dogShelter);
+        if ((catShelterName + "_report").equals(data)) reportFromPetOwner(id, catShelter);
 
-                if ("first_meeting".equals(data)) part2.firstMeetingWithDog(id, dogShelter);
+        if ("first_meeting".equals(data)) part2.firstMeetingWithDog(id, dogShelter);
     }
 
     private void contactsRequest(Long chatId, String prefix, String info) {
@@ -187,8 +189,9 @@ public class AnimalShelterBotListener implements UpdatesListener {
         }
     }
 
-    private void reportFromPetOwner() {
-
+    private void reportFromPetOwner(Long chatId, Shelter shelter) {
+        reportRequest = true;
+        sendMessage(chatId, "Вы попали в блок отправки отчета волонтеру");
 
     }
 
