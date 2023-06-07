@@ -1,7 +1,11 @@
 package com.telegrambotanimalshelter.models;
 
+import com.telegrambotanimalshelter.models.animals.Animal;
 import com.telegrambotanimalshelter.models.animals.Cat;
 import com.telegrambotanimalshelter.models.animals.Dog;
+import com.telegrambotanimalshelter.models.reports.CatReport;
+import com.telegrambotanimalshelter.models.reports.DogReport;
+import com.telegrambotanimalshelter.models.reports.Report;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.Hibernate;
@@ -11,7 +15,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Entity
-@Table(name="petowners")
+@Table(name = "petowners")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -20,13 +24,13 @@ import java.util.Objects;
 public class PetOwner {
 
     @Id
-    @Column(name="petowner_id")
+    @Column(name = "petowner_id")
     private Long id;
 
-    @Column(name="first_name")
+    @Column(name = "first_name")
     private String firstName;
 
-    @Column(name="last_name")
+    @Column(name = "last_name")
     private String lastName;
 
     @Column(name = "username")
@@ -38,17 +42,25 @@ public class PetOwner {
     @Column(name = "has_pets")
     private boolean hasPets;
 
-    @OneToMany(mappedBy = "petOwner")
+    @OneToMany(mappedBy = "petOwner", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ToString.Exclude
+    private List<CatReport> catReports;
+
+    @OneToMany(mappedBy = "petOwner", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ToString.Exclude
+    private List<DogReport> dogReports;
+
+    @OneToMany(mappedBy = "petOwner", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @ToString.Exclude
     private List<Cat> cats;
 
-    @OneToMany(mappedBy = "petOwner")
+    @OneToMany(mappedBy = "petOwner", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @ToString.Exclude
     private List<Dog> dogs;
 
     public PetOwner(Long id, String firstName,
                     String lastName, String userName,
-                    LocalDateTime registeredAt, boolean hasPets){
+                    LocalDateTime registeredAt, boolean hasPets) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;

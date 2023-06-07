@@ -1,9 +1,16 @@
-package com.telegrambotanimalshelter.listener;
+package com.telegrambotanimalshelter.listener.parts;
 
 import com.pengrad.telegrambot.TelegramBot;
+import com.pengrad.telegrambot.model.Animation;
+import com.pengrad.telegrambot.model.MessageEntity;
+import com.pengrad.telegrambot.model.Poll;
+import com.pengrad.telegrambot.model.request.ChatAction;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
-import com.pengrad.telegrambot.request.SendMessage;
+import com.pengrad.telegrambot.request.*;
+import com.pengrad.telegrambot.response.BaseResponse;
+import com.pengrad.telegrambot.response.GetChatMemberResponse;
+import com.pengrad.telegrambot.response.GetChatResponse;
 import com.pengrad.telegrambot.response.SendResponse;
 import com.telegrambotanimalshelter.models.Shelter;
 import org.slf4j.Logger;
@@ -42,14 +49,6 @@ public class Part1 {
         sendResponse(sendMessagePart1(id, shelter.getSafetyPrecautions(), part1Markup(shelter)));
     }
 
-    public void potentialOwnerContactsRequest(Long id, Shelter shelter) {
-
-        SendMessage sendMessage = new SendMessage(id, "Введите ваши контактные данные");
-        sendResponse(sendMessage);
-
-
-    }
-
     private void sendResponse(SendMessage sendMessage) {
         SendResponse sendResponse = telegramBot.execute(sendMessage);
         if (!sendResponse.isOk()) {
@@ -58,6 +57,7 @@ public class Part1 {
     }
 
     private SendMessage sendMessagePart1(Long id, String message, InlineKeyboardMarkup inlineKeyboardMarkup) {
+        telegramBot.execute(new SendChatAction(id, ChatAction.typing));
         return new SendMessage(id, message).replyMarkup(inlineKeyboardMarkup);
     }
 
