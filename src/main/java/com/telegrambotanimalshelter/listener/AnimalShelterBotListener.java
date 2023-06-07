@@ -56,15 +56,15 @@ public class AnimalShelterBotListener implements UpdatesListener {
                                     @Qualifier("dogsServiceImpl") PetService<Dog> dogsService,
                                     PetOwnersService petOwnersService,
                                     Logger logger, Part1 part1, Part2 part2, ReportPart reportPart) {
-        this.telegramBot = telegramBot;
-        this.catsService = catsService;
-        this.dogsService = dogsService;
-        this.petOwnersService = petOwnersService;
-        this.logger = logger;
-        this.part1 = part1;
-        this.part2 = part2;
-        this.reportPart = reportPart;
-    }
+            this.telegramBot = telegramBot;
+            this.catsService = catsService;
+            this.dogsService = dogsService;
+            this.petOwnersService = petOwnersService;
+            this.logger = logger;
+            this.part1 = part1;
+            this.part2 = part2;
+            this.reportPart = reportPart;
+        }
 
     @PostConstruct
     public void init() {
@@ -108,6 +108,14 @@ public class AnimalShelterBotListener implements UpdatesListener {
         return UpdatesListener.CONFIRMED_UPDATES_ALL;
     }
 
+    /** Если пользователь юзает одну из предложенных ботом кнопку, метод принимает параметр <b>callbackQuery</b> ({@link Update#callbackQuery()})
+     * и, в зависимости от выбранной кнопки, бот выдает сообщение и список из последующих кнопок для дальнейшего взаимодействия. <br> <br>
+     * <i> Все взаимодействия пользователя с кнопками проходят через этот метод. </i>
+     * @param callbackQuery
+     * @see Part1
+     * @see Part2
+     * @see AnimalShelterBotListener#shelterMenu(Long, Shelter)
+     */
     private void callbackQueryCheck(CallbackQuery callbackQuery) {
         Shelter dogShelter = dogsService.getShelter();
         Shelter catShelter = catsService.getShelter();
@@ -169,6 +177,7 @@ public class AnimalShelterBotListener implements UpdatesListener {
         if ((catShelterName + "_report").equals(data)) startReportFromPetOwner(id, catShelter);
 
         if ("first_meeting".equals(data)) part2.firstMeetingWithDog(id, dogShelter);
+        // Здесь мб добавить такое же первое знакомство как с собакой, но с кошкой?
     }
 
     private void contactsRequestBlock(Long chatId, String prefix, String info) {
@@ -241,12 +250,22 @@ public class AnimalShelterBotListener implements UpdatesListener {
     }
 
 
+    /**
+     * Если бот не распознает команду от пользователя, то он выводит дефолтный текст.
+     * @param chatId not null.
+     * @param message "<i>Бот не может корректно прочесть ваше сообщение. Повторите снова.</i>"
+     */
     private void sendMessage(Long chatId, String message) {
         SendMessage sendMessage = new SendMessage(chatId, message);
         sendMessage.parseMode(ParseMode.Markdown);
         sendResponse(sendMessage);
     }
 
+    /**
+     * Отправка сформированного ответа пользователю. <br>
+     * Если формирование ответа прошло не успешно, бросается ошибка {@link Logger#error(String)}
+     * @param sendMessage
+     */
     private void sendResponse(SendMessage sendMessage) {
         SendResponse sendResponse = telegramBot.execute(sendMessage);
         if (!sendResponse.isOk()) {
@@ -265,6 +284,13 @@ public class AnimalShelterBotListener implements UpdatesListener {
         }
     }
 
+    /**
+     * Принимает <b><u>chatId</b></u> пользователя и выводит приветственное сообщение при отправке пользователем команды <b><u>/start</b></u>. <br> <br>
+     * Также бот выводит кнопки выбора одного из приютов: для кошек ({@link ShelterType#CATS_SHELTER}) или собак ({@link ShelterType#DOGS_SHELTER}) <br> <br>
+     * Если команда(сообщение) от пользователя не распознана, то бот выдает дефолтный текст {@link AnimalShelterBotListener#sendMessage(Long, String)} <br> <br>
+     * <i> следующий этап взаимодействия с ботом --> {@link AnimalShelterBotListener#shelterMenu(Long, Shelter)} </i>
+     * @param chatId not null.
+    */
     private void sendStartMessage(Long chatId) {
         SendMessage sendMessage = new SendMessage(chatId,
                 "Здравствуйте! Вас приветсвует сеть приютов для животных города Астаны. \n" +
@@ -296,6 +322,12 @@ public class AnimalShelterBotListener implements UpdatesListener {
     //блок запроса контактов от пользователя
 
 
+    /** После приветственного сообщения из {@link AnimalShelterBotListener#sendStartMessage(Long)} и выбора одной из предложенных кнопок
+     * бот, в зависимости от выбора приюта, выводит его название ({@link Shelter#getName()}) и список последующих кнопок для взаимодействия с выбранным приютом. <br> <br>
+     * <i> список выводимых кнопок в этом методе --> {@link AnimalShelterBotListener#shelterMenuMarkup(Shelter)} <i>
+     * @param chatId
+     * @param shelter
+     */
     private void shelterMenu(Long chatId, Shelter shelter) {
         SendMessage sendMessage = null;
         String shelterName = shelter.getName();
@@ -309,6 +341,12 @@ public class AnimalShelterBotListener implements UpdatesListener {
         sendResponse(sendMessage);
     }
 
+    /**
+     * Кнопки, выводимые для взаимодействия с пользователем, из метода {@link AnimalShelterBotListener#shelterMenu(Long, Shelter)}
+     * @param shelter
+     * @see Part1
+     * @see Part2
+     */
     private InlineKeyboardMarkup shelterMenuMarkup(Shelter shelter) {
         String shelterName = shelter.getName();
         return new InlineKeyboardMarkup(
