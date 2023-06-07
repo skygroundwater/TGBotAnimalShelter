@@ -83,21 +83,21 @@ public class AnimalShelterBotListener implements UpdatesListener {
                             Message message = update.message();
                             Long chatId = message.chat().id();
                             String text = message.text();
+                            String preFix = text.split(" ")[0];
+                            String info = text.substring(preFix.length() - 1);
                             if (contactsRequest) {
-                                String preFix = text.split(" ")[0];
-                                String info = text.substring(preFix.length() - 1);
-                                contactsRequest(chatId, preFix, info);
-                            } else if(reportRequest){
-
+                                contactsRequestBlock(chatId, preFix, info);
                             }
-                                switch (text) {
-                                    case "/start" -> {
-                                        savePotentialPetOwner(update);
-                                        sendStartMessage(chatId);
-                                    }
-                                    default ->
-                                            sendMessage(chatId, "Бот не может корректно прочесть ваше сообщение. Повторите снова");
+                            if (reportRequest) {
+                                reportFromPetOwnerBlock(chatId, preFix, message);
+                            } else switch (text) {
+                                case "/start" -> {
+                                    savePotentialPetOwner(update);
+                                    sendStartMessage(chatId);
                                 }
+                                default ->
+                                        sendMessage(chatId, "Бот не может корректно прочесть ваше сообщение. Повторите снова");
+                            }
                         } else {
                             callbackQueryCheck(update.callbackQuery());
                         }
@@ -165,13 +165,13 @@ public class AnimalShelterBotListener implements UpdatesListener {
         if ((dogShelterName + "_reasons_for_refusal").equals(data)) part2.reasonsForRefusal(id, dogShelter);
         if ((catShelterName + "_reasons_for_refusal").equals(data)) part2.reasonsForRefusal(id, catShelter);
 
-        if ((dogShelterName + "_report").equals(data)) reportFromPetOwner(id, dogShelter);
-        if ((catShelterName + "_report").equals(data)) reportFromPetOwner(id, catShelter);
+        if ((dogShelterName + "_report").equals(data)) startReportFromPetOwner(id, dogShelter);
+        if ((catShelterName + "_report").equals(data)) startReportFromPetOwner(id, catShelter);
 
         if ("first_meeting".equals(data)) part2.firstMeetingWithDog(id, dogShelter);
     }
 
-    private void contactsRequest(Long chatId, String prefix, String info) {
+    private void contactsRequestBlock(Long chatId, String prefix, String info) {
         switch (prefix) {
             case "Имя:" -> sendMessageToTakeSecondName(chatId, info);
             case "Фамилия:" -> sendMessageToTakeNumberOfPhone(chatId, info);
@@ -189,9 +189,54 @@ public class AnimalShelterBotListener implements UpdatesListener {
         }
     }
 
-    private void reportFromPetOwner(Long chatId, Shelter shelter) {
+    private void startReportFromPetOwner(Long chatId, Shelter shelter) {
         reportRequest = true;
-        sendMessage(chatId, "Вы попали в блок отправки отчета волонтеру");
+        sendMessage(chatId, "Итак, вы решили отправить-таки отчет по своему питомцу.\n" +
+                "Следующим сообщением приложите его фотографии, предварительно прописав префикс *Фото: *." +
+                "Чтобы прекратить процесс отправки отчета, воспользуйтесь командой /break");
+    }
+
+    private void reportFromPetOwnerBlock(Long chatId, String prefix, Message message) {
+
+        switch (prefix) {
+            case "Фото:" -> sendMessageToTakeDiet(chatId, message);
+            case "Диета:" -> sendMessageToTakeCommonStatus(chatId, message);
+            case "Состояние:" -> {
+                sendConfirmMessage(chatId, "Спасибо Вам за ваш отчет. Если будет что-то не так - волонтёр отпишетися вам. Желаем удачи.");
+                reportRequest = false;
+            }
+            case "/break" -> {
+                sendStartMessage(chatId);
+                reportRequest = false;
+            }
+            default -> sendWarningLetter(chatId);
+        }
+
+    }
+
+    private void sendMessageToTakeDiet(Long chatId, Message message) {
+        sendMessage(chatId, "Отлично. Теперь отправьте сообщешием повседневный рацион вашего животного. Префикс *Диета: *");
+
+    }
+
+    private void sendMessageToTakeCommonStatus(Long chatId, Message message) {
+        sendMessage(chatId, "Мы уже близки к завершению. Поделитесь общим состоянием животного.\n" +
+                " Как его самочувствие и процесс привыкания к новому месту? Префикс *Состояние: *");
+
+    }
+
+    private void sendMessageToTakeChanges(Long chatId, Message message) {
+        sendMessage(chatId, "Последняя наша просьба - поделиться процессом изменения животного.\n" +
+                "Как идет процесс восчпитания? Может быть, животное стало проявлять новые черты в своем поведении? Префикс *Изменения: *");
+
+    }
+
+    private void sendWarningLetter(Long chatId) {
+        sendMessage(chatId, "«Дорогой усыновитель, мы заметили, что ты заполняешь отчет не так подробно,\n" +
+                " как необходимо. Пожалуйста, подойди ответственнее к этому занятию. \n" +
+                "В противном случае, волонтеры приюта будут обязаны \n" +
+                "самолично проверять условия содержания животного».");
+
 
     }
 
