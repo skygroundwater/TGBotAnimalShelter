@@ -1,20 +1,18 @@
 package com.telegrambotanimalshelter.models.animals;
 
+import com.telegrambotanimalshelter.models.reports.Report;
 import com.telegrambotanimalshelter.models.Shelter;
-import jakarta.persistence.Column;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.MappedSuperclass;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import jakarta.persistence.*;
+import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 
-@Data
-@AllArgsConstructor
-@RequiredArgsConstructor
+@Getter
+@Setter
+@ToString
+@NoArgsConstructor
 @MappedSuperclass
 public abstract class Animal {
 
@@ -27,4 +25,10 @@ public abstract class Animal {
     @Column(name = "registered_at")
     private LocalDateTime registeredAt;
 
+    public Animal(String nickname, boolean isChipped, LocalDateTime registeredAt, Shelter shelter){
+        this.nickName = nickname;
+        this.isChipped = isChipped;
+        this.registeredAt = registeredAt;
+
+    }
 }
