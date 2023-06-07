@@ -28,7 +28,7 @@ public class DogsServiceImpl implements PetService<Dog> {
 
     @Override
     public List<Dog> findPetsByPetOwner(PetOwner petOwner) {
-        return null;
+        return dogsRepository.findDogsByPetOwner(petOwner);
     }
 
     @Override
