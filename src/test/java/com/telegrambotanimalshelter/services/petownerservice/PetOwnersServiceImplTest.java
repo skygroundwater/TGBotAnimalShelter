@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -30,6 +31,8 @@ class PetOwnersServiceImplTest {
 
     @Mock
     private PetOwnersService petOwnersService;
+
+    private final List<PetOwner> list = new ArrayList<>();
 
     @Test
     void shouldSavePetOwnerToDBTest() {
@@ -52,7 +55,6 @@ class PetOwnersServiceImplTest {
 
     @Test
     void shouldFindActualPetOwnersTest() {
-        List<PetOwner> list = List.of(petOwner);
 
         when(petOwnersRepository.findPetOwnersByHasPetsTrue()).thenReturn(list);
 
@@ -61,7 +63,6 @@ class PetOwnersServiceImplTest {
 
     @Test
     void shouldGetAllPetOwnersTest() {
-        List<PetOwner> list = List.of(petOwner);
 
         when(petOwnersService.getAllPetOwners()).thenReturn(list);
 

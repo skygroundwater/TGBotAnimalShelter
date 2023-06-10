@@ -5,6 +5,7 @@ import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.SendResponse;
+import com.telegrambotanimalshelter.services.petownerservice.PetOwnersService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -25,10 +26,14 @@ import static org.mockito.Mockito.when;
 
 
 @ExtendWith(MockitoExtension.class)
+public
 class AnimalShelterBotListenerTest {
 
     @Mock
     private TelegramBot telegramBot;
+
+    @Mock
+    private PetOwnersService petOwnersService;
 
     @InjectMocks
     private AnimalShelterBotListener animalShelterBotListener;
