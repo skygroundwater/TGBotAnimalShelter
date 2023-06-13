@@ -98,7 +98,7 @@ public class Part2 {
                     .addRow(new InlineKeyboardButton("Обратиться к волонтеру")
                             .url("https://t.me/Anton_Ryabinin"))
                     .addRow(new InlineKeyboardButton("Запишем ваши контактные данные")
-                            .callbackData(shelterName + "_contacts"))
+                            .callbackData("_contacts"))
                     .addRow(new InlineKeyboardButton("Назад к выбору приюта")
                             .callbackData("back"));
         } else if (shelter.getShelterType().equals(ShelterType.CATS_SHELTER)) {
@@ -120,7 +120,7 @@ public class Part2 {
                     .addRow(new InlineKeyboardButton("Обратиться к волонтеру")
                             .url("https://t.me/Anton_Ryabinin"))
                     .addRow(new InlineKeyboardButton("Запишем ваши контактные данные")
-                            .callbackData(shelterName + "_contacts"))
+                            .callbackData("_contacts"))
                     .addRow(new InlineKeyboardButton("Назад к выбору приюта")
                             .callbackData("back"));
         }

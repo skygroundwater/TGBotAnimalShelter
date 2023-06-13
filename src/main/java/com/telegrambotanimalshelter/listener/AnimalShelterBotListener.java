@@ -40,10 +40,6 @@ public class AnimalShelterBotListener implements UpdatesListener {
 
     private final Logger logger;
 
-    private final Part1 part1;
-
-    private final Part2 part2;
-
     private final ReportPart reportPart;
 
     private static boolean contactsRequest;
@@ -55,14 +51,12 @@ public class AnimalShelterBotListener implements UpdatesListener {
                                     @Qualifier("catsServiceImpl") PetService<Cat> catsService,
                                     @Qualifier("dogsServiceImpl") PetService<Dog> dogsService,
                                     PetOwnersService petOwnersService,
-                                    Logger logger, Part1 part1, Part2 part2, ReportPart reportPart) {
+                                    Logger logger, ReportPart reportPart) {
         this.telegramBot = telegramBot;
         this.catsService = catsService;
         this.dogsService = dogsService;
         this.petOwnersService = petOwnersService;
         this.logger = logger;
-        this.part1 = part1;
-        this.part2 = part2;
         this.reportPart = reportPart;
     }
 
@@ -123,52 +117,16 @@ public class AnimalShelterBotListener implements UpdatesListener {
         if ("cat_shelter".equals(data)) shelterMenu(id, catShelter);
         if ("dog_shelter".equals(data)) shelterMenu(id, dogShelter);
 
-        if ((dogShelterName + "_shelter_info").equals(data)) part1.part1(id, dogShelter);
-        if ((catShelterName + "_shelter_info").equals(data)) part1.part1(id, catShelter);
+        if ("_contacts".equals(data)) sendMessageToTakeName(id, dogShelter);
+        if ("_report".equals(data)) startReportFromPetOwner(id, dogShelter);
 
-        if ((dogShelterName + "_info").equals(data)) part1.shelterInfo(id, dogShelter);
-        if ((catShelterName + "_info").equals(data)) part1.shelterInfo(id, catShelter);
+        String preFix = data.split("_")[0];
 
-        if ((dogShelterName + "_hours").equals(data)) part1.shelterWorkingHours(id, dogShelter);
-        if ((catShelterName + "_hours").equals(data)) part1.shelterWorkingHours(id, catShelter);
-
-        if ((dogShelterName + "_pass").equals(data)) part1.shelterPass(id, dogShelter);
-        if ((catShelterName + "_pass").equals(data)) part1.shelterPass(id, catShelter);
-
-        if ((dogShelterName + "_safety").equals(data)) part1.shelterSafety(id, dogShelter);
-        if ((catShelterName + "_safety").equals(data)) part1.shelterSafety(id, catShelter);
-
-        if ((dogShelterName + "_contacts").equals(data)) sendMessageToTakeName(id, dogShelter);
-        if ((catShelterName + "_contacts").equals(data)) sendMessageToTakeName(id, catShelter);
-
-        if ((dogShelterName + "_shelter_consultation").equals(data)) part2.part2(id, dogShelter);
-        if ((catShelterName + "_shelter_consultation").equals(data)) part2.part2(id, catShelter);
-
-        if ((dogShelterName + "_acquaintance").equals(data)) part2.acquaintanceWithPet(id, dogShelter);
-        if ((catShelterName + "_acquaintance").equals(data)) part2.acquaintanceWithPet(id, catShelter);
-
-        if ((dogShelterName + "_documents").equals(data)) part2.documentsForPetOwner(id, dogShelter);
-        if ((catShelterName + "_documents").equals(data)) part2.documentsForPetOwner(id, catShelter);
-
-        if ((dogShelterName + "_transportation").equals(data)) part2.transportation(id, dogShelter);
-        if ((catShelterName + "_transportation").equals(data)) part2.transportation(id, catShelter);
-
-        if ((dogShelterName + "_little").equals(data)) part2.homeForLittlePet(id, dogShelter);
-        if ((catShelterName + "_little").equals(data)) part2.homeForLittlePet(id, catShelter);
-
-        if ((dogShelterName + "_adult").equals(data)) part2.homeForAdultPet(id, dogShelter);
-        if ((catShelterName + "_adult").equals(data)) part2.homeForAdultPet(id, catShelter);
-
-        if ((dogShelterName + "_restricted").equals(data)) part2.homeForRestrictedPet(id, dogShelter);
-        if ((catShelterName + "_restricted").equals(data)) part2.homeForRestrictedPet(id, catShelter);
-
-        if ((dogShelterName + "_reasons_for_refusal").equals(data)) part2.reasonsForRefusal(id, dogShelter);
-        if ((catShelterName + "_reasons_for_refusal").equals(data)) part2.reasonsForRefusal(id, catShelter);
-
-        if ((dogShelterName + "_report").equals(data)) startReportFromPetOwner(id, dogShelter);
-        if ((catShelterName + "_report").equals(data)) startReportFromPetOwner(id, catShelter);
-
-        if ("first_meeting".equals(data)) part2.firstMeetingWithDog(id, dogShelter);
+        if (preFix.equals(dogShelterName)) {
+            dogsService.callBackQueryServiceCheck(callbackQuery);
+        } else if (preFix.equals(catShelterName)) {
+            catsService.callBackQueryServiceCheck(callbackQuery);
+        }
     }
 
     private void contactsRequestBlock(Long chatId, String prefix, String info) {
@@ -194,6 +152,8 @@ public class AnimalShelterBotListener implements UpdatesListener {
         sendMessage(chatId, "Итак, вы решили отправить-таки отчет по своему питомцу.\n" +
                 "Следующим сообщением приложите его фотографии, предварительно прописав префикс *Фото: *." +
                 "Чтобы прекратить процесс отправки отчета, воспользуйтесь командой /break");
+
+
     }
 
     private void reportFromPetOwnerBlock(Long chatId, String prefix, Message message) {
