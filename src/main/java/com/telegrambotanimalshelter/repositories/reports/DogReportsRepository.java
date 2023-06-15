@@ -15,4 +15,6 @@ public interface DogReportsRepository extends JpaRepository<DogReport, Long> {
 
     List<DogReport> findDogReportsByDog(Dog dog);
 
+    void deleteDogReportsByDog(Dog dog);
+
 }

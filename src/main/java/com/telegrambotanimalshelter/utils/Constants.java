@@ -1,29 +1,30 @@
 package com.telegrambotanimalshelter.utils;
 
 import com.pengrad.telegrambot.model.CallbackQuery;
-import com.telegrambotanimalshelter.listener.parts.Part1;
-import com.telegrambotanimalshelter.listener.parts.Part2;
+import com.telegrambotanimalshelter.listener.parts.IntroductionPart;
+import com.telegrambotanimalshelter.listener.parts.BecomingPetOwnerPart;
 import com.telegrambotanimalshelter.models.Shelter;
 
 public class Constants {
     public static void callBackQueryConstantCheck(CallbackQuery callbackQuery, Shelter shelter,
-                                                  Part1 part1, Part2 part2){
+                                                  IntroductionPart introductionPart,
+                                                  BecomingPetOwnerPart becomingPetOwnerPart){
         String shelterName = shelter.getName();
         String data = callbackQuery.data();
         Long id = callbackQuery.from().id();
-        if ((shelterName + "_shelter_info").equals(data)) part1.part1(id, shelter);
-        if ((shelterName + "_info").equals(data)) part1.shelterInfo(id, shelter);
-        if ((shelterName + "_hours").equals(data)) part1.shelterWorkingHours(id, shelter);
-        if ((shelterName + "_pass").equals(data)) part1.shelterPass(id, shelter);
-        if ((shelterName + "_safety").equals(data)) part1.shelterSafety(id, shelter);
-        if ((shelterName + "_shelter_consultation").equals(data)) part2.part2(id, shelter);
-        if ((shelterName + "_acquaintance").equals(data)) part2.acquaintanceWithPet(id, shelter);
-        if ((shelterName + "_documents").equals(data)) part2.documentsForPetOwner(id, shelter);
-        if ((shelterName + "_transportation").equals(data)) part2.transportation(id, shelter);
-        if ((shelterName + "_little").equals(data)) part2.homeForLittlePet(id, shelter);
-        if ((shelterName + "_adult").equals(data)) part2.homeForAdultPet(id, shelter);
-        if ((shelterName + "_restricted").equals(data)) part2.homeForRestrictedPet(id, shelter);
-        if ((shelterName + "_reasons_for_refusal").equals(data)) part2.reasonsForRefusal(id, shelter);
+        if ((shelterName + "_shelter_info").equals(data)) introductionPart.part1(id, shelter);
+        if ((shelterName + "_info").equals(data)) introductionPart.shelterInfo(id, shelter);
+        if ((shelterName + "_hours").equals(data)) introductionPart.shelterWorkingHours(id, shelter);
+        if ((shelterName + "_pass").equals(data)) introductionPart.shelterPass(id, shelter);
+        if ((shelterName + "_safety").equals(data)) introductionPart.shelterSafety(id, shelter);
+        if ((shelterName + "_shelter_consultation").equals(data)) becomingPetOwnerPart.part2(id, shelter);
+        if ((shelterName + "_acquaintance").equals(data)) becomingPetOwnerPart.acquaintanceWithPet(id, shelter);
+        if ((shelterName + "_documents").equals(data)) becomingPetOwnerPart.documentsForPetOwner(id, shelter);
+        if ((shelterName + "_transportation").equals(data)) becomingPetOwnerPart.transportation(id, shelter);
+        if ((shelterName + "_little").equals(data)) becomingPetOwnerPart.homeForLittlePet(id, shelter);
+        if ((shelterName + "_adult").equals(data)) becomingPetOwnerPart.homeForAdultPet(id, shelter);
+        if ((shelterName + "_restricted").equals(data)) becomingPetOwnerPart.homeForRestrictedPet(id, shelter);
+        if ((shelterName + "_reasons_for_refusal").equals(data)) becomingPetOwnerPart.reasonsForRefusal(id, shelter);
     }
 
     public static String DOG_SHELTER_DESCRIPTION = """

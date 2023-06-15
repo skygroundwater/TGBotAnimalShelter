@@ -2,8 +2,10 @@ package com.telegrambotanimalshelter.services.petservice;
 
 
 import com.pengrad.telegrambot.model.CallbackQuery;
-import com.telegrambotanimalshelter.listener.parts.Part1;
-import com.telegrambotanimalshelter.listener.parts.Part2;
+import com.telegrambotanimalshelter.exceptions.NotFoundInDataBaseException;
+import com.telegrambotanimalshelter.exceptions.NotValidDataException;
+import com.telegrambotanimalshelter.listener.parts.IntroductionPart;
+import com.telegrambotanimalshelter.listener.parts.BecomingPetOwnerPart;
 import com.telegrambotanimalshelter.models.PetOwner;
 import com.telegrambotanimalshelter.models.Shelter;
 import com.telegrambotanimalshelter.models.animals.Dog;
@@ -11,6 +13,7 @@ import com.telegrambotanimalshelter.repositories.animals.DogsRepository;
 import com.telegrambotanimalshelter.utils.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,18 +25,43 @@ public class DogsServiceImpl implements PetService<Dog> {
 
     private final Shelter shelter;
 
-    private final Part1 part1;
+    private final IntroductionPart introductionPart;
 
-    private final Part2 part2;
+    private final BecomingPetOwnerPart becomingPetOwnerPart;
 
     @Autowired
-    public DogsServiceImpl(DogsRepository dogsRepository, @Qualifier("dogShelter") Shelter shelter, Part1 part1, Part2 part2) {
-        this.part1 = part1;
-        this.part2 = part2;
+    public DogsServiceImpl(DogsRepository dogsRepository, @Qualifier("dogShelter") Shelter shelter, IntroductionPart introductionPart, BecomingPetOwnerPart becomingPetOwnerPart) {
+        this.introductionPart = introductionPart;
+        this.becomingPetOwnerPart = becomingPetOwnerPart;
         shelter.getAllAnimalsFromDB(dogsRepository.findAll());
         this.dogsRepository = dogsRepository;
         this.shelter = shelter;
     }
+
+    @Override
+    public Dog postPet(Dog dog){
+        return dogsRepository.save(dog);
+    }
+
+    @Override
+    public HttpStatus deletePet(Dog dog){
+        dogsRepository.delete(dog);
+        return HttpStatus.OK;
+    }
+
+    @Override
+    public Dog findPet(Long id) {
+        return dogsRepository.findById(id).orElseThrow(() -> new NotFoundInDataBaseException("Пёс не найден"));
+    }
+
+    @Override
+    public Dog putPet(Dog dog) {
+        if(dog != null){
+            return dogsRepository.save(dog);
+        }
+        else throw new NotValidDataException("Отправьте информацию снова");
+    }
+
 
     @Override
     public List<Dog> findPetsByPetOwner(PetOwner petOwner) {
@@ -42,20 +70,15 @@ public class DogsServiceImpl implements PetService<Dog> {
 
     @Override
     public void callBackQueryServiceCheck(CallbackQuery callbackQuery) {
-        Constants.callBackQueryConstantCheck(callbackQuery, shelter, part1, part2);
+        Constants.callBackQueryConstantCheck(callbackQuery, shelter, introductionPart, becomingPetOwnerPart);
         if ("first_meeting".equals(callbackQuery.data())){
-            part2.firstMeetingWithDog(callbackQuery.from().id(), shelter);
+            becomingPetOwnerPart.firstMeetingWithDog(callbackQuery.from().id(), shelter);
         }
     }
 
     @Override
     public List<Dog> getAllPets() {
         return dogsRepository.findAll();
-    }
-
-    @Override
-    public Dog savePet(Dog dog) {
-        return dogsRepository.save(dog);
     }
 
     @Override

@@ -20,7 +20,6 @@ public class ReportPart {
     }
 
 
-
     private void sendResponse(SendMessage sendMessage) {
         SendResponse sendResponse = telegramBot.execute(sendMessage);
         if (!sendResponse.isOk()) {

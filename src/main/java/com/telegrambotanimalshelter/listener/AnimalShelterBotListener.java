@@ -2,17 +2,20 @@ package com.telegrambotanimalshelter.listener;
 
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
-import com.pengrad.telegrambot.model.*;
-import com.pengrad.telegrambot.model.request.*;
-import com.pengrad.telegrambot.request.*;
+import com.pengrad.telegrambot.model.CallbackQuery;
+import com.pengrad.telegrambot.model.Chat;
+import com.pengrad.telegrambot.model.Message;
+import com.pengrad.telegrambot.model.Update;
+import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
+import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
+import com.pengrad.telegrambot.model.request.ParseMode;
+import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.SendResponse;
 import com.telegrambotanimalshelter.enums.ShelterType;
 import com.telegrambotanimalshelter.exceptions.NotFoundInDataBaseException;
+import com.telegrambotanimalshelter.listener.parts.ReportPart;
 import com.telegrambotanimalshelter.models.PetOwner;
 import com.telegrambotanimalshelter.models.Shelter;
-import com.telegrambotanimalshelter.listener.parts.Part1;
-import com.telegrambotanimalshelter.listener.parts.Part2;
-import com.telegrambotanimalshelter.listener.parts.ReportPart;
 import com.telegrambotanimalshelter.models.animals.Cat;
 import com.telegrambotanimalshelter.models.animals.Dog;
 import com.telegrambotanimalshelter.services.petownerservice.PetOwnersService;
@@ -84,13 +87,15 @@ public class AnimalShelterBotListener implements UpdatesListener {
                             }
                             if (reportRequest) {
                                 reportFromPetOwnerBlock(chatId, preFix, message);
-                            } else switch (text) {
+                            }
+                            switch (text) {
                                 case "/start" -> {
                                     savePotentialPetOwner(update);
                                     sendStartMessage(chatId);
                                 }
-                                default ->
-                                        sendMessage(chatId, "Бот не может корректно прочесть ваше сообщение. Повторите снова");
+                                default -> {
+                                    sendMessage(chatId, "Бот не может корректно прочесть ваше сообщение. Повторите снова");
+                                }
                             }
                         } else {
                             callbackQueryCheck(update.callbackQuery());
@@ -218,9 +223,9 @@ public class AnimalShelterBotListener implements UpdatesListener {
         Message message = update.message();
         Chat chat = message.chat();
         try {
-            petOwnersService.findPetOwnerById(chat.id());
+            petOwnersService.findPetOwner(chat.id());
         } catch (NotFoundInDataBaseException e) {
-            petOwnersService.savePetOwnerToDB(new PetOwner(chat.id(), chat.firstName(), chat.lastName(),
+            petOwnersService.postPetOwner(new PetOwner(chat.id(), chat.firstName(), chat.lastName(),
                     chat.username(), LocalDateTime.now(), false));
         }
     }

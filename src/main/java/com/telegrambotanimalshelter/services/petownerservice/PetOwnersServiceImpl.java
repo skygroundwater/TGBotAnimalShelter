@@ -5,6 +5,7 @@ import com.telegrambotanimalshelter.exceptions.NotValidDataException;
 import com.telegrambotanimalshelter.models.PetOwner;
 import com.telegrambotanimalshelter.repositories.PetOwnersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,15 +21,26 @@ public class PetOwnersServiceImpl implements PetOwnersService {
     }
 
     @Override
-    public PetOwner savePetOwnerToDB(PetOwner petOwner) {
+    public PetOwner postPetOwner(PetOwner petOwner) {
         if (petOwner == null) throw new NotValidDataException("Не валидные данные");
         return petOwnersRepository.save(petOwner);
     }
 
     @Override
-    public PetOwner findPetOwnerById(Long id) {
+    public HttpStatus deletePetOwner(PetOwner petOwner){
+        petOwnersRepository.delete(petOwner);
+        return HttpStatus.OK;
+    }
+
+    @Override
+    public PetOwner findPetOwner(Long id) {
         return petOwnersRepository.findById(id).orElseThrow(() ->
                 new NotFoundInDataBaseException("Пользователь не был найден в базе данных"));
+    }
+
+    @Override
+    public PetOwner putPetOwner(PetOwner petOwner){
+        return petOwnersRepository.save(petOwner);
     }
 
     @Override

@@ -1,30 +1,24 @@
 package com.telegrambotanimalshelter.listener.parts;
 
 import com.pengrad.telegrambot.TelegramBot;
-import com.pengrad.telegrambot.model.Animation;
-import com.pengrad.telegrambot.model.MessageEntity;
-import com.pengrad.telegrambot.model.Poll;
 import com.pengrad.telegrambot.model.request.ChatAction;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.request.*;
-import com.pengrad.telegrambot.response.BaseResponse;
-import com.pengrad.telegrambot.response.GetChatMemberResponse;
-import com.pengrad.telegrambot.response.GetChatResponse;
 import com.pengrad.telegrambot.response.SendResponse;
 import com.telegrambotanimalshelter.models.Shelter;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
 @Component
-public class Part1 {
+public class IntroductionPart {
 
     private final TelegramBot telegramBot;
 
     private final Logger logger;
 
-    public Part1(TelegramBot telegramBot,
-                 Logger logger) {
+    public IntroductionPart(TelegramBot telegramBot,
+                            Logger logger) {
         this.telegramBot = telegramBot;
         this.logger = logger;
     }
@@ -68,7 +62,7 @@ public class Part1 {
                 new InlineKeyboardButton("Адрес, время работы").callbackData(shelterName + "_hours")
         ).addRow(new InlineKeyboardButton("Пропуск в приют").callbackData(shelterName + "_pass"),
                         new InlineKeyboardButton("Техника безопасности").callbackData(shelterName + "_safety")
-                ).addRow(new InlineKeyboardButton("Ваши контакты для связи").callbackData(shelterName + "_contacts"),
+                ).addRow(new InlineKeyboardButton("Ваши контакты для связи").callbackData("_contacts"),
                         new InlineKeyboardButton("Волонтер").url("https://t.me/Anton_Ryabinin"))
                 .addRow(new InlineKeyboardButton("Назад к выбору приюта").callbackData("back"));
     }

@@ -14,13 +14,13 @@ import static com.telegrambotanimalshelter.utils.Constants.FIRST_MEETING_WITH_DO
 import static com.telegrambotanimalshelter.utils.Constants.REASONS_FOR_REFUSAL;
 
 @Component
-public class Part2 {
+public class BecomingPetOwnerPart {
 
     private final TelegramBot telegramBot;
 
     private final Logger logger;
 
-    public Part2(TelegramBot telegramBot, Logger logger) {
+    public BecomingPetOwnerPart(TelegramBot telegramBot, Logger logger) {
         this.telegramBot = telegramBot;
         this.logger = logger;
     }

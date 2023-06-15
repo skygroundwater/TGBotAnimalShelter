@@ -3,6 +3,7 @@ package com.telegrambotanimalshelter.services.reportservice;
 import com.telegrambotanimalshelter.models.animals.Dog;
 import com.telegrambotanimalshelter.models.reports.DogReport;
 import com.telegrambotanimalshelter.repositories.reports.DogReportsRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,12 +18,28 @@ public class DogReportServiceImpl implements ReportService<DogReport, Dog> {
     }
 
     @Override
-    public List<DogReport> getAllReports(){
+    public DogReport postReport(DogReport dogReport) {
+        return reportsRepository.save(dogReport);
+    }
+
+    @Override
+    public DogReport putReport(DogReport dogReport) {
+        return reportsRepository.save(dogReport);
+    }
+
+    @Override
+    public HttpStatus deleteReportsByPet(Dog dog) {
+        reportsRepository.deleteDogReportsByDog(dog);
+        return HttpStatus.OK;
+    }
+
+    @Override
+    public List<DogReport> getAllReports() {
         return reportsRepository.findAll();
     }
 
     @Override
-    public List<DogReport> findReportsFromPet(Dog dog){
+    public List<DogReport> findReportsFromPet(Dog dog) {
         return reportsRepository.findDogReportsByDog(dog);
     }
 
