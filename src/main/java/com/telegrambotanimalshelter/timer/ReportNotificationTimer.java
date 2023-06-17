@@ -13,7 +13,6 @@ import com.telegrambotanimalshelter.models.animals.Dog;
 import com.telegrambotanimalshelter.models.reports.CatReport;
 import com.telegrambotanimalshelter.models.reports.DogReport;
 import com.telegrambotanimalshelter.models.reports.Report;
-import com.telegrambotanimalshelter.repositories.animals.DogsRepository;
 import com.telegrambotanimalshelter.services.petownerservice.PetOwnersService;
 import com.telegrambotanimalshelter.services.petservice.PetService;
 import com.telegrambotanimalshelter.services.reportservice.ReportService;

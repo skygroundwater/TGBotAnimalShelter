@@ -11,4 +11,5 @@ public interface PetOwnersRepository extends JpaRepository<PetOwner, Long> {
 
     List<PetOwner> findPetOwnersByHasPetsTrue();
 
+
 }

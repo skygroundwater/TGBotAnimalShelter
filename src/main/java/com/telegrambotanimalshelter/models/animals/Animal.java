@@ -1,12 +1,14 @@
 package com.telegrambotanimalshelter.models.animals;
 
-import com.telegrambotanimalshelter.models.reports.Report;
 import com.telegrambotanimalshelter.models.Shelter;
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.MappedSuperclass;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 
 @Getter

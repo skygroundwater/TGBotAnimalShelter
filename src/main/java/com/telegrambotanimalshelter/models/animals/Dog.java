@@ -25,7 +25,7 @@ public class Dog extends Animal {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(referencedColumnName = "petowner_id")
+    @JoinColumn(referencedColumnName = "id")
     private PetOwner petOwner;
 
     @OneToMany(mappedBy = "dog", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

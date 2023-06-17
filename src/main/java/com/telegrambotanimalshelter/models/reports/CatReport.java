@@ -24,7 +24,7 @@ public class CatReport extends Report {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(referencedColumnName = "petowner_id")
+    @JoinColumn(referencedColumnName = "id")
     @ToString.Exclude
     private PetOwner petOwner;
 

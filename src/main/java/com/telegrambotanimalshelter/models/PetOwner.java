@@ -24,7 +24,7 @@ import java.util.Objects;
 public class PetOwner {
 
     @Id
-    @Column(name = "petowner_id")
+    @Column(name = "id")
     private Long id;
 
     @Column(name = "first_name")
@@ -41,6 +41,19 @@ public class PetOwner {
 
     @Column(name = "has_pets")
     private boolean hasPets;
+
+    @Column(name = "contact_request_chat")
+    private boolean contactRequest;
+
+    @Column(name = "report_request_chat")
+    private boolean reportRequest;
+
+    @Column(name = "volunteer_chat")
+    private boolean volunteerChat;
+
+    @OneToOne
+    @JoinColumn(name = "volunteer_id", referencedColumnName = "id")
+    private Volunteer volunteer;
 
     @OneToMany(mappedBy = "petOwner", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @ToString.Exclude

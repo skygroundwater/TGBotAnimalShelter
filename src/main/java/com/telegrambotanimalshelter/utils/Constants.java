@@ -3,16 +3,22 @@ package com.telegrambotanimalshelter.utils;
 import com.pengrad.telegrambot.model.CallbackQuery;
 import com.telegrambotanimalshelter.listener.parts.IntroductionPart;
 import com.telegrambotanimalshelter.listener.parts.BecomingPetOwnerPart;
+import com.telegrambotanimalshelter.listener.parts.MessageSender;
 import com.telegrambotanimalshelter.models.Shelter;
 
 public class Constants {
+
+    public static void sendMessage(MessageSender messageSender,Long chatId, String msg){
+        messageSender.sendMessage(chatId, msg);
+    }
+
     public static void callBackQueryConstantCheck(CallbackQuery callbackQuery, Shelter shelter,
                                                   IntroductionPart introductionPart,
                                                   BecomingPetOwnerPart becomingPetOwnerPart){
         String shelterName = shelter.getName();
         String data = callbackQuery.data();
         Long id = callbackQuery.from().id();
-        if ((shelterName + "_shelter_info").equals(data)) introductionPart.part1(id, shelter);
+        if ((shelterName + "_shelter_info").equals(data)) introductionPart.welcome(id, shelter);
         if ((shelterName + "_info").equals(data)) introductionPart.shelterInfo(id, shelter);
         if ((shelterName + "_hours").equals(data)) introductionPart.shelterWorkingHours(id, shelter);
         if ((shelterName + "_pass").equals(data)) introductionPart.shelterPass(id, shelter);

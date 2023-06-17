@@ -1,57 +1,45 @@
 package com.telegrambotanimalshelter.listener.parts;
 
-import com.pengrad.telegrambot.TelegramBot;
-import com.pengrad.telegrambot.model.request.ChatAction;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
-import com.pengrad.telegrambot.request.*;
-import com.pengrad.telegrambot.response.SendResponse;
+import com.pengrad.telegrambot.request.SendMessage;
 import com.telegrambotanimalshelter.models.Shelter;
-import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
 @Component
 public class IntroductionPart {
 
-    private final TelegramBot telegramBot;
+    private final MessageSender sender;
 
-    private final Logger logger;
-
-    public IntroductionPart(TelegramBot telegramBot,
-                            Logger logger) {
-        this.telegramBot = telegramBot;
-        this.logger = logger;
+    public IntroductionPart(MessageSender sender) {
+        this.sender = sender;
     }
 
-    public void part1(Long chatId, Shelter shelter) {
-        sendResponse(sendMessagePart1(chatId, "Здравствуйте!", part1Markup(shelter)));
+    public void welcome(Long chatId, Shelter shelter) {
+        sendResponse(introductionPart(chatId, "Здравствуйте!", part1Markup(shelter)));
     }
 
     public void shelterInfo(Long id, Shelter shelter) {
-        sendResponse(sendMessagePart1(id, shelter.getDescription(), part1Markup(shelter)));
+        sendResponse(introductionPart(id, shelter.getDescription(), part1Markup(shelter)));
     }
 
     public void shelterWorkingHours(Long id, Shelter shelter) {
-        sendResponse(sendMessagePart1(id, shelter.getWorkingHours(), part1Markup(shelter)));
+        sendResponse(introductionPart(id, shelter.getWorkingHours(), part1Markup(shelter)));
     }
 
     public void shelterPass(Long id, Shelter shelter) {
-        sendResponse(sendMessagePart1(id, shelter.getSecurityContacts(), part1Markup(shelter)));
+        sendResponse(introductionPart(id, shelter.getSecurityContacts(), part1Markup(shelter)));
     }
 
     public void shelterSafety(Long id, Shelter shelter) {
-        sendResponse(sendMessagePart1(id, shelter.getSafetyPrecautions(), part1Markup(shelter)));
+        sendResponse(introductionPart(id, shelter.getSafetyPrecautions(), part1Markup(shelter)));
     }
 
     private void sendResponse(SendMessage sendMessage) {
-        SendResponse sendResponse = telegramBot.execute(sendMessage);
-        if (!sendResponse.isOk()) {
-            logger.error("Error during sending message: {}", sendResponse.message());
-        }
+        sender.sendResponse(sendMessage);
     }
 
-    private SendMessage sendMessagePart1(Long id, String message, InlineKeyboardMarkup inlineKeyboardMarkup) {
-        telegramBot.execute(new SendChatAction(id, ChatAction.typing));
+    private SendMessage introductionPart(Long id, String message, InlineKeyboardMarkup inlineKeyboardMarkup) {
         return new SendMessage(id, message).replyMarkup(inlineKeyboardMarkup);
     }
 
@@ -63,7 +51,7 @@ public class IntroductionPart {
         ).addRow(new InlineKeyboardButton("Пропуск в приют").callbackData(shelterName + "_pass"),
                         new InlineKeyboardButton("Техника безопасности").callbackData(shelterName + "_safety")
                 ).addRow(new InlineKeyboardButton("Ваши контакты для связи").callbackData("_contacts"),
-                        new InlineKeyboardButton("Волонтер").url("https://t.me/Anton_Ryabinin"))
+                        new InlineKeyboardButton("Обратиться к волонтеру").callbackData("volunteer"))
                 .addRow(new InlineKeyboardButton("Назад к выбору приюта").callbackData("back"));
     }
 }
