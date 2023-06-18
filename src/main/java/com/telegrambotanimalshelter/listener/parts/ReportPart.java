@@ -1,11 +1,9 @@
 package com.telegrambotanimalshelter.listener.parts;
 
-import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Message;
 import com.telegrambotanimalshelter.models.Shelter;
 import com.telegrambotanimalshelter.services.petownerservice.PetOwnersService;
 import org.springframework.stereotype.Component;
-import org.slf4j.Logger;
 
 import static com.telegrambotanimalshelter.utils.Constants.sendMessage;
 
@@ -13,22 +11,16 @@ import static com.telegrambotanimalshelter.utils.Constants.sendMessage;
 @Component
 public class ReportPart {
 
-    private final TelegramBot telegramBot;
-
     private final MessageSender sender;
 
     private final PetOwnersService petOwnersService;
 
     private final ContactRequestBlock contactBlock;
 
-    private final Logger logger;
-
-    public ReportPart(TelegramBot telegramBot, MessageSender sender, PetOwnersService petOwnersService, ContactRequestBlock contactBlock, Logger logger) {
-        this.telegramBot = telegramBot;
+    public ReportPart(MessageSender sender, PetOwnersService petOwnersService, ContactRequestBlock contactBlock) {
         this.sender = sender;
         this.petOwnersService = petOwnersService;
         this.contactBlock = contactBlock;
-        this.logger = logger;
     }
 
     public void startReportFromPetOwner(Long chatId, Shelter shelter) {
@@ -75,6 +67,4 @@ public class ReportPart {
                 "В противном случае, волонтеры приюта будут обязаны \n" +
                 "самолично проверять условия содержания животного».");
     }
-
-
 }

@@ -40,6 +40,7 @@ public class CallbackChecker {
     }
 
     public void callbackQueryCheck(CallbackQuery callbackQuery) {
+
         Shelter dogShelter = dogsService.getShelter();
         Shelter catShelter = catsService.getShelter();
 
@@ -58,7 +59,7 @@ public class CallbackChecker {
         if ("_report".equals(data)) reportPart.startReportFromPetOwner(id, dogShelter);
 
         if ("volunteer".equals(data)) {
-            chat.startChatWithVolunteer(id, "Здравствуйте. С вами хочет поговорить усыновитель. " + callbackQuery.from().firstName());
+            chat.startChat(id, "Здравствуйте. С вами хочет поговорить усыновитель. " + callbackQuery.from().firstName());
         }
 
         String preFix = data.split("_")[0];
@@ -88,8 +89,7 @@ public class CallbackChecker {
         return new InlineKeyboardMarkup(
                 new InlineKeyboardButton("Узнать информацию о приюте").callbackData(shelterName + "_shelter_info"))
                 .addRow(new InlineKeyboardButton("Как взять животное из приюта").callbackData(shelterName + "_shelter_consultation"))
-                .addRow(new InlineKeyboardButton("Прислать отчет о питомце").callbackData(shelterName + "_report"))
+                .addRow(new InlineKeyboardButton("Прислать отчет о питомце").callbackData("_report"))
                 .addRow(new InlineKeyboardButton("Обратиться к волонтеру").callbackData("volunteer"));
     }
-
 }

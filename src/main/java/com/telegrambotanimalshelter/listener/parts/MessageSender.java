@@ -1,10 +1,7 @@
 package com.telegrambotanimalshelter.listener.parts;
 
 import com.pengrad.telegrambot.TelegramBot;
-import com.pengrad.telegrambot.model.request.ChatAction;
-import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
-import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
-import com.pengrad.telegrambot.model.request.ParseMode;
+import com.pengrad.telegrambot.model.request.*;
 import com.pengrad.telegrambot.request.SendChatAction;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.SendResponse;
@@ -37,6 +34,13 @@ public class MessageSender {
     public void sendMessage(Long chatId, String message) {
         SendMessage sendMessage = new SendMessage(chatId, message);
         sendMessage.parseMode(ParseMode.Markdown);
+        telegramBot.execute(new SendChatAction(chatId, ChatAction.typing));
+        sendResponse(sendMessage);
+    }
+
+    public void sendChatMessage(Long chatId, String msg){
+        SendMessage sendMessage = new SendMessage(chatId, msg);
+        sendMessage.replyMarkup(new ReplyKeyboardMarkup(new KeyboardButton("Прекратить чат")));
         telegramBot.execute(new SendChatAction(chatId, ChatAction.typing));
         sendResponse(sendMessage);
     }

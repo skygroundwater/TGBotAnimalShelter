@@ -15,5 +15,7 @@ public interface VolunteerService {
 
     Volunteer putVolunteer(Volunteer volunteer);
 
+    Volunteer setFree(Long id, boolean trueOrFalse);
+
     Volunteer findFreeVolunteer();
 }

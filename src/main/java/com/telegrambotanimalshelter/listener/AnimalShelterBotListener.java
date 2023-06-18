@@ -77,17 +77,20 @@ public class AnimalShelterBotListener implements UpdatesListener {
                                     return;
                                 }
                             }
-                            if (petOwnersService.checkVolunteerChatStatus(chatId)) {
-                                chat.volunteerAndPetOwnerChat(chatId, null, text);
-                            }
-                            if (volunteerService.checkVolunteer(chatId)) {
-                                chat.volunteerAndPetOwnerChat(null, chatId, text);
-                            }
                             if (petOwnersService.checkContactRequestStatus(chatId)) {
                                 contactBlock.contactsRequestBlock(chatId, preFix, info);
+                                return;
                             }
                             if (petOwnersService.checkReportRequestStatus(chatId)) {
                                 reportPart.reportFromPetOwnerBlock(chatId, preFix, message);
+                                return;
+                            }
+                            if (petOwnersService.checkVolunteerChatStatus(chatId)) {
+                                chat.continueChat(chatId, null, text);
+                                return;
+                            }
+                            if (volunteerService.checkVolunteer(chatId)) {
+                                chat.continueChat(null, chatId, text);
                             }
                         } else {
                             checker.callbackQueryCheck(update.callbackQuery());

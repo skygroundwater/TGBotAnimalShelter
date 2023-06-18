@@ -12,6 +12,10 @@ public class Constants {
         messageSender.sendMessage(chatId, msg);
     }
 
+    public static void sendChatMessage(MessageSender messageSender,Long chatId, String msg){
+        messageSender.sendChatMessage(chatId, msg);
+    }
+
     public static void callBackQueryConstantCheck(CallbackQuery callbackQuery, Shelter shelter,
                                                   IntroductionPart introductionPart,
                                                   BecomingPetOwnerPart becomingPetOwnerPart){
