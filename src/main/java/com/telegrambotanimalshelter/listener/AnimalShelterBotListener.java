@@ -4,9 +4,11 @@ import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
-import com.telegrambotanimalshelter.listener.parts.*;
-import com.telegrambotanimalshelter.services.petownerservice.PetOwnersService;
-import com.telegrambotanimalshelter.services.volunteerservice.VolunteerService;
+import com.telegrambotanimalshelter.listener.parts.checker.CallbackChecker;
+import com.telegrambotanimalshelter.listener.parts.requests.ContactRequestBlock;
+import com.telegrambotanimalshelter.listener.parts.requests.ReportRequestBlock;
+import com.telegrambotanimalshelter.listener.parts.requests.VolunteerAndPetOwnerChat;
+import com.telegrambotanimalshelter.utils.MessageSender;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,36 +22,29 @@ public class AnimalShelterBotListener implements UpdatesListener {
 
     private final TelegramBot telegramBot;
 
-    private final CallbackChecker checker;
-
-    private final PetOwnersService petOwnersService;
-
-    private final VolunteerService volunteerService;
-
-    private final MessageSender sender;
-
     private final VolunteerAndPetOwnerChat chat;
 
     private final ContactRequestBlock contactBlock;
 
+    private final CallbackChecker checker;
+
+    private final MessageSender sender;
+
     private final Logger logger;
 
-    private final ReportPart reportPart;
+    private final ReportRequestBlock reportRequestBlock;
 
     @Autowired
-    public AnimalShelterBotListener(TelegramBot telegramBot, CallbackChecker checker,
-                                    PetOwnersService petOwnersService, VolunteerService volunteerService,
-                                    MessageSender sender, VolunteerAndPetOwnerChat chat,
-                                    ContactRequestBlock contactBlock, Logger logger, ReportPart reportPart) {
+    public AnimalShelterBotListener(TelegramBot telegramBot, VolunteerAndPetOwnerChat chat,
+                                    CallbackChecker checker, MessageSender sender, ReportRequestBlock reportRequestBlock,
+                                    ContactRequestBlock contactBlock, Logger logger) {
         this.telegramBot = telegramBot;
-        this.checker = checker;
-        this.petOwnersService = petOwnersService;
-        this.volunteerService = volunteerService;
-        this.sender = sender;
         this.chat = chat;
+        this.checker = checker;
+        this.sender = sender;
         this.contactBlock = contactBlock;
         this.logger = logger;
-        this.reportPart = reportPart;
+        this.reportRequestBlock = reportRequestBlock;
     }
 
     @PostConstruct
@@ -64,7 +59,9 @@ public class AnimalShelterBotListener implements UpdatesListener {
                     .filter(Objects::nonNull)
                     .forEach(update ->
                     {
-                        if (update.callbackQuery() == null) {
+                        if (update.callbackQuery() != null) {
+                            checker.callbackQueryCheck(update.callbackQuery());
+                        } else {
                             Message message = update.message();
                             Long chatId = message.chat().id();
                             String text = message.text();
@@ -72,28 +69,23 @@ public class AnimalShelterBotListener implements UpdatesListener {
                             String info = text.substring(preFix.length() - 1);
                             switch (text) {
                                 case "/start" -> {
-                                    petOwnersService.savePotentialPetOwner(update);
+                                    contactBlock.savePotentialPetOwner(update);
                                     sender.sendStartMessage(chatId);
                                     return;
                                 }
                             }
-                            if (petOwnersService.checkContactRequestStatus(chatId)) {
+                            if (contactBlock.checkContactRequestStatus(chatId)) {
                                 contactBlock.contactsRequestBlock(chatId, preFix, info);
-                                return;
                             }
-                            if (petOwnersService.checkReportRequestStatus(chatId)) {
-                                reportPart.reportFromPetOwnerBlock(chatId, preFix, message);
-                                return;
+                            if (reportRequestBlock.checkReportRequestStatus(chatId)) {
+                                reportRequestBlock.reportFromPetOwnerBlock(chatId, preFix, message);
                             }
-                            if (petOwnersService.checkVolunteerChatStatus(chatId)) {
+                            if (chat.checkPetOwnerChatStatus(chatId)) {
                                 chat.continueChat(chatId, null, text);
-                                return;
                             }
-                            if (volunteerService.checkVolunteer(chatId)) {
+                            if (chat.checkVolunteer(chatId)) {
                                 chat.continueChat(null, chatId, text);
                             }
-                        } else {
-                            checker.callbackQueryCheck(update.callbackQuery());
                         }
                     });
         } catch (Exception e) {

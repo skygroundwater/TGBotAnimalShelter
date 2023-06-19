@@ -1,10 +1,10 @@
-package com.telegrambotanimalshelter.listener.parts;
+package com.telegrambotanimalshelter.listener.parts.requests;
 
+import com.pengrad.telegrambot.model.Update;
 import com.telegrambotanimalshelter.models.Shelter;
 import com.telegrambotanimalshelter.services.petownerservice.PetOwnersService;
+import com.telegrambotanimalshelter.utils.MessageSender;
 import org.springframework.stereotype.Component;
-
-import static com.telegrambotanimalshelter.utils.Constants.sendMessage;
 
 @Component
 public class ContactRequestBlock {
@@ -23,7 +23,7 @@ public class ContactRequestBlock {
             case "Имя:" -> sendMessageToTakeSecondName(chatId, info);
             case "Фамилия:" -> sendMessageToTakeNumberOfPhone(chatId, info);
             case "Телефон:" -> {
-                sendConfirmMessage(chatId, "Ваши контакты успешно записаны. Можете продолжить работу с нашим ботом.");
+                sender.sendMessage(chatId, "Ваши контакты успешно записаны. Можете продолжить работу с нашим ботом.");
                 sender.sendStartMessage(chatId);
                 petOwnersService.setPetOwnerContactRequest(chatId, false);
             }
@@ -31,24 +31,28 @@ public class ContactRequestBlock {
                 sender.sendStartMessage(chatId);
                 petOwnersService.setPetOwnerContactRequest(chatId, false);
             }
-            default -> sendMessage(sender, chatId, "Вы находитесь в блоке записи контактных данных. Чтобы выйти из него отправьте команду /break");
+            default -> sender.sendMessage(chatId, "Вы находитесь в блоке записи контактных данных. Чтобы выйти из него отправьте команду /break");
         }
     }
 
-    public void sendConfirmMessage(Long chatId, String info) {
-        sendMessage(sender, chatId, info);
+    public void savePotentialPetOwner(Update update) {
+        petOwnersService.savePotentialPetOwner(update);
+    }
+
+    public boolean checkContactRequestStatus(Long petOwnerId) {
+        return petOwnersService.checkContactRequestStatus(petOwnerId);
     }
 
     public void sendMessageToTakeName(Long chatId, Shelter shelter) {
         petOwnersService.setPetOwnerContactRequest(chatId, true);
-        sendMessage(sender, chatId, "Введите ваше имя после префикса *Имя: * \uD83E\uDEAA Не забудьте пробел после двоеточия.");
+        sender.sendMessage(chatId, "Введите ваше имя после префикса *Имя: * \uD83E\uDEAA Не забудьте пробел после двоеточия.");
     }
 
     public void sendMessageToTakeSecondName(Long chatId, String name) {
-        sendMessage(sender, chatId, "Введите вашу Фамилию после префикса *Фамилия: * \uD83E\uDEAA Не забудьте пробел после двоеточия.");
+        sender.sendMessage(chatId, "Введите вашу Фамилию после префикса *Фамилия: * \uD83E\uDEAA Не забудьте пробел после двоеточия.");
     }
 
     public void sendMessageToTakeNumberOfPhone(Long chatId, String secondName) {
-        sendMessage(sender, chatId, "Введите ваш номер телефона после префикса *Телефон: * \uD83E\uDEAA Не забудьте пробел после двоеточия.");
+        sender.sendMessage(chatId, "Введите ваш номер телефона после префикса *Телефон: * \uD83E\uDEAA Не забудьте пробел после двоеточия.");
     }
 }

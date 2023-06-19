@@ -52,7 +52,8 @@ public class CatsServiceImpl implements PetService<Cat> {
 
     @Override
     public Cat findPet(Long id) {
-        return catsRepository.findById(id).orElseThrow(() -> new NotFoundInDataBaseException("Кот не найден"));
+        return catsRepository.findById(id)
+                .orElseThrow(() -> new NotFoundInDataBaseException("Кот не найден"));
     }
 
     @Override

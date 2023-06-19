@@ -1,9 +1,10 @@
-package com.telegrambotanimalshelter.listener.parts;
+package com.telegrambotanimalshelter.listener.parts.requests;
 
 import com.telegrambotanimalshelter.models.PetOwner;
 import com.telegrambotanimalshelter.models.Volunteer;
 import com.telegrambotanimalshelter.services.petownerservice.PetOwnersService;
 import com.telegrambotanimalshelter.services.volunteerservice.VolunteerService;
+import com.telegrambotanimalshelter.utils.MessageSender;
 import org.springframework.stereotype.Component;
 
 import static com.telegrambotanimalshelter.utils.Constants.sendChatMessage;
@@ -41,8 +42,8 @@ public class VolunteerAndPetOwnerChat {
 
         //отправляем сообщения волонтеру и усыновителю,
         // что они находятся в чате друг с другом
-        sendChatMessage(sender, volunteer.getId(), msg);
-        sendChatMessage(sender, petOwner.getId(), "С вами будет общаться волонтёр " + volunteer.getFirstName());
+        sender.sendChatMessage(volunteer.getId(), msg);
+        sender.sendChatMessage(petOwner.getId(), "С вами будет общаться волонтёр " + volunteer.getFirstName());
     }
 
     public void continueChat(Long petOwnerId, Long volunteerId, String msg) {
@@ -62,14 +63,22 @@ public class VolunteerAndPetOwnerChat {
         }
     }
 
+    public boolean checkPetOwnerChatStatus(Long petOwnerId){
+        return petOwnersService.checkVolunteerChatStatus(petOwnerId);
+    }
+
+    public boolean checkVolunteer(Long volunteerId){
+        return volunteerService.checkVolunteer(volunteerId);
+    }
+
     private void sendToVolunteer(Long petOwnerId, String msg){
         PetOwner petOwner = petOwnersService.findPetOwner(petOwnerId);
-        sendChatMessage(sender, petOwner.getVolunteer().getId(), msg);
+        sender.sendMessage(petOwner.getVolunteer().getId(), msg);
     }
 
     private void sendToPetOwner(Long volunteerId, String msg){
         Volunteer volunteer = volunteerService.findVolunteer(volunteerId);
-        sendChatMessage(sender, volunteer.getPetOwner().getId(), msg);
+        sender.sendMessage(volunteer.getPetOwner().getId(), msg);
     }
 
     public boolean stopChat(Long petOwnerId, Long volunteerId, String msg) {
@@ -88,8 +97,8 @@ public class VolunteerAndPetOwnerChat {
 
                 //кладём усыновителя обратно в базу
                 petOwnersService.putPetOwner(petOwner);
-                sendChatMessage(sender, petOwner.getId(), "Вы закончили чат");
-                sendChatMessage(sender, volunteer.getId(), "Вы закончили чат");
+                sender.sendMessage(petOwner.getId(), "Вы закончили чат");
+                sender.sendMessage(volunteer.getId(), "Вы закончили чат");
 
                 sender.sendStartMessage(petOwner.getId());
                 return true;
@@ -109,8 +118,8 @@ public class VolunteerAndPetOwnerChat {
                 //кладём волонтера обратно в базу
                 volunteerService.putVolunteer(volunteer);
 
-                sendChatMessage(sender, volunteer.getId(), "Вы закончили чат");
-                sendChatMessage(sender, petOwner.getId(), "Вы закончили чат");
+                sender.sendMessage(volunteer.getId(), "Вы закончили чат");
+                sender.sendMessage(petOwner.getId(), "Вы закончили чат");
                 sender.sendStartMessage(petOwner.getId());
                 return true;
             }

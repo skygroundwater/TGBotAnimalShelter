@@ -5,6 +5,7 @@ import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.telegrambotanimalshelter.enums.ShelterType;
 import com.telegrambotanimalshelter.models.Shelter;
+import com.telegrambotanimalshelter.utils.MessageSender;
 import org.springframework.stereotype.Component;
 
 import static com.telegrambotanimalshelter.utils.Constants.FIRST_MEETING_WITH_DOG;

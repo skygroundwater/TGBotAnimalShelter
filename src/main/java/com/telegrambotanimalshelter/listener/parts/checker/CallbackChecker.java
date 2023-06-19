@@ -1,43 +1,46 @@
-package com.telegrambotanimalshelter.listener.parts;
+package com.telegrambotanimalshelter.listener.parts.checker;
 
 import com.pengrad.telegrambot.model.CallbackQuery;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.telegrambotanimalshelter.enums.ShelterType;
+import com.telegrambotanimalshelter.listener.parts.requests.ContactRequestBlock;
+import com.telegrambotanimalshelter.listener.parts.requests.ReportRequestBlock;
+import com.telegrambotanimalshelter.listener.parts.requests.VolunteerAndPetOwnerChat;
 import com.telegrambotanimalshelter.models.Shelter;
 import com.telegrambotanimalshelter.models.animals.Cat;
 import com.telegrambotanimalshelter.models.animals.Dog;
 import com.telegrambotanimalshelter.services.petservice.PetService;
-import org.springframework.beans.factory.annotation.Qualifier;
+import com.telegrambotanimalshelter.utils.MessageSender;
 import org.springframework.stereotype.Component;
 
 @Component
 public class CallbackChecker {
 
-    private final PetService<Cat> catsService;
-
     private final PetService<Dog> dogsService;
 
-    private final MessageSender sender;
-
-    private final VolunteerAndPetOwnerChat chat;
+    private final PetService<Cat> catsService;
 
     private final ContactRequestBlock contactBlock;
 
-    private final ReportPart reportPart;
+    private final ReportRequestBlock reportRequestBlock;
 
-    public CallbackChecker(@Qualifier("catsServiceImpl") PetService<Cat> catsService,
-                           @Qualifier("dogsServiceImpl") PetService<Dog> dogsService,
-                           MessageSender sender, VolunteerAndPetOwnerChat chat,
-                           ContactRequestBlock contactBlock, ReportPart reportPart) {
-        this.catsService = catsService;
+    private final VolunteerAndPetOwnerChat chat;
+
+    private final MessageSender sender;
+
+    public CallbackChecker(PetService<Dog> dogsService, PetService<Cat> catsService,
+                           ContactRequestBlock contactBlock, ReportRequestBlock reportRequestBlock,
+                           VolunteerAndPetOwnerChat chat, MessageSender sender) {
         this.dogsService = dogsService;
-        this.sender = sender;
-        this.chat = chat;
+        this.catsService = catsService;
         this.contactBlock = contactBlock;
-        this.reportPart = reportPart;
+        this.reportRequestBlock = reportRequestBlock;
+        this.chat = chat;
+        this.sender = sender;
     }
+
 
     public void callbackQueryCheck(CallbackQuery callbackQuery) {
 
@@ -56,7 +59,7 @@ public class CallbackChecker {
         if ("back".equals(data)) sender.sendStartMessage(id);
 
         if ("_contacts".equals(data)) contactBlock.sendMessageToTakeName(id, dogShelter);
-        if ("_report".equals(data)) reportPart.startReportFromPetOwner(id, dogShelter);
+        if ("_report".equals(data)) reportRequestBlock.startReportFromPetOwner(id, dogShelter);
 
         if ("volunteer".equals(data)) {
             chat.startChat(id, "Здравствуйте. С вами хочет поговорить усыновитель. " + callbackQuery.from().firstName());

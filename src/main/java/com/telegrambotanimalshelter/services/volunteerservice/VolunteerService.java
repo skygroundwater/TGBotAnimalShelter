@@ -6,7 +6,6 @@ import org.springframework.http.HttpStatus;
 public interface VolunteerService {
     Volunteer findVolunteer(Long id);
 
-
     boolean checkVolunteer(Long id);
 
     Volunteer saveVolunteer(Volunteer volunteer);

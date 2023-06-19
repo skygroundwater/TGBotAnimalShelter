@@ -20,13 +20,11 @@ public class VolunteerServiceImpl implements VolunteerService {
         return volunteerRepository.findById(id).orElseThrow(() -> new NotFoundInDataBaseException("Волонтер не был найден"));
     }
 
-
     @Override
     public boolean checkVolunteer(Long id) {
         try {
             return findVolunteer(id) != null;
         } catch (NotFoundInDataBaseException e) {
-            System.out.println(e.getMessage());
             return false;
         }
     }
@@ -51,7 +49,7 @@ public class VolunteerServiceImpl implements VolunteerService {
     public Volunteer setFree(Long id, boolean trueOrFalse) {
         Volunteer volunteer = findVolunteer(id);
         volunteer.setFree(trueOrFalse);
-        if(trueOrFalse){
+        if (trueOrFalse) {
             volunteer.setPetOwner(null);
         }
         return volunteerRepository.save(volunteer);

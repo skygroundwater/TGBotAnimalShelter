@@ -1,4 +1,4 @@
-package com.telegrambotanimalshelter.listener.parts;
+package com.telegrambotanimalshelter.utils;
 
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.request.*;
@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class MessageSender {
-
 
     private final TelegramBot telegramBot;
 
@@ -38,7 +37,7 @@ public class MessageSender {
         sendResponse(sendMessage);
     }
 
-    public void sendChatMessage(Long chatId, String msg){
+    public void sendChatMessage(Long chatId, String msg) {
         SendMessage sendMessage = new SendMessage(chatId, msg);
         sendMessage.replyMarkup(new ReplyKeyboardMarkup(new KeyboardButton("Прекратить чат")));
         telegramBot.execute(new SendChatAction(chatId, ChatAction.typing));
