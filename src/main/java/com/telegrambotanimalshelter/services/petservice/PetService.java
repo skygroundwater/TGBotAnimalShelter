@@ -1,6 +1,5 @@
 package com.telegrambotanimalshelter.services.petservice;
 
-import com.pengrad.telegrambot.model.CallbackQuery;
 import com.telegrambotanimalshelter.models.PetOwner;
 import com.telegrambotanimalshelter.models.Shelter;
 import com.telegrambotanimalshelter.models.animals.Animal;
@@ -8,7 +7,7 @@ import org.springframework.http.HttpStatus;
 
 import java.util.List;
 
-public interface PetService <T extends Animal>{
+public interface PetService<T extends Animal> {
 
     T postPet(T pet);
 
@@ -24,5 +23,4 @@ public interface PetService <T extends Animal>{
 
     Shelter getShelter();
 
-    void callBackQueryServiceCheck(CallbackQuery callbackQuery);
 }

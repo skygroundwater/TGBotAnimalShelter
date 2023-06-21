@@ -17,30 +17,26 @@ public class IntroductionPart {
     }
 
     public void welcome(Long chatId, Shelter shelter) {
-        sendResponse(introductionPart(chatId, "Здравствуйте!", introductionPartMarkup(shelter)));
+        sender.sendResponse(introductionPartMessage(chatId, "Здравствуйте!", introductionPartMarkup(shelter)));
     }
 
     public void shelterInfo(Long id, Shelter shelter) {
-        sendResponse(introductionPart(id, shelter.getDescription(), introductionPartMarkup(shelter)));
+        sender.sendResponse(introductionPartMessage(id, shelter.getDescription(), introductionPartMarkup(shelter)));
     }
 
     public void shelterWorkingHours(Long id, Shelter shelter) {
-        sendResponse(introductionPart(id, shelter.getWorkingHours(), introductionPartMarkup(shelter)));
+        sender.sendResponse(introductionPartMessage(id, shelter.getWorkingHours(), introductionPartMarkup(shelter)));
     }
 
     public void shelterPass(Long id, Shelter shelter) {
-        sendResponse(introductionPart(id, shelter.getSecurityContacts(), introductionPartMarkup(shelter)));
+        sender.sendResponse(introductionPartMessage(id, shelter.getSecurityContacts(), introductionPartMarkup(shelter)));
     }
 
     public void shelterSafety(Long id, Shelter shelter) {
-        sendResponse(introductionPart(id, shelter.getSafetyPrecautions(), introductionPartMarkup(shelter)));
+        sender.sendResponse(introductionPartMessage(id, shelter.getSafetyPrecautions(), introductionPartMarkup(shelter)));
     }
 
-    private void sendResponse(SendMessage sendMessage) {
-        sender.sendResponse(sendMessage);
-    }
-
-    private SendMessage introductionPart(Long id, String message, InlineKeyboardMarkup inlineKeyboardMarkup) {
+    private SendMessage introductionPartMessage(Long id, String message, InlineKeyboardMarkup inlineKeyboardMarkup) {
         return new SendMessage(id, message).replyMarkup(inlineKeyboardMarkup);
     }
 

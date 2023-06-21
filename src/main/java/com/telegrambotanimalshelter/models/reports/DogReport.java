@@ -2,20 +2,18 @@ package com.telegrambotanimalshelter.models.reports;
 
 import com.telegrambotanimalshelter.models.PetOwner;
 import com.telegrambotanimalshelter.models.animals.Dog;
+import com.telegrambotanimalshelter.models.images.DogImage;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
-import org.hibernate.Hibernate;
+import lombok.*;
 
-import java.util.Objects;
+import java.util.List;
 
 @Entity
 @Table(name = "dog_reports")
 @NoArgsConstructor
 @Getter
 @Setter
+@Data
 public class DogReport extends Report {
 
     @Id
@@ -32,13 +30,8 @@ public class DogReport extends Report {
     @JoinColumn(referencedColumnName = "id")
     private Dog dog;
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        DogReport dogReport = (DogReport) o;
-        return getId() != null && Objects.equals(getId(), dogReport.getId());
-    }
+    @OneToMany(targetEntity = DogImage.class, mappedBy = "report", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<DogImage> images;
 
     @Override
     public int hashCode() {

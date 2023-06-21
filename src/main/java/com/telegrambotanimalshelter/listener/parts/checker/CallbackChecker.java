@@ -5,22 +5,19 @@ import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.telegrambotanimalshelter.enums.ShelterType;
+import com.telegrambotanimalshelter.listener.parts.BecomingPetOwnerPart;
+import com.telegrambotanimalshelter.listener.parts.IntroductionPart;
 import com.telegrambotanimalshelter.listener.parts.requests.ContactRequestBlock;
 import com.telegrambotanimalshelter.listener.parts.requests.ReportRequestBlock;
 import com.telegrambotanimalshelter.listener.parts.requests.VolunteerAndPetOwnerChat;
 import com.telegrambotanimalshelter.models.Shelter;
-import com.telegrambotanimalshelter.models.animals.Cat;
-import com.telegrambotanimalshelter.models.animals.Dog;
-import com.telegrambotanimalshelter.services.petservice.PetService;
+import com.telegrambotanimalshelter.utils.Constants;
 import com.telegrambotanimalshelter.utils.MessageSender;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
 public class CallbackChecker {
-
-    private final PetService<Dog> dogsService;
-
-    private final PetService<Cat> catsService;
 
     private final ContactRequestBlock contactBlock;
 
@@ -28,24 +25,32 @@ public class CallbackChecker {
 
     private final VolunteerAndPetOwnerChat chat;
 
+    private final IntroductionPart introductionPart;
+
+    private final BecomingPetOwnerPart becomingPart;
+
+    private final Shelter dogShelter;
+
+    private final Shelter catShelter;
+
     private final MessageSender sender;
 
-    public CallbackChecker(PetService<Dog> dogsService, PetService<Cat> catsService,
-                           ContactRequestBlock contactBlock, ReportRequestBlock reportRequestBlock,
-                           VolunteerAndPetOwnerChat chat, MessageSender sender) {
-        this.dogsService = dogsService;
-        this.catsService = catsService;
+    public CallbackChecker(ContactRequestBlock contactBlock, ReportRequestBlock reportRequestBlock,
+                           VolunteerAndPetOwnerChat chat, IntroductionPart introductionPart,
+                           BecomingPetOwnerPart becomingPart, MessageSender sender,
+                           @Qualifier("dogShelter") Shelter dogShelter, @Qualifier("catShelter") Shelter catShelter) {
         this.contactBlock = contactBlock;
         this.reportRequestBlock = reportRequestBlock;
         this.chat = chat;
+        this.introductionPart = introductionPart;
+        this.becomingPart = becomingPart;
+        this.dogShelter = dogShelter;
+        this.catShelter = catShelter;
         this.sender = sender;
     }
 
 
     public void callbackQueryCheck(CallbackQuery callbackQuery) {
-
-        Shelter dogShelter = dogsService.getShelter();
-        Shelter catShelter = catsService.getShelter();
 
         String dogShelterName = dogShelter.getName();
         String catShelterName = catShelter.getName();
@@ -68,10 +73,32 @@ public class CallbackChecker {
         String preFix = data.split("_")[0];
 
         if (preFix.equals(dogShelterName)) {
-            dogsService.callBackQueryServiceCheck(callbackQuery);
+            callBackQueryConstantCheck(callbackQuery, dogShelter);
+            if ("first_meeting".equals(callbackQuery.data())) {
+                becomingPart.firstMeetingWithDog(callbackQuery.from().id(), dogShelter);
+            }
         } else if (preFix.equals(catShelterName)) {
-            catsService.callBackQueryServiceCheck(callbackQuery);
+            callBackQueryConstantCheck(callbackQuery, catShelter);
         }
+    }
+
+    private void callBackQueryConstantCheck(CallbackQuery callbackQuery, Shelter shelter) {
+        String shelterName = shelter.getName();
+        String data = callbackQuery.data();
+        Long id = callbackQuery.from().id();
+        if ((shelterName + "_shelter_info").equals(data)) introductionPart.welcome(id, shelter);
+        if ((shelterName + "_info").equals(data)) introductionPart.shelterInfo(id, shelter);
+        if ((shelterName + "_hours").equals(data)) introductionPart.shelterWorkingHours(id, shelter);
+        if ((shelterName + "_pass").equals(data)) introductionPart.shelterPass(id, shelter);
+        if ((shelterName + "_safety").equals(data)) introductionPart.shelterSafety(id, shelter);
+        if ((shelterName + "_shelter_consultation").equals(data)) becomingPart.welcome(id, shelter);
+        if ((shelterName + "_acquaintance").equals(data)) becomingPart.acquaintanceWithPet(id, shelter);
+        if ((shelterName + "_documents").equals(data)) becomingPart.documentsForPetOwner(id, shelter);
+        if ((shelterName + "_transportation").equals(data)) becomingPart.transportation(id, shelter);
+        if ((shelterName + "_little").equals(data)) becomingPart.homeForLittlePet(id, shelter);
+        if ((shelterName + "_adult").equals(data)) becomingPart.homeForAdultPet(id, shelter);
+        if ((shelterName + "_restricted").equals(data)) becomingPart.homeForRestrictedPet(id, shelter);
+        if ((shelterName + "_reasons_for_refusal").equals(data)) becomingPart.reasonsForRefusal(id, shelter);
     }
 
     private void shelterMenu(Long chatId, Shelter shelter) {

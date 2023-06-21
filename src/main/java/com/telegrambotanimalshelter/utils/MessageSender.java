@@ -4,12 +4,14 @@ import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.request.*;
 import com.pengrad.telegrambot.request.SendChatAction;
 import com.pengrad.telegrambot.request.SendMessage;
+import com.pengrad.telegrambot.request.SendPhoto;
 import com.pengrad.telegrambot.response.SendResponse;
+import com.telegrambotanimalshelter.models.animals.Animal;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
 @Component
-public class MessageSender {
+public class MessageSender<A extends Animal> {
 
     private final TelegramBot telegramBot;
 
@@ -42,6 +44,15 @@ public class MessageSender {
         sendMessage.replyMarkup(new ReplyKeyboardMarkup(new KeyboardButton("Прекратить чат")));
         telegramBot.execute(new SendChatAction(chatId, ChatAction.typing));
         sendResponse(sendMessage);
+    }
+
+    public void choosePetMessage(Long chatId, A animal){
+        SendPhoto sendPhoto = new SendPhoto(chatId, new byte[]{});
+        sendPhoto.replyMarkup(new InlineKeyboardMarkup(new InlineKeyboardButton("Выбрать " + animal.getNickName())));
+        SendResponse sendResponse = telegramBot.execute(sendPhoto);
+        if (!sendResponse.isOk()) {
+            logger.error("Error during sending message: {}", sendResponse.message());
+        }
     }
 
     public void sendResponse(SendMessage sendMessage) {

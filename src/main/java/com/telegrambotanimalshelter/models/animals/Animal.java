@@ -24,6 +24,9 @@ public abstract class Animal {
     @Column(name = "is_chipped")
     private boolean isChipped;
 
+    @Column(name = "reported")
+    private boolean reported;
+
     @Column(name = "registered_at")
     private LocalDateTime registeredAt;
 

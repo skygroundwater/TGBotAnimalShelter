@@ -2,6 +2,8 @@ package com.telegrambotanimalshelter.models.animals;
 
 import com.telegrambotanimalshelter.models.PetOwner;
 import com.telegrambotanimalshelter.models.Shelter;
+import com.telegrambotanimalshelter.models.images.CatImage;
+import com.telegrambotanimalshelter.models.images.DogImage;
 import com.telegrambotanimalshelter.models.reports.CatReport;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -30,6 +32,9 @@ public class Cat extends Animal {
     @OneToMany(mappedBy = "cat", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @ToString.Exclude
     private List<CatReport> reports;
+
+    @OneToMany(targetEntity = CatImage.class, mappedBy = "cat", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<CatImage> images;
 
     public Cat(String nickname, boolean isChipped, LocalDateTime registeredAt, Shelter shelter, PetOwner petOwner) {
         super(nickname, isChipped, registeredAt, shelter);

@@ -1,13 +1,13 @@
 package com.telegrambotanimalshelter.models.reports;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @NoArgsConstructor
 @Getter
@@ -28,4 +28,8 @@ public abstract class Report {
     @Column(name = "behavior")
     private String behavioralChanges;
 
+    @PrePersist
+    private void init() {
+        date = LocalDateTime.now().toLocalDate();
+    }
 }

@@ -18,15 +18,15 @@ public interface PetOwnersService {
 
     void savePotentialPetOwner(Update update);
 
-    void setPetOwnerReportRequest(Long id, boolean trueOrFalse);
+    PetOwner setPetOwnerReportRequest(Long id, boolean trueOrFalse);
 
     boolean checkReportRequestStatus(Long id);
 
     boolean checkContactRequestStatus(Long id);
 
-    void setPetOwnerContactRequest(Long id, boolean trueOrFalse);
+    PetOwner setPetOwnerContactRequest(Long id, boolean trueOrFalse);
 
-    PetOwner setPetOwnerToVolunteerChat(Long id,Volunteer volunteer, boolean trueOrFalse);
+    PetOwner setPetOwnerToVolunteerChat(Long id, Volunteer volunteer, boolean trueOrFalse);
 
     boolean checkVolunteerChatStatus(Long id);
 

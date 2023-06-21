@@ -6,6 +6,8 @@ import com.telegrambotanimalshelter.repositories.VolunteerRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class VolunteerServiceImpl implements VolunteerService {
 
@@ -59,5 +61,10 @@ public class VolunteerServiceImpl implements VolunteerService {
     public Volunteer findFreeVolunteer() {
         return volunteerRepository.findVolunteersByIsFreeTrue().stream().findAny()
                 .orElseThrow(() -> new NotFoundInDataBaseException("Все волонтеры на данный момент заняты. Просим вас подождать"));
+    }
+
+    @Override
+    public List<Volunteer> gatAllVolunteers() {
+        return volunteerRepository.findAll();
     }
 }

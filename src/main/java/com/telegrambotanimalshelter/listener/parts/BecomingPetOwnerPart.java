@@ -20,7 +20,7 @@ public class BecomingPetOwnerPart {
         this.sender = sender;
     }
 
-    public void part2(Long id, Shelter shelter) {
+    public void welcome(Long id, Shelter shelter) {
         sender.sendResponse(becomingPart(id, "Здравствуйте! Это 2-ой этап", becomingPartMarkup(shelter)));
     }
 

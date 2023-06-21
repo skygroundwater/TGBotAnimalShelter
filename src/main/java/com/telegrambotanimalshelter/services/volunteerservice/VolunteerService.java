@@ -3,6 +3,8 @@ package com.telegrambotanimalshelter.services.volunteerservice;
 import com.telegrambotanimalshelter.models.Volunteer;
 import org.springframework.http.HttpStatus;
 
+import java.util.List;
+
 public interface VolunteerService {
     Volunteer findVolunteer(Long id);
 
@@ -17,4 +19,6 @@ public interface VolunteerService {
     Volunteer setFree(Long id, boolean trueOrFalse);
 
     Volunteer findFreeVolunteer();
+
+    List<Volunteer> gatAllVolunteers();
 }

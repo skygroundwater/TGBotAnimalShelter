@@ -1,16 +1,12 @@
 package com.telegrambotanimalshelter.services.petservice;
 
 
-import com.pengrad.telegrambot.model.CallbackQuery;
 import com.telegrambotanimalshelter.exceptions.NotFoundInDataBaseException;
 import com.telegrambotanimalshelter.exceptions.NotValidDataException;
-import com.telegrambotanimalshelter.listener.parts.IntroductionPart;
-import com.telegrambotanimalshelter.listener.parts.BecomingPetOwnerPart;
 import com.telegrambotanimalshelter.models.PetOwner;
 import com.telegrambotanimalshelter.models.Shelter;
 import com.telegrambotanimalshelter.models.animals.Dog;
 import com.telegrambotanimalshelter.repositories.animals.DogsRepository;
-import com.telegrambotanimalshelter.utils.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
@@ -25,14 +21,8 @@ public class DogsServiceImpl implements PetService<Dog> {
 
     private final Shelter shelter;
 
-    private final IntroductionPart introductionPart;
-
-    private final BecomingPetOwnerPart becomingPetOwnerPart;
-
     @Autowired
-    public DogsServiceImpl(DogsRepository dogsRepository, @Qualifier("dogShelter") Shelter shelter, IntroductionPart introductionPart, BecomingPetOwnerPart becomingPetOwnerPart) {
-        this.introductionPart = introductionPart;
-        this.becomingPetOwnerPart = becomingPetOwnerPart;
+    public DogsServiceImpl(DogsRepository dogsRepository, @Qualifier("dogShelter") Shelter shelter) {
         shelter.getAllAnimalsFromDB(dogsRepository.findAll());
         this.dogsRepository = dogsRepository;
         this.shelter = shelter;
@@ -68,13 +58,6 @@ public class DogsServiceImpl implements PetService<Dog> {
         return dogsRepository.findDogsByPetOwner(petOwner);
     }
 
-    @Override
-    public void callBackQueryServiceCheck(CallbackQuery callbackQuery) {
-        Constants.callBackQueryConstantCheck(callbackQuery, shelter, introductionPart, becomingPetOwnerPart);
-        if ("first_meeting".equals(callbackQuery.data())){
-            becomingPetOwnerPart.firstMeetingWithDog(callbackQuery.from().id(), shelter);
-        }
-    }
 
     @Override
     public List<Dog> getAllPets() {

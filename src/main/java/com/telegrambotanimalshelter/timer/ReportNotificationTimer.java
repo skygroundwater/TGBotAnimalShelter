@@ -10,6 +10,8 @@ import com.telegrambotanimalshelter.models.Shelter;
 import com.telegrambotanimalshelter.models.animals.Animal;
 import com.telegrambotanimalshelter.models.animals.Cat;
 import com.telegrambotanimalshelter.models.animals.Dog;
+import com.telegrambotanimalshelter.models.images.CatImage;
+import com.telegrambotanimalshelter.models.images.DogImage;
 import com.telegrambotanimalshelter.models.reports.CatReport;
 import com.telegrambotanimalshelter.models.reports.DogReport;
 import com.telegrambotanimalshelter.models.reports.Report;
@@ -33,9 +35,9 @@ public class ReportNotificationTimer<A extends Animal> {
 
     private final PetService<Dog> dogsService;
 
-    private final ReportService<DogReport, Dog> dogReportService;
+    private final ReportService<DogReport, Dog, DogImage> dogReportService;
 
-    private final ReportService<CatReport, Cat> catReportService;
+    private final ReportService<CatReport, Cat, CatImage> catReportService;
 
     private final PetOwnersService petOwnersService;
 
@@ -45,8 +47,8 @@ public class ReportNotificationTimer<A extends Animal> {
     @Autowired
     public ReportNotificationTimer(@Qualifier("catsServiceImpl") PetService<Cat> catsService,
                                    @Qualifier("dogsServiceImpl") PetService<Dog> dogsService,
-                                   @Qualifier("dogReportServiceImpl") ReportService<DogReport, Dog> dogReportService,
-                                   @Qualifier("catReportServiceImpl") ReportService<CatReport, Cat> catReportService,
+                                   @Qualifier("dogReportServiceImpl") ReportService<DogReport, Dog, DogImage> dogReportService,
+                                   @Qualifier("catReportServiceImpl") ReportService<CatReport, Cat, CatImage> catReportService,
                                    PetOwnersService petOwnersService, TelegramBot telegramBot) {
         this.catsService = catsService;
         this.dogsService = dogsService;
@@ -55,7 +57,6 @@ public class ReportNotificationTimer<A extends Animal> {
         this.petOwnersService = petOwnersService;
         this.telegramBot = telegramBot;
     }
-
 
     @Scheduled(fixedDelay = 1, timeUnit = TimeUnit.DAYS)
     public void notificationToSendReport() {
@@ -97,7 +98,6 @@ public class ReportNotificationTimer<A extends Animal> {
         return catReportService.findReportsFromPet(cat);
     }
 
-
     private void sendMessageToSendReport(Long chatId, String petName, Shelter shelter) {
         String text = "Пришлите отчет по вашему подопечному: *" + petName
                 + "*\n Ждём информации сегодня до конца дня";
@@ -108,7 +108,6 @@ public class ReportNotificationTimer<A extends Animal> {
                 new InlineKeyboardButton("Прислать отчет")
                         .callbackData(shelter.getName() + "_report")
         ));
-
         telegramBot.execute(sendMessage);
     }
 }

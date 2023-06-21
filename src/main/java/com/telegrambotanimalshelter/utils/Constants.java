@@ -1,36 +1,9 @@
 package com.telegrambotanimalshelter.utils;
 
-import com.pengrad.telegrambot.model.CallbackQuery;
-import com.telegrambotanimalshelter.listener.parts.IntroductionPart;
-import com.telegrambotanimalshelter.listener.parts.BecomingPetOwnerPart;
-import com.telegrambotanimalshelter.models.Shelter;
+import com.telegrambotanimalshelter.models.reports.Report;
 
-public class Constants {
+public class Constants<R extends Report> {
 
-    public static void sendChatMessage(MessageSender messageSender, Long chatId, String msg) {
-        messageSender.sendChatMessage(chatId, msg);
-    }
-
-    public static void callBackQueryConstantCheck(CallbackQuery callbackQuery, Shelter shelter,
-                                                  IntroductionPart introductionPart,
-                                                  BecomingPetOwnerPart becomingPetOwnerPart) {
-        String shelterName = shelter.getName();
-        String data = callbackQuery.data();
-        Long id = callbackQuery.from().id();
-        if ((shelterName + "_shelter_info").equals(data)) introductionPart.welcome(id, shelter);
-        if ((shelterName + "_info").equals(data)) introductionPart.shelterInfo(id, shelter);
-        if ((shelterName + "_hours").equals(data)) introductionPart.shelterWorkingHours(id, shelter);
-        if ((shelterName + "_pass").equals(data)) introductionPart.shelterPass(id, shelter);
-        if ((shelterName + "_safety").equals(data)) introductionPart.shelterSafety(id, shelter);
-        if ((shelterName + "_shelter_consultation").equals(data)) becomingPetOwnerPart.part2(id, shelter);
-        if ((shelterName + "_acquaintance").equals(data)) becomingPetOwnerPart.acquaintanceWithPet(id, shelter);
-        if ((shelterName + "_documents").equals(data)) becomingPetOwnerPart.documentsForPetOwner(id, shelter);
-        if ((shelterName + "_transportation").equals(data)) becomingPetOwnerPart.transportation(id, shelter);
-        if ((shelterName + "_little").equals(data)) becomingPetOwnerPart.homeForLittlePet(id, shelter);
-        if ((shelterName + "_adult").equals(data)) becomingPetOwnerPart.homeForAdultPet(id, shelter);
-        if ((shelterName + "_restricted").equals(data)) becomingPetOwnerPart.homeForRestrictedPet(id, shelter);
-        if ((shelterName + "_reasons_for_refusal").equals(data)) becomingPetOwnerPart.reasonsForRefusal(id, shelter);
-    }
 
     public static String DOG_SHELTER_DESCRIPTION = """
             Приют работает с 2019 года. В приоритете — спасение сбитых машинами и больных животных.\s

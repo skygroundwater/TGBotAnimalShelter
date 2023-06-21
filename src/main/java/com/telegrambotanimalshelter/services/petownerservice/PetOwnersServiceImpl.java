@@ -61,10 +61,10 @@ public class PetOwnersServiceImpl implements PetOwnersService {
     }
 
     @Override
-    public void setPetOwnerReportRequest(Long id, boolean trueOrFalse) {
+    public PetOwner setPetOwnerReportRequest(Long id, boolean trueOrFalse) {
         PetOwner petOwner = findPetOwner(id);
         petOwner.setReportRequest(trueOrFalse);
-        putPetOwner(petOwner);
+        return putPetOwner(petOwner);
     }
 
     @Override
@@ -86,10 +86,10 @@ public class PetOwnersServiceImpl implements PetOwnersService {
     }
 
     @Override
-    public void setPetOwnerContactRequest(Long id, boolean trueOrFalse) {
+    public PetOwner setPetOwnerContactRequest(Long id, boolean trueOrFalse) {
         PetOwner petOwner = findPetOwner(id);
         petOwner.setContactRequest(trueOrFalse);
-        putPetOwner(petOwner);
+        return putPetOwner(petOwner);
     }
 
     @Override

@@ -1,11 +1,9 @@
 package com.telegrambotanimalshelter.models;
 
-import com.telegrambotanimalshelter.models.animals.Animal;
 import com.telegrambotanimalshelter.models.animals.Cat;
 import com.telegrambotanimalshelter.models.animals.Dog;
 import com.telegrambotanimalshelter.models.reports.CatReport;
 import com.telegrambotanimalshelter.models.reports.DogReport;
-import com.telegrambotanimalshelter.models.reports.Report;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.Hibernate;
@@ -38,6 +36,9 @@ public class PetOwner {
 
     @Column(name = "registered_at")
     private LocalDateTime registeredAt;
+
+    @Column(name = "phone_number")
+    private String phoneNumber;
 
     @Column(name = "has_pets")
     private boolean hasPets;
