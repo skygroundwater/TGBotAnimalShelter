@@ -1,10 +1,11 @@
 package com.telegrambotanimalshelter.services.reportservice;
 
 import com.telegrambotanimalshelter.models.images.CatImage;
-import com.telegrambotanimalshelter.models.images.Image;
 import com.telegrambotanimalshelter.models.animals.Cat;
 import com.telegrambotanimalshelter.models.reports.CatReport;
+import com.telegrambotanimalshelter.repositories.images.BinaryContentRepository;
 import com.telegrambotanimalshelter.repositories.images.CatImagesRepository;
+import com.telegrambotanimalshelter.repositories.images.DocumentRepository;
 import com.telegrambotanimalshelter.repositories.reports.CatReportsRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -19,12 +20,10 @@ import java.util.List;
 public class CatReportServiceImpl implements ReportService<CatReport, Cat, CatImage> {
 
     private final CatReportsRepository reportsRepository;
-
-
     private final CatImagesRepository<CatReport> catImagesRepository;
 
     public CatReportServiceImpl(CatReportsRepository reportsRepository,
-                                CatImagesRepository<CatReport> catImagesRepository) {
+                                BinaryContentRepository binaryContentRepository, DocumentRepository documentRepository, CatImagesRepository<CatReport> catImagesRepository) {
         this.reportsRepository = reportsRepository;
         this.catImagesRepository = catImagesRepository;
     }

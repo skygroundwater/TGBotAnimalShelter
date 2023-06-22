@@ -9,7 +9,7 @@ import lombok.Setter;
 
 
 @Entity
-@Table(name = "cat_images")
+@Table(schema = "images", name = "cat_images")
 @Getter
 @Setter
 @NoArgsConstructor

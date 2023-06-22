@@ -1,14 +1,10 @@
 package com.telegrambotanimalshelter.models;
 
-
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.Hibernate;
-
-import java.util.Objects;
 
 @Entity
-@Table(name = "volunteers")
+@Table(schema = "public", name = "volunteers")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter

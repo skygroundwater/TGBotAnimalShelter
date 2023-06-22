@@ -67,6 +67,9 @@ public class AnimalShelterBotListener<A extends Animal> implements UpdatesListen
                         if (update.callbackQuery() != null) {
                             checker.callbackQueryCheck(update.callbackQuery());
                         } else {
+                            if (reportRequestBlock.checkReportRequestStatus(update.message().chat().id())) {
+                                reportRequestBlock.reportFromPetOwnerBlock(update.message());
+                            }
                             Message message = update.message();
                             Long chatId = message.chat().id();
                             String text = message.text();
@@ -81,9 +84,6 @@ public class AnimalShelterBotListener<A extends Animal> implements UpdatesListen
                             }
                             if (contactBlock.checkContactRequestStatus(chatId)) {
                                 contactBlock.contactsRequestBlock(chatId, preFix, info);
-                            }
-                            if (reportRequestBlock.checkReportRequestStatus(chatId)) {
-                                reportRequestBlock.reportFromPetOwnerBlock(chatId, preFix, message);
                             }
                             if (chat.checkPetOwnerChatStatus(chatId)) {
                                 chat.continueChat(chatId, null, text);

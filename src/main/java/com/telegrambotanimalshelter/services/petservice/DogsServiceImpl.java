@@ -7,6 +7,8 @@ import com.telegrambotanimalshelter.models.PetOwner;
 import com.telegrambotanimalshelter.models.Shelter;
 import com.telegrambotanimalshelter.models.animals.Dog;
 import com.telegrambotanimalshelter.repositories.animals.DogsRepository;
+import com.telegrambotanimalshelter.repositories.images.BinaryContentRepository;
+import com.telegrambotanimalshelter.repositories.images.DocumentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;

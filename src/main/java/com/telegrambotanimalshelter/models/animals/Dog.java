@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Table(name = "dogs")
+@Table(schema = "animals", name = "dogs")
 @Getter
 @Setter
 @NoArgsConstructor

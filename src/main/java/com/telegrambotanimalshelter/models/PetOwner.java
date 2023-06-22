@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Entity
-@Table(name = "petowners")
+@Table(schema = "public", name = "petowners")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter

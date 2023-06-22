@@ -3,6 +3,8 @@ package com.telegrambotanimalshelter.services.reportservice;
 import com.telegrambotanimalshelter.models.animals.Dog;
 import com.telegrambotanimalshelter.models.images.DogImage;
 import com.telegrambotanimalshelter.models.reports.DogReport;
+import com.telegrambotanimalshelter.repositories.images.BinaryContentRepository;
+import com.telegrambotanimalshelter.repositories.images.DocumentRepository;
 import com.telegrambotanimalshelter.repositories.images.DogImagesRepository;
 import com.telegrambotanimalshelter.repositories.reports.DogReportsRepository;
 import org.springframework.http.HttpStatus;
@@ -18,7 +20,6 @@ import java.util.List;
 public class DogReportServiceImpl implements ReportService<DogReport, Dog, DogImage> {
 
     private final DogReportsRepository reportsRepository;
-
     private final DogImagesRepository dogImagesRepository;
 
     public DogReportServiceImpl(DogReportsRepository reportsRepository, DogImagesRepository dogImagesRepository) {

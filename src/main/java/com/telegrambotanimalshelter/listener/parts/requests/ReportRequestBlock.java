@@ -7,10 +7,12 @@ import com.telegrambotanimalshelter.models.Shelter;
 import com.telegrambotanimalshelter.models.animals.Animal;
 import com.telegrambotanimalshelter.models.animals.Cat;
 import com.telegrambotanimalshelter.models.animals.Dog;
+import com.telegrambotanimalshelter.models.images.AppDocument;
 import com.telegrambotanimalshelter.models.images.CatImage;
 import com.telegrambotanimalshelter.models.images.DogImage;
 import com.telegrambotanimalshelter.models.reports.CatReport;
 import com.telegrambotanimalshelter.models.reports.DogReport;
+import com.telegrambotanimalshelter.services.FileService;
 import com.telegrambotanimalshelter.services.petownerservice.PetOwnersService;
 import com.telegrambotanimalshelter.services.petservice.PetService;
 import com.telegrambotanimalshelter.services.reportservice.ReportService;
@@ -19,7 +21,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 
@@ -29,6 +30,8 @@ public class ReportRequestBlock<A extends Animal> {
     private final MessageSender<A> sender;
 
     private final PetOwnersService petOwnersService;
+
+    private final FileService fileService;
 
     private final ReportService<CatReport, Cat, CatImage> catReportService;
 
@@ -41,12 +44,13 @@ public class ReportRequestBlock<A extends Animal> {
     private final Keeper<A> keeper;
 
     public ReportRequestBlock(MessageSender<A> sender, PetOwnersService petOwnersService,
-                              @Qualifier("catReportServiceImpl") ReportService<CatReport, Cat, CatImage> catReportService,
+                              FileService fileService, @Qualifier("catReportServiceImpl") ReportService<CatReport, Cat, CatImage> catReportService,
                               @Qualifier("dogReportServiceImpl") ReportService<DogReport, Dog, DogImage> dogReportService,
                               @Qualifier("catsServiceImpl") PetService<Cat> catService,
                               @Qualifier("dogsServiceImpl") PetService<Dog> dogService, Keeper<A> keeper) {
         this.sender = sender;
         this.petOwnersService = petOwnersService;
+        this.fileService = fileService;
         this.catReportService = catReportService;
         this.dogReportService = dogReportService;
         this.catService = catService;
@@ -57,54 +61,48 @@ public class ReportRequestBlock<A extends Animal> {
     public void startReportFromPetOwner(Long chatId, Shelter shelter) {
         PetOwner petOwner = keeper.getCashedPetOwners().put(chatId, petOwnersService.setPetOwnerReportRequest(chatId, true));
 
-        List<A> pets = new ArrayList<>();
-        pets.addAll((List<A>) petOwner.getCats());
-        pets.addAll((List<A>) petOwner.getDogs());
-
-
-        keeper.getCashedAnimals().put(chatId, pets);
-
-
-        for (A animal : keeper.getCashedAnimals().get(chatId)) {
-            if (!animal.isReported()) {
-                sender.choosePetMessage(chatId, animal);
-
-            }
-        }
-
 
         sender.sendMessage(chatId, "Итак, вы решили отправить-таки отчет по своему питомцу.\n" +
-                "Следующим сообщением приложите его фотографии, предварительно прописав префикс *Фото: *." +
+                "Следующим сообщением приложите его свежие фотографии." +
                 "Чтобы прекратить процесс отправки отчета, воспользуйтесь командой /break");
 
 
     }
 
-    public void reportFromPetOwnerBlock(Long chatId, String prefix, Message message) {
-        switch (prefix) {
-            case "Фото:" -> sendMessageToTakeDiet(chatId, message);
-            case "Диета:" -> sendMessageToTakeCommonStatus(chatId, message);
-            case "Состояние:" -> {
-                sender.sendMessage(chatId, "Спасибо Вам за ваш отчет. Если будет что-то не так - волонтёр отпишетися вам. Желаем удачи.");
-                keeper.getCashedPetOwners().put(chatId, petOwnersService.setPetOwnerReportRequest(chatId, false));
+    public void reportFromPetOwnerBlock(Message message) {
+        if (message.photo() == null) {
+            Long chatId = message.chat().id();
+            String text = message.text();
+            String preFix = text.split(" ")[0];
+            switch (preFix) {
+                case "Диета:" -> sendMessageToTakeCommonStatus(chatId, message);
+                case "Состояние:" -> {
+                    sender.sendMessage(chatId, "Спасибо Вам за ваш отчет. Если будет что-то не так - волонтёр отпишетися вам. Желаем удачи.");
+                    keeper.getCashedPetOwners().put(chatId, petOwnersService.setPetOwnerReportRequest(chatId, false));
+                }
+                case "/break" -> {
+                    sender.sendStartMessage(chatId);
+                    keeper.getCashedPetOwners().put(chatId, petOwnersService.setPetOwnerReportRequest(chatId, false));
+                }
+                default -> sendWarningLetter(chatId);
             }
-            case "/break" -> {
-                sender.sendStartMessage(chatId);
-                keeper.getCashedPetOwners().put(chatId, petOwnersService.setPetOwnerReportRequest(chatId, false));
-            }
-            default -> sendWarningLetter(chatId);
+        }else {
+            sendMessageToTakeDiet(message.chat().id(), message);
         }
     }
 
     public boolean checkReportRequestStatus(Long petOwnerId) {
         try {
             return keeper.getCashedPetOwners().get(petOwnerId).isReportRequest();
-        }catch (NullPointerException e){
+        } catch (NullPointerException e) {
             return false;
         }
     }
 
     private void sendMessageToTakeDiet(Long chatId, Message message) {
+        fileService.processDoc(message);
+
+
         sender.sendMessage(chatId, "Отлично. Теперь отправьте сообщешием повседневный рацион вашего животного. Префикс *Диета: *");
     }
 
