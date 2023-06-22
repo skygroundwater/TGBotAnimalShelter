@@ -54,12 +54,10 @@ public class DogsServiceImpl implements PetService<Dog> {
         else throw new NotValidDataException("Отправьте информацию снова");
     }
 
-
     @Override
     public List<Dog> findPetsByPetOwner(PetOwner petOwner) {
         return dogsRepository.findDogsByPetOwner(petOwner);
     }
-
 
     @Override
     public List<Dog> getAllPets() {

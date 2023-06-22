@@ -3,7 +3,6 @@ package com.telegrambotanimalshelter.services;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.PhotoSize;
-import com.pengrad.telegrambot.request.SendPhoto;
 import com.telegrambotanimalshelter.exceptions.UploadFileException;
 import com.telegrambotanimalshelter.models.images.AppDocument;
 import com.telegrambotanimalshelter.models.images.BinaryContent;
@@ -20,12 +19,10 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.stream.Collectors;
+import java.util.List;
 
 @Service
 public class FileServiceImpl implements FileService {
-
-    private final TelegramBot telegramBot;
     private final BinaryContentRepository binaryContentRepository;
     private final DocumentRepository documentRepository;
     @Value("${bot.token}")
@@ -37,8 +34,7 @@ public class FileServiceImpl implements FileService {
     @Value("${service.file_storage.uri}")
     String filePath;
 
-    public FileServiceImpl(TelegramBot telegramBot, BinaryContentRepository binaryContentRepository, DocumentRepository documentRepository) {
-        this.telegramBot = telegramBot;
+    public FileServiceImpl(BinaryContentRepository binaryContentRepository, DocumentRepository documentRepository) {
         this.binaryContentRepository = binaryContentRepository;
         this.documentRepository = documentRepository;
     }
@@ -46,9 +42,8 @@ public class FileServiceImpl implements FileService {
     @Override
     public AppDocument processDoc(Message message) {
         PhotoSize photoSize = Arrays.stream(message.photo()).toList().get(2);
-        String fileId = null;
         if (photoSize != null) {
-            fileId = photoSize.fileId();
+            String fileId = photoSize.fileId();
             ResponseEntity<String> response = getFilePath(fileId);
             if (response.getStatusCode() == HttpStatus.OK) {
                 JSONObject jsonObject = new JSONObject(response.getBody());
@@ -56,10 +51,7 @@ public class FileServiceImpl implements FileService {
                 byte[] fileInByte = downloadFile(filePath);
                 BinaryContent transientBinaryContent = BinaryContent.builder().fileAsArrayOfBytes(fileInByte).build();
                 BinaryContent persistentBinaryContent = binaryContentRepository.save(transientBinaryContent);
-
                 AppDocument transientAppDocument = buildTransientDocument(photoSize, persistentBinaryContent);
-
-                telegramBot.execute(new SendPhoto(message.chat().id(),fileInByte ));
                 return documentRepository.save(transientAppDocument);
             }
         } else {

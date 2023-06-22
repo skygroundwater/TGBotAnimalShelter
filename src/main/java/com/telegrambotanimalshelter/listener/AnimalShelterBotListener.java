@@ -30,7 +30,7 @@ public class AnimalShelterBotListener<A extends Animal> implements UpdatesListen
 
     private final CallbackChecker checker;
 
-    private final Keeper<A> keeper;
+    private final Keeper keeper;
 
     private final MessageSender<A> sender;
 
@@ -40,7 +40,7 @@ public class AnimalShelterBotListener<A extends Animal> implements UpdatesListen
 
     @Autowired
     public AnimalShelterBotListener(TelegramBot telegramBot, VolunteerAndPetOwnerChat<A> chat,
-                                    CallbackChecker checker, Keeper<A> keeper, MessageSender<A> sender, ReportRequestBlock<A> reportRequestBlock,
+                                    CallbackChecker checker, Keeper keeper, MessageSender<A> sender, ReportRequestBlock<A> reportRequestBlock,
                                     ContactRequestBlock<A> contactBlock, Logger logger) {
         this.telegramBot = telegramBot;
         this.chat = chat;

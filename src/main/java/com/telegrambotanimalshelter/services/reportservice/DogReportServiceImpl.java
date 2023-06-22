@@ -1,19 +1,16 @@
 package com.telegrambotanimalshelter.services.reportservice;
 
+import com.pengrad.telegrambot.model.PhotoSize;
 import com.telegrambotanimalshelter.models.animals.Dog;
 import com.telegrambotanimalshelter.models.images.DogImage;
 import com.telegrambotanimalshelter.models.reports.DogReport;
-import com.telegrambotanimalshelter.repositories.images.BinaryContentRepository;
-import com.telegrambotanimalshelter.repositories.images.DocumentRepository;
 import com.telegrambotanimalshelter.repositories.images.DogImagesRepository;
 import com.telegrambotanimalshelter.repositories.reports.DogReportsRepository;
+import com.telegrambotanimalshelter.services.FileService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -22,43 +19,27 @@ public class DogReportServiceImpl implements ReportService<DogReport, Dog, DogIm
     private final DogReportsRepository reportsRepository;
     private final DogImagesRepository dogImagesRepository;
 
-    public DogReportServiceImpl(DogReportsRepository reportsRepository, DogImagesRepository dogImagesRepository) {
+    private final FileService fileService;
+
+    public DogReportServiceImpl(DogReportsRepository reportsRepository,
+                                DogImagesRepository dogImagesRepository,
+                                FileService fileService) {
         this.reportsRepository = reportsRepository;
         this.dogImagesRepository = dogImagesRepository;
+        this.fileService = fileService;
     }
 
     @Override
     public DogReport postReport(DogReport dogReport, MultipartFile... multipartFiles) {
         List<DogImage> images = null;
         if (multipartFiles.length > 0) {
-            images = toImages(dogReport, multipartFiles);
+
+
             dogImagesRepository.saveAll(images);
         }
         dogReport.setImages(images);
         reportsRepository.save(dogReport);
         return reportsRepository.save(dogReport);
-    }
-    @Override
-    public List<DogImage> toImages(DogReport dogReport, MultipartFile... files) {
-        List<DogImage> images = new ArrayList<>();
-
-        Arrays.stream(files).forEach(file -> {
-            try {
-                if (file.getSize() != 0) {
-                    DogImage image = new DogImage();
-                    image.setName(file.getName());
-                    image.setOriginalFileName(file.getOriginalFilename());
-                    image.setContentType(file.getContentType());
-                    image.setSize(file.getSize());
-                    images.add(image);
-                    image.setBytes(file.getBytes());
-                    image.setReport(dogReport);
-                }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        });
-        return images;
     }
 
     @Override

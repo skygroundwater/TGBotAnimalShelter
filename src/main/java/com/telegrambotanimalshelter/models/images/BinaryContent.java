@@ -15,12 +15,15 @@ import java.util.Objects;
 @ToString
 @Builder
 public class BinaryContent {
+
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column(name = "file_as_array_of_bytes")
     private byte[] fileAsArrayOfBytes;
+
     @OneToOne
     private AppDocument appDocument;
 

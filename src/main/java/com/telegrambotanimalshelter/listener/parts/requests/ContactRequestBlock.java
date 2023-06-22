@@ -14,12 +14,12 @@ public class ContactRequestBlock<A extends Animal> {
 
     private final MessageSender<A> sender;
 
-    private final Keeper<A> keeper;
+    private final Keeper keeper;
 
     private final PetOwnersService petOwnersService;
 
 
-    public ContactRequestBlock(MessageSender<A> sender, PetOwnersService petOwnersService, Keeper<A> keeper) {
+    public ContactRequestBlock(MessageSender<A> sender, PetOwnersService petOwnersService, Keeper keeper) {
         this.sender = sender;
         this.petOwnersService = petOwnersService;
         this.keeper = keeper;

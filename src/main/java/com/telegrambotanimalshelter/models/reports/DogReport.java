@@ -13,6 +13,8 @@ import java.util.Objects;
 @Entity
 @Table(schema = "reports", name = "dog_reports")
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Getter
 @Setter
 @ToString

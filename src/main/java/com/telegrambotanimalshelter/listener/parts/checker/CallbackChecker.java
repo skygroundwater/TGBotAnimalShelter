@@ -64,7 +64,7 @@ public class CallbackChecker {
         if ("back".equals(data)) sender.sendStartMessage(id);
 
         if ("_contacts".equals(data)) contactBlock.sendMessageToTakeName(id, dogShelter);
-        if ("_report".equals(data)) reportRequestBlock.startReportFromPetOwner(id, dogShelter);
+        if ("_report".equals(data)) reportRequestBlock.choosePet(id, dogShelter);
 
         if ("volunteer".equals(data)) {
             chat.startChat(id, "Здравствуйте. С вами хочет поговорить усыновитель. " + callbackQuery.from().firstName());

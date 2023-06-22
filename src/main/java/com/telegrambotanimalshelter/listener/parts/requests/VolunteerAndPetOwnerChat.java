@@ -19,9 +19,9 @@ public class VolunteerAndPetOwnerChat<A extends Animal> {
 
     private final MessageSender<A> sender;
 
-    private final Keeper<A> keeper;
+    private final Keeper keeper;
 
-    public VolunteerAndPetOwnerChat(PetOwnersService petOwnersService, VolunteerService volunteerService, MessageSender<A> sender, Keeper<A> keeper) {
+    public VolunteerAndPetOwnerChat(PetOwnersService petOwnersService, VolunteerService volunteerService, MessageSender<A> sender, Keeper keeper) {
         this.petOwnersService = petOwnersService;
         this.volunteerService = volunteerService;
         this.sender = sender;

@@ -7,6 +7,8 @@ import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.request.SendPhoto;
 import com.pengrad.telegrambot.response.SendResponse;
 import com.telegrambotanimalshelter.models.animals.Animal;
+import com.telegrambotanimalshelter.models.animals.Cat;
+import com.telegrambotanimalshelter.models.animals.Dog;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
@@ -47,8 +49,18 @@ public class MessageSender<A extends Animal> {
     }
 
     public void choosePetMessage(Long chatId, A animal){
-        SendPhoto sendPhoto = new SendPhoto(chatId, new byte[]{});
-        sendPhoto.replyMarkup(new InlineKeyboardMarkup(new InlineKeyboardButton("Выбрать " + animal.getNickName())));
+        if(animal instanceof Dog) {
+            SendPhoto sendPhoto = new SendPhoto(chatId, new byte[]{});
+            sendPhoto.replyMarkup(new InlineKeyboardMarkup(new InlineKeyboardButton("Выбрать " + animal.getNickName()).callbackData(chatId + " " + ((Dog) animal).getId())));
+            sendResponse(sendPhoto);
+        } else if (animal instanceof Cat){
+            SendPhoto sendPhoto = new SendPhoto(chatId, new byte[]{});
+            sendPhoto.replyMarkup(new InlineKeyboardMarkup(new InlineKeyboardButton("Выбрать " + animal.getNickName()).callbackData(chatId + " " + ((Cat) animal).getId())));
+            sendResponse(sendPhoto);
+        }
+    }
+
+    public void sendResponse(SendPhoto sendPhoto) {
         SendResponse sendResponse = telegramBot.execute(sendPhoto);
         if (!sendResponse.isOk()) {
             logger.error("Error during sending message: {}", sendResponse.message());

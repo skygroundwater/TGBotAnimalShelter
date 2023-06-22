@@ -34,7 +34,7 @@ public class Dog extends Animal {
     @ToString.Exclude
     private List<DogReport> reports;
 
-    @OneToMany(targetEntity = DogImage.class, mappedBy = "dog", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(targetEntity = DogImage.class, mappedBy = "dog", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<DogImage> images;
 
     public Dog(String nickname, boolean isChipped, LocalDateTime registeredAt, Shelter dogShelter, PetOwner petOwner) {

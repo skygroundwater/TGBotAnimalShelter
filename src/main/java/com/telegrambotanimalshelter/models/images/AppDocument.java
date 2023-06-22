@@ -15,13 +15,24 @@ import java.util.Objects;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AppDocument {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String telegramFileId;
+
     @OneToOne
     private BinaryContent binaryContent;
     private Long fileSize;
+
+    @OneToOne
+    @JoinColumn(name = "cat_image_id")
+    private CatImage catImage;
+
+    @OneToOne
+    @JoinColumn(name = "dog_image_id")
+    private DogImage dogImage;
 
     @Override
     public boolean equals(Object o) {

@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 
 @Component
@@ -41,13 +42,13 @@ public class ReportRequestBlock<A extends Animal> {
 
     private final PetService<Dog> dogService;
 
-    private final Keeper<A> keeper;
+    private final Keeper keeper;
 
     public ReportRequestBlock(MessageSender<A> sender, PetOwnersService petOwnersService,
                               FileService fileService, @Qualifier("catReportServiceImpl") ReportService<CatReport, Cat, CatImage> catReportService,
                               @Qualifier("dogReportServiceImpl") ReportService<DogReport, Dog, DogImage> dogReportService,
                               @Qualifier("catsServiceImpl") PetService<Cat> catService,
-                              @Qualifier("dogsServiceImpl") PetService<Dog> dogService, Keeper<A> keeper) {
+                              @Qualifier("dogsServiceImpl") PetService<Dog> dogService, Keeper keeper) {
         this.sender = sender;
         this.petOwnersService = petOwnersService;
         this.fileService = fileService;
@@ -58,8 +59,21 @@ public class ReportRequestBlock<A extends Animal> {
         this.keeper = keeper;
     }
 
+    public void choosePet(Long chatId, Shelter shelter){
+
+        for(Map.Entry<Long, List<Cat>> entry: keeper.getCashedCats().entrySet()){
+            entry.getValue().forEach(cat -> sender.choosePetMessage(chatId, (A) cat));
+        }
+        for(Map.Entry<Long, List<Dog>> entry: keeper.getCashedDogs().entrySet()){
+            entry.getValue().forEach(dog -> sender.choosePetMessage(chatId, (A) dog));
+        }
+
+    }
+
+
     public void startReportFromPetOwner(Long chatId, Shelter shelter) {
         PetOwner petOwner = keeper.getCashedPetOwners().put(chatId, petOwnersService.setPetOwnerReportRequest(chatId, true));
+
 
 
         sender.sendMessage(chatId, "Итак, вы решили отправить-таки отчет по своему питомцу.\n" +
@@ -86,7 +100,7 @@ public class ReportRequestBlock<A extends Animal> {
                 }
                 default -> sendWarningLetter(chatId);
             }
-        }else {
+        } else {
             sendMessageToTakeDiet(message.chat().id(), message);
         }
     }
@@ -100,6 +114,8 @@ public class ReportRequestBlock<A extends Animal> {
     }
 
     private void sendMessageToTakeDiet(Long chatId, Message message) {
+
+
         fileService.processDoc(message);
 
 

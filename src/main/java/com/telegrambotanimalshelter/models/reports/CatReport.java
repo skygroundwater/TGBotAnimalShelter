@@ -16,6 +16,8 @@ import java.util.Objects;
 @Setter
 @NoArgsConstructor
 @ToString
+@Builder
+@AllArgsConstructor
 public class CatReport extends Report {
 
     @Id
