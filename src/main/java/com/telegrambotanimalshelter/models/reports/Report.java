@@ -25,6 +25,12 @@ public abstract class Report {
     @Column(name = "behavior")
     private String behavioralChanges;
 
+    @Column(name="copied_owner_id")
+    private Long copiedPetOwnerId;
+
+    @Column(name = "checked_by_volunteer")
+    private boolean checkedByVolunteer;
+
     @PrePersist
     private void init() {
         date = LocalDateTime.now().toLocalDate();

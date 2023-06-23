@@ -1,10 +1,7 @@
 package com.telegrambotanimalshelter.models.animals;
 
 import com.telegrambotanimalshelter.models.PetOwner;
-import com.telegrambotanimalshelter.models.Shelter;
-import com.telegrambotanimalshelter.models.images.CatImage;
 import com.telegrambotanimalshelter.models.images.DogImage;
-import com.telegrambotanimalshelter.models.reports.CatReport;
 import com.telegrambotanimalshelter.models.reports.DogReport;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -37,8 +34,8 @@ public class Dog extends Animal {
     @OneToMany(targetEntity = DogImage.class, mappedBy = "dog", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<DogImage> images;
 
-    public Dog(String nickname, boolean isChipped, LocalDateTime registeredAt, Shelter dogShelter, PetOwner petOwner) {
-        super(nickname, isChipped, registeredAt, dogShelter);
+    public Dog(String nickname, boolean isChipped, LocalDateTime registeredAt, PetOwner petOwner) {
+        super(nickname, isChipped, registeredAt);
         this.petOwner = petOwner;
     }
 }

@@ -44,7 +44,7 @@ public class Config {
     public Shelter dogShelter() {
         ArrayList<Dog> dogs = new ArrayList<>();
         return new Shelter(
-                "Halfway Home",
+                dogShelterName,
                 DOG_SHELTER_DESCRIPTION,
                 DOG_SHELTER_WORKING_HOURS,
                 DOG_SHELTER_SAFETY,
@@ -63,7 +63,7 @@ public class Config {
     @Scope(scopeName = "singleton")
     public Shelter catShelter() {
         ArrayList<Cat> cats = new ArrayList<>();
-        return new Shelter("Ковчег",
+        return new Shelter(catShelterName,
                 CAT_SHELTER_DESCRIPTION,
                 CAT_SHELTER_WORKING_HOURS,
                 CAT_SHELTER_SAFETY,

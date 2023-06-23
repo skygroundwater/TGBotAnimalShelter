@@ -5,10 +5,8 @@ import com.telegrambotanimalshelter.models.animals.Cat;
 import com.telegrambotanimalshelter.models.images.CatImage;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.Hibernate;
 
 import java.util.List;
-import java.util.Objects;
 
 @Entity
 @Table(schema = "reports", name = "cat_reports")
@@ -32,23 +30,10 @@ public class CatReport extends Report {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(referencedColumnName = "id")
-    @ToString.Exclude
     private Cat cat;
 
-    @OneToMany(targetEntity = CatImage.class, mappedBy = "report", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @ToString.Exclude
+    @OneToMany(targetEntity = CatImage.class, mappedBy = "catReport", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<CatImage> images;
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        CatReport catReport = (CatReport) o;
-        return getId() != null && Objects.equals(getId(), catReport.getId());
-    }
 
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
-    }
 }

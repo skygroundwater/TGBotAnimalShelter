@@ -1,23 +1,25 @@
 package com.telegrambotanimalshelter.services.reportservice;
 
 import com.telegrambotanimalshelter.models.animals.Animal;
-import com.telegrambotanimalshelter.models.images.Image;
+import com.telegrambotanimalshelter.models.images.AppImage;
 import com.telegrambotanimalshelter.models.reports.Report;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
-public interface ReportService<T extends Report, N extends Animal, I extends Image> {
+public interface ReportService<R extends Report, A extends Animal, I extends AppImage> {
 
-    T postReport(T report, MultipartFile... multipartFiles);
+    R postReport(R report, MultipartFile... multipartFiles);
 
-    T putReport(T report);
+    R putReport(R report);
 
-    HttpStatus deleteReportsByPet(N animal);
+    HttpStatus deleteReportsByPet(A animal);
 
-    List<T> getAllReports();
+    List<R> getAllReports();
 
-    List<T> findReportsFromPet(N animal);
+    List<R> findReportsFromPet(A animal);
+
+
 
 }

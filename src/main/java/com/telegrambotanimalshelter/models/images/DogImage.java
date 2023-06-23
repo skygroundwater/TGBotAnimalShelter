@@ -9,24 +9,22 @@ import lombok.*;
 @Table(schema = "images", name = "dog_images")
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class DogImage extends Image {
+public class DogImage extends AppImage{
 
     @Id
+    @Column(name="id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(cascade = CascadeType.REFRESH, fetch = FetchType.EAGER)
-    @JoinColumn(referencedColumnName = "id")
-    private DogReport report;
-
-    @ManyToOne(cascade = CascadeType.REFRESH, fetch = FetchType.EAGER)
-    @JoinColumn(referencedColumnName = "id")
+    @ManyToOne
+    @JoinColumn(name = "dog_id")
     private Dog dog;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinColumn(name = "document_id")
-    private AppDocument appDocument;
+    @ManyToOne
+    @JoinColumn(name = "report_id")
+    private DogReport dogReport;
+
 }

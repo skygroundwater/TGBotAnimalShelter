@@ -4,6 +4,10 @@ import com.telegrambotanimalshelter.models.reports.Report;
 
 public class Constants<R extends Report> {
 
+    public static String dogShelterName = "Halfway home";
+
+    public static String catShelterName = "Ковчег";
+
 
     public static String DOG_SHELTER_DESCRIPTION = """
             Приют работает с 2019 года. В приоритете — спасение сбитых машинами и больных животных.\s

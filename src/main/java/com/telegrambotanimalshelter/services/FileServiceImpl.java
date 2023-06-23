@@ -1,13 +1,13 @@
 package com.telegrambotanimalshelter.services;
 
-import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.PhotoSize;
 import com.telegrambotanimalshelter.exceptions.UploadFileException;
-import com.telegrambotanimalshelter.models.images.AppDocument;
-import com.telegrambotanimalshelter.models.images.BinaryContent;
-import com.telegrambotanimalshelter.repositories.images.BinaryContentRepository;
-import com.telegrambotanimalshelter.repositories.images.DocumentRepository;
+import com.telegrambotanimalshelter.models.images.AppImage;
+import com.telegrambotanimalshelter.models.images.CatImage;
+import com.telegrambotanimalshelter.models.images.DogImage;
+import com.telegrambotanimalshelter.repositories.images.CatImagesRepository;
+import com.telegrambotanimalshelter.repositories.images.DogImagesRepository;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -19,12 +19,15 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.List;
 
 @Service
-public class FileServiceImpl implements FileService {
-    private final BinaryContentRepository binaryContentRepository;
-    private final DocumentRepository documentRepository;
+public class FileServiceImpl<I extends AppImage> implements FileService<I> {
+
+    private final CatImagesRepository catImagesRepository;
+
+    private final DogImagesRepository dogImagesRepository;
+
+
     @Value("${bot.token}")
     private String botToken;
 
@@ -34,13 +37,14 @@ public class FileServiceImpl implements FileService {
     @Value("${service.file_storage.uri}")
     String filePath;
 
-    public FileServiceImpl(BinaryContentRepository binaryContentRepository, DocumentRepository documentRepository) {
-        this.binaryContentRepository = binaryContentRepository;
-        this.documentRepository = documentRepository;
+    public FileServiceImpl(CatImagesRepository catImagesRepository, DogImagesRepository dogImagesRepository) {
+        this.catImagesRepository = catImagesRepository;
+        this.dogImagesRepository = dogImagesRepository;
     }
 
+
     @Override
-    public AppDocument processDoc(Message message) {
+    public I processDoc(I image, Message message) {
         PhotoSize photoSize = Arrays.stream(message.photo()).toList().get(2);
         if (photoSize != null) {
             String fileId = photoSize.fileId();
@@ -49,10 +53,10 @@ public class FileServiceImpl implements FileService {
                 JSONObject jsonObject = new JSONObject(response.getBody());
                 String filePath = String.valueOf(jsonObject.getJSONObject("result").getString("file_path"));
                 byte[] fileInByte = downloadFile(filePath);
-                BinaryContent transientBinaryContent = BinaryContent.builder().fileAsArrayOfBytes(fileInByte).build();
-                BinaryContent persistentBinaryContent = binaryContentRepository.save(transientBinaryContent);
-                AppDocument transientAppDocument = buildTransientDocument(photoSize, persistentBinaryContent);
-                return documentRepository.save(transientAppDocument);
+                image.setFileSize(photoSize.fileSize());
+                image.setTelegramFileId(photoSize.fileId());
+                image.setFileAsArrayOfBytes(fileInByte);
+                return image;
             }
         } else {
             throw new UploadFileException("Ошибка ответа от телеграма");
@@ -60,19 +64,21 @@ public class FileServiceImpl implements FileService {
         return null;
     }
 
+    @Override
+    public DogImage saveDogImage(DogImage dogImage) {
+        return dogImagesRepository.save(dogImage);
+    }
+
+    @Override
+    public CatImage saveCatImage(CatImage catImage) {
+        return catImagesRepository.save(catImage);
+    }
+
     private ResponseEntity<String> getFilePath(String fileId) {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         HttpEntity<String> request = new HttpEntity<>(headers);
         return restTemplate.exchange(fileInfo, HttpMethod.GET, request, String.class, botToken, fileId);
-    }
-
-    private AppDocument buildTransientDocument(PhotoSize telegramDocument, BinaryContent persistentBinaryContent) {
-        return AppDocument.builder()
-                .telegramFileId(telegramDocument.fileId())
-                .binaryContent(persistentBinaryContent)
-                .fileSize(telegramDocument.fileSize())
-                .build();
     }
 
     private byte[] downloadFile(String filePath) {

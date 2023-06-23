@@ -5,6 +5,7 @@ import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.telegrambotanimalshelter.enums.ShelterType;
 import com.telegrambotanimalshelter.models.Shelter;
+import com.telegrambotanimalshelter.models.animals.Animal;
 import com.telegrambotanimalshelter.utils.MessageSender;
 import org.springframework.stereotype.Component;
 
@@ -14,9 +15,9 @@ import static com.telegrambotanimalshelter.utils.Constants.REASONS_FOR_REFUSAL;
 @Component
 public class BecomingPetOwnerPart {
 
-    private final MessageSender sender;
+    private final MessageSender<Animal> sender;
 
-    public BecomingPetOwnerPart(MessageSender sender) {
+    public BecomingPetOwnerPart(MessageSender<Animal> sender) {
         this.sender = sender;
     }
 
@@ -78,7 +79,7 @@ public class BecomingPetOwnerPart {
                             new InlineKeyboardButton("Дом для собаки с ограничениями")
                                     .callbackData(shelterName + "_restricted")
                     ).addRow(new InlineKeyboardButton("Первое общение с собакой")
-                                    .callbackData("first_meeting"),
+                                    .callbackData(shelterName + "_first_meeting"),
                             new InlineKeyboardButton("ЦКФ города Астана")
                                     .url("https://zoosfera.kz/club#contact"))
                     .addRow(new InlineKeyboardButton("Причины отказа приюта отдать собаку")

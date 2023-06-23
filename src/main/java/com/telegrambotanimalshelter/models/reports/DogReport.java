@@ -5,10 +5,8 @@ import com.telegrambotanimalshelter.models.animals.Dog;
 import com.telegrambotanimalshelter.models.images.DogImage;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.Hibernate;
 
 import java.util.List;
-import java.util.Objects;
 
 @Entity
 @Table(schema = "reports", name = "dog_reports")
@@ -35,20 +33,9 @@ public class DogReport extends Report {
     @ToString.Exclude
     private Dog dog;
 
-    @OneToMany(targetEntity = DogImage.class, mappedBy = "report", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(targetEntity = DogImage.class, mappedBy = "dogReport", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @ToString.Exclude
     private List<DogImage> images;
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        DogReport dogReport = (DogReport) o;
-        return getId() != null && Objects.equals(getId(), dogReport.getId());
-    }
 
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
-    }
 }

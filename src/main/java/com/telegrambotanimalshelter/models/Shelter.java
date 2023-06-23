@@ -4,6 +4,7 @@ import com.telegrambotanimalshelter.enums.ShelterType;
 import com.telegrambotanimalshelter.models.animals.Animal;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @RequiredArgsConstructor
+@EqualsAndHashCode
 public class Shelter {
 
     private final String name;

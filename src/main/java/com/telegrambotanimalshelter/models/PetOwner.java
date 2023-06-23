@@ -64,11 +64,11 @@ public class PetOwner {
     @ToString.Exclude
     private List<DogReport> dogReports;
 
-    @OneToMany(mappedBy = "petOwner", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "petOwner", cascade = CascadeType.ALL)
     @ToString.Exclude
     private List<Cat> cats;
 
-    @OneToMany(mappedBy = "petOwner", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "petOwner", cascade = CascadeType.ALL)
     @ToString.Exclude
     private List<Dog> dogs;
 

@@ -7,8 +7,6 @@ import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.request.SendPhoto;
 import com.pengrad.telegrambot.response.SendResponse;
 import com.telegrambotanimalshelter.models.animals.Animal;
-import com.telegrambotanimalshelter.models.animals.Cat;
-import com.telegrambotanimalshelter.models.animals.Dog;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +16,7 @@ public class MessageSender<A extends Animal> {
     private final TelegramBot telegramBot;
 
     private final Logger logger;
+
 
     public MessageSender(TelegramBot telegramBot, Logger logger) {
         this.telegramBot = telegramBot;
@@ -48,18 +47,6 @@ public class MessageSender<A extends Animal> {
         sendResponse(sendMessage);
     }
 
-    public void choosePetMessage(Long chatId, A animal){
-        if(animal instanceof Dog) {
-            SendPhoto sendPhoto = new SendPhoto(chatId, new byte[]{});
-            sendPhoto.replyMarkup(new InlineKeyboardMarkup(new InlineKeyboardButton("Выбрать " + animal.getNickName()).callbackData(chatId + " " + ((Dog) animal).getId())));
-            sendResponse(sendPhoto);
-        } else if (animal instanceof Cat){
-            SendPhoto sendPhoto = new SendPhoto(chatId, new byte[]{});
-            sendPhoto.replyMarkup(new InlineKeyboardMarkup(new InlineKeyboardButton("Выбрать " + animal.getNickName()).callbackData(chatId + " " + ((Cat) animal).getId())));
-            sendResponse(sendPhoto);
-        }
-    }
-
     public void sendResponse(SendPhoto sendPhoto) {
         SendResponse sendResponse = telegramBot.execute(sendPhoto);
         if (!sendResponse.isOk()) {
@@ -72,5 +59,19 @@ public class MessageSender<A extends Animal> {
         if (!sendResponse.isOk()) {
             logger.error("Error during sending message: {}", sendResponse.message());
         }
+    }
+
+    public void sendMessageToSendReport(Long chatId, String petNames) {
+        String text = "Пришлите отчет по вашим подопечным: *" + petNames
+                + "*\n Ждём информации сегодня до конца дня";
+
+        SendMessage sendMessage = new SendMessage(chatId, text);
+        sendMessage.parseMode(ParseMode.Markdown);
+
+            sendMessage.replyMarkup(new InlineKeyboardMarkup(
+                    new InlineKeyboardButton("Отправить отчет")
+                            .callbackData("_report")
+            ));
+        sendResponse(sendMessage);
     }
 }

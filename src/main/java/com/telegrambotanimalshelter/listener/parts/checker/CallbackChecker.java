@@ -11,19 +11,24 @@ import com.telegrambotanimalshelter.listener.parts.requests.ContactRequestBlock;
 import com.telegrambotanimalshelter.listener.parts.requests.ReportRequestBlock;
 import com.telegrambotanimalshelter.listener.parts.requests.VolunteerAndPetOwnerChat;
 import com.telegrambotanimalshelter.models.Shelter;
-import com.telegrambotanimalshelter.utils.Constants;
+import com.telegrambotanimalshelter.models.animals.Animal;
+import com.telegrambotanimalshelter.models.images.AppImage;
+import com.telegrambotanimalshelter.models.reports.Report;
 import com.telegrambotanimalshelter.utils.MessageSender;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import static com.telegrambotanimalshelter.utils.Constants.catShelterName;
+import static com.telegrambotanimalshelter.utils.Constants.dogShelterName;
+
 @Component
-public class CallbackChecker {
+public class CallbackChecker<A extends Animal, R extends Report, I extends AppImage> {
 
-    private final ContactRequestBlock contactBlock;
+    private final ContactRequestBlock<A, R> contactBlock;
 
-    private final ReportRequestBlock reportRequestBlock;
+    private final ReportRequestBlock<A, R, I> reportRequestBlock;
 
-    private final VolunteerAndPetOwnerChat chat;
+    private final VolunteerAndPetOwnerChat<A, R> chat;
 
     private final IntroductionPart introductionPart;
 
@@ -33,11 +38,11 @@ public class CallbackChecker {
 
     private final Shelter catShelter;
 
-    private final MessageSender sender;
+    private final MessageSender<A> sender;
 
-    public CallbackChecker(ContactRequestBlock contactBlock, ReportRequestBlock reportRequestBlock,
-                           VolunteerAndPetOwnerChat chat, IntroductionPart introductionPart,
-                           BecomingPetOwnerPart becomingPart, MessageSender sender,
+    public CallbackChecker(ContactRequestBlock<A, R> contactBlock, ReportRequestBlock<A, R, I> reportRequestBlock,
+                           VolunteerAndPetOwnerChat<A, R> chat, IntroductionPart introductionPart,
+                           BecomingPetOwnerPart becomingPart, MessageSender<A> sender,
                            @Qualifier("dogShelter") Shelter dogShelter, @Qualifier("catShelter") Shelter catShelter) {
         this.contactBlock = contactBlock;
         this.reportRequestBlock = reportRequestBlock;
@@ -52,9 +57,6 @@ public class CallbackChecker {
 
     public void callbackQueryCheck(CallbackQuery callbackQuery) {
 
-        String dogShelterName = dogShelter.getName();
-        String catShelterName = catShelter.getName();
-
         String data = callbackQuery.data();
         Long id = callbackQuery.from().id();
 
@@ -64,19 +66,19 @@ public class CallbackChecker {
         if ("back".equals(data)) sender.sendStartMessage(id);
 
         if ("_contacts".equals(data)) contactBlock.sendMessageToTakeName(id, dogShelter);
-        if ("_report".equals(data)) reportRequestBlock.choosePet(id, dogShelter);
+        if ("_report".equals(data)) reportRequestBlock.startReportFromPetOwner(id);
 
         if ("volunteer".equals(data)) {
             chat.startChat(id, "Здравствуйте. С вами хочет поговорить усыновитель. " + callbackQuery.from().firstName());
+        }
+        if ((dogShelterName + "_first_meeting").equals(data)) {
+            becomingPart.firstMeetingWithDog(callbackQuery.from().id(), dogShelter);
         }
 
         String preFix = data.split("_")[0];
 
         if (preFix.equals(dogShelterName)) {
             callBackQueryConstantCheck(callbackQuery, dogShelter);
-            if ("first_meeting".equals(callbackQuery.data())) {
-                becomingPart.firstMeetingWithDog(callbackQuery.from().id(), dogShelter);
-            }
         } else if (preFix.equals(catShelterName)) {
             callBackQueryConstantCheck(callbackQuery, catShelter);
         }

@@ -30,10 +30,12 @@ public abstract class Animal {
     @Column(name = "registered_at")
     private LocalDateTime registeredAt;
 
-    public Animal(String nickname, boolean isChipped, LocalDateTime registeredAt, Shelter shelter){
+    @Column(name = "copied_id")
+    private Long copiedId;
+
+    public Animal(String nickname, boolean isChipped, LocalDateTime registeredAt){
         this.nickName = nickname;
         this.isChipped = isChipped;
         this.registeredAt = registeredAt;
-
     }
 }

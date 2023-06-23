@@ -4,15 +4,16 @@ import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.telegrambotanimalshelter.models.Shelter;
+import com.telegrambotanimalshelter.models.animals.Animal;
 import com.telegrambotanimalshelter.utils.MessageSender;
 import org.springframework.stereotype.Component;
 
 @Component
 public class IntroductionPart {
 
-    private final MessageSender sender;
+    private final MessageSender<Animal> sender;
 
-    public IntroductionPart(MessageSender sender) {
+    public IntroductionPart(MessageSender<Animal> sender) {
         this.sender = sender;
     }
 
