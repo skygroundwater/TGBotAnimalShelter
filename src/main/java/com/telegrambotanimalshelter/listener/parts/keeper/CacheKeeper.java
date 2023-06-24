@@ -140,6 +140,6 @@ public class CacheKeeper<A extends Animal, R extends Report> {
         for (Map.Entry<Long, Volunteer> entry : volunteers.entrySet()) {
             if (entry.getValue().isFree()) return entry.getValue();
         }
-        throw new NotFoundInDataBaseException("Волонтеры заняты. ПРидется подождать");
+        throw new NotFoundInDataBaseException("Волонтеры заняты. Придется подождать. Обратитесь позже");
     }
 }

@@ -11,6 +11,13 @@ import com.telegrambotanimalshelter.services.volunteerservice.VolunteerService;
 import com.telegrambotanimalshelter.utils.MessageSender;
 import org.springframework.stereotype.Component;
 
+/**
+ * Сущность, отвечающая за взаимодействие пользователя
+ * с волонтером, посредством их обоюдным общением внутри телеграм бота
+ *
+ * @param <A>
+ * @param <R>
+ */
 @Component
 public class VolunteerAndPetOwnerChat<A extends Animal, R extends Report> {
 
@@ -29,31 +36,42 @@ public class VolunteerAndPetOwnerChat<A extends Animal, R extends Report> {
         this.keeper = keeper;
     }
 
+    /**
+     * Метод проверяет является ли пользователь в данный
+     * момент в активном статусе общения с волонтёром
+     *
+     * @param petOwnerId личный id усыновителя
+     * @return true или false
+     */
     public boolean checkPetOwnerChatStatus(Long petOwnerId) {
-        try {
-            return keeper.getPetOwners().get(petOwnerId).isVolunteerChat();
-        } catch (NullPointerException e) {
-            return false;
-        }
+        PetOwner petOwner = keeper.getPetOwners().get(petOwnerId);
+        if (petOwner != null) {
+            return petOwner.isVolunteerChat();
+        } else return false;
     }
 
+    /**
+     * Метод помогает определить является ли волонтёр
+     * на данный момент занятым перепиской с усыновителем
+     *
+     * @param volunteerId личный id волонтёра
+     * @return true или false
+     */
     public boolean checkVolunteer(Long volunteerId) {
-        try {
+        Volunteer volunteer = keeper.getVolunteers().get(volunteerId);
+        if (volunteer != null) {
             return !keeper.getVolunteers().get(volunteerId).isFree();
-        } catch (NullPointerException e) {
-            return false;
-        }
+        } else return false;
     }
 
-    private void sendToVolunteer(Long petOwnerId, String msg) {
-        sender.sendMessage(keeper.getPetOwners().get(petOwnerId).getVolunteer().getId(), msg);
-    }
-
-    private void sendToPetOwner(Long volunteerId, String msg) {
-        sender.sendMessage(keeper.getVolunteers().get(volunteerId).getPetOwner().getId(), msg);
-    }
-
-    public void startChat(Long id, String msg) {
+    /**
+     * Метод предоставляет усыновителю возможность начать
+     * чат со свободным волонтером из кеша.
+     *
+     * @param chatId личный id пользователя
+     * @param msg    текстовое сообщение от пользователя
+     */
+    public void startChat(Long chatId, String msg) {
 
         //вызов метода может происходить только со стороны усыновителя
         //поэтому находим сначала любого свободного волонтера
@@ -61,8 +79,7 @@ public class VolunteerAndPetOwnerChat<A extends Animal, R extends Report> {
             Volunteer volunteer = keeper.findFreeVolunteer();
 
             //назначем поля усыновителю в базе данных и одновременно возвращаем его из метода
-
-            PetOwner petOwner = petOwnersService.setPetOwnerToVolunteerChat(id, volunteer, true);
+            PetOwner petOwner = petOwnersService.setPetOwnerToVolunteerChat(chatId, volunteer, true);
             keeper.getPetOwners().put(petOwner.getId(), petOwner);
 
             //также назначаем поля волонтеру
@@ -77,27 +94,18 @@ public class VolunteerAndPetOwnerChat<A extends Animal, R extends Report> {
             sender.sendChatMessage(volunteer.getId(), msg);
             sender.sendChatMessage(petOwner.getId(), "С вами будет общаться волонтёр " + volunteer.getFirstName());
         } catch (NotFoundInDataBaseException e) {
-            sender.sendMessage(id, e.getMessage());
+            sender.sendMessage(chatId, e.getMessage());
         }
     }
 
-    public void continueChat(Long petOwnerId, Long volunteerId, String msg) {
-
-        //этот метод осуществляет одновременно и проверку и, в случае успешной проверки, завершает чат
-        if (!stopChat(petOwnerId, volunteerId, msg)) {
-
-            //в случае, если сообщение отправляет усыновитель
-            if (petOwnerId != null && volunteerId == null) {
-                sendToVolunteer(petOwnerId, msg);
-            }
-
-            //в случае, если сообщение отправил волонтёр
-            if (volunteerId != null && petOwnerId == null) {
-                sendToPetOwner(volunteerId, msg);
-            }
-        }
-    }
-
+    /**
+     * Метод предоставляет возможность остановить переписку
+     * и со стороны волонтера и со стороны усыновителя
+     * @param petOwnerId личный id усыновителя
+     * @param volunteerId личный id волонтёра
+     * @param msg текстовое сообщение
+     * @return true или false
+     */
     public boolean stopChat(Long petOwnerId, Long volunteerId, String msg) {
         if ("Прекратить чат".equals(msg)) {
             if (volunteerId == null) {
@@ -145,5 +153,51 @@ public class VolunteerAndPetOwnerChat<A extends Animal, R extends Report> {
             }
         }
         return false;
+    }
+
+    /**
+     * Метод позволяет продолжать переписку волонтёра
+     * и усыновителя, пока не поступит команда об остановке переписки
+     * @param petOwnerId личный id усыновителя
+     * @param volunteerId личный id волонтёра
+     * @param msg текстовое сообщение
+     */
+    public void continueChat(Long petOwnerId, Long volunteerId, String msg) {
+
+        //этот метод осуществляет одновременно и проверку и, в случае успешной проверки, завершает чат
+        if (!stopChat(petOwnerId, volunteerId, msg)) {
+
+            //в случае, если сообщение отправляет усыновитель
+            if (petOwnerId != null && volunteerId == null) {
+                sendToVolunteer(petOwnerId, msg);
+            }
+
+            //в случае, если сообщение отправил волонтёр
+            if (volunteerId != null && petOwnerId == null) {
+                sendToPetOwner(volunteerId, msg);
+            }
+        }
+    }
+
+    /**
+     * Отправляет сообщение усыновителю от волонтера
+     *
+     * @param petOwnerId личный id усыновителя
+     * @param msg        текстовое сообщение от волонтера
+     * @hidden все данные о волонтере берутся из кеша
+     */
+    private void sendToVolunteer(Long petOwnerId, String msg) {
+        sender.sendMessage(keeper.getPetOwners().get(petOwnerId).getVolunteer().getId(), msg);
+    }
+
+    /**
+     * Отправляет сообщение от волонтера к усыновителю
+     *
+     * @param volunteerId личный id усыновителя
+     * @param msg         текстовое сообщение от волонтера
+     * @hidden все данные о об усыновителе берутся из кеша
+     */
+    private void sendToPetOwner(Long volunteerId, String msg) {
+        sender.sendMessage(keeper.getVolunteers().get(volunteerId).getPetOwner().getId(), msg);
     }
 }

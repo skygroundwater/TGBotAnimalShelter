@@ -46,7 +46,6 @@ public class ReportNotificationTimer<A extends Animal> {
         this.cacheKeeper = cacheKeeper;
     }
 
-    @Scheduled(fixedDelay = 1, timeUnit = TimeUnit.DAYS)
     public void notificationToSendReport() {
         StringBuilder stringBuilder = new StringBuilder();
 

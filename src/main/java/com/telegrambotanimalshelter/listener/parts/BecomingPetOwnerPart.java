@@ -9,9 +9,14 @@ import com.telegrambotanimalshelter.models.animals.Animal;
 import com.telegrambotanimalshelter.utils.MessageSender;
 import org.springframework.stereotype.Component;
 
-import static com.telegrambotanimalshelter.utils.Constants.FIRST_MEETING_WITH_DOG;
-import static com.telegrambotanimalshelter.utils.Constants.REASONS_FOR_REFUSAL;
+import static com.telegrambotanimalshelter.utils.Constants.*;
 
+/**
+ * Сущность, отвечающая за этап консультации с потенциальным хозяином животного из приюта.
+ * *На данном этапе бот помогает потенциальным усыновителям животного из приюта разобраться
+ * с бюрократическими (оформление договора) и бытовыми (как подготовиться к жизни с животным)
+ * вопросами.
+ */
 @Component
 public class BecomingPetOwnerPart {
 
@@ -21,44 +26,51 @@ public class BecomingPetOwnerPart {
         this.sender = sender;
     }
 
-    public void welcome(Long id, Shelter shelter) {
-        sender.sendResponse(becomingPart(id, "Здравствуйте! Это 2-ой этап", becomingPartMarkup(shelter)));
+    public void welcome(Long chatId, Shelter shelter) {
+        String shelterName = shelter.getName();
+        if (shelterName.equals(dogShelterName)) {
+            sender.sendResponse(becomingPart(chatId, "Здравствуйте! Это приют " +
+                    dogShelterName + ". Здесь вы можете ознакомиться с приютом", becomingPartMarkup(shelter)));
+        } else if (shelterName.equals(catShelterName)) {
+            sender.sendResponse(becomingPart(chatId, "Здравствуйте! Это приют " +
+                    catShelterName + ". Здесь вы можете ознакомиться с приютом", becomingPartMarkup(shelter)));
+        }
     }
 
-    public void acquaintanceWithPet(Long id, Shelter shelter) {
-        sender.sendResponse(becomingPart(id, shelter.getAcquaintance(), becomingPartMarkup(shelter)));
+    public void acquaintanceWithPet(Long chatId, Shelter shelter) {
+        sender.sendResponse(becomingPart(chatId, shelter.getAcquaintance(), becomingPartMarkup(shelter)));
     }
 
-    public void documentsForPetOwner(Long id, Shelter shelter) {
-        sender.sendResponse(becomingPart(id, shelter.getContractDocuments(), becomingPartMarkup(shelter)));
+    public void documentsForPetOwner(Long chatId, Shelter shelter) {
+        sender.sendResponse(becomingPart(chatId, shelter.getContractDocuments(), becomingPartMarkup(shelter)));
     }
 
-    public void transportation(Long id, Shelter shelter) {
-        sender.sendResponse(becomingPart(id, shelter.getTransportation(), becomingPartMarkup(shelter)));
+    public void transportation(Long chatId, Shelter shelter) {
+        sender.sendResponse(becomingPart(chatId, shelter.getTransportation(), becomingPartMarkup(shelter)));
     }
 
-    public void homeForLittlePet(Long id, Shelter shelter) {
-        sender.sendResponse(becomingPart(id, shelter.getHomeForLittle(), becomingPartMarkup(shelter)));
+    public void homeForLittlePet(Long chatId, Shelter shelter) {
+        sender.sendResponse(becomingPart(chatId, shelter.getHomeForLittle(), becomingPartMarkup(shelter)));
     }
 
-    public void homeForAdultPet(Long id, Shelter shelter) {
-        sender.sendResponse(becomingPart(id, shelter.getHomeForAdult(), becomingPartMarkup(shelter)));
+    public void homeForAdultPet(Long chatId, Shelter shelter) {
+        sender.sendResponse(becomingPart(chatId, shelter.getHomeForAdult(), becomingPartMarkup(shelter)));
     }
 
-    public void homeForRestrictedPet(Long id, Shelter shelter) {
-        sender.sendResponse(becomingPart(id, shelter.getHomeForRestricted(), becomingPartMarkup(shelter)));
+    public void homeForRestrictedPet(Long chatId, Shelter shelter) {
+        sender.sendResponse(becomingPart(chatId, shelter.getHomeForRestricted(), becomingPartMarkup(shelter)));
     }
 
-    public void reasonsForRefusal(Long id, Shelter shelter) {
-        sender.sendResponse(becomingPart(id, REASONS_FOR_REFUSAL, becomingPartMarkup(shelter)));
+    public void reasonsForRefusal(Long chatId, Shelter shelter) {
+        sender.sendResponse(becomingPart(chatId, REASONS_FOR_REFUSAL, becomingPartMarkup(shelter)));
     }
 
-    public void firstMeetingWithDog(Long id, Shelter shelter) {
-        sender.sendResponse(becomingPart(id, FIRST_MEETING_WITH_DOG, becomingPartMarkup(shelter)));
+    public void firstMeetingWithDog(Long chatId, Shelter shelter) {
+        sender.sendResponse(becomingPart(chatId, FIRST_MEETING_WITH_DOG, becomingPartMarkup(shelter)));
     }
 
-    private SendMessage becomingPart(Long id, String message, InlineKeyboardMarkup inlineKeyboardMarkup) {
-        return new SendMessage(id, message).replyMarkup(inlineKeyboardMarkup);
+    private SendMessage becomingPart(Long chatId, String message, InlineKeyboardMarkup inlineKeyboardMarkup) {
+        return new SendMessage(chatId, message).replyMarkup(inlineKeyboardMarkup);
     }
 
     private InlineKeyboardMarkup becomingPartMarkup(Shelter shelter) {

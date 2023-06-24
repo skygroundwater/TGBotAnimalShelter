@@ -21,6 +21,12 @@ import org.springframework.stereotype.Component;
 import static com.telegrambotanimalshelter.utils.Constants.catShelterName;
 import static com.telegrambotanimalshelter.utils.Constants.dogShelterName;
 
+/**
+ * Сущность, отвечающая за проверку скрытых данных от кнопок.
+ * @param <A>
+ * @param <R>
+ * @param <I>
+ */
 @Component
 public class CallbackChecker<A extends Animal, R extends Report, I extends AppImage> {
 
@@ -65,7 +71,7 @@ public class CallbackChecker<A extends Animal, R extends Report, I extends AppIm
 
         if ("back".equals(data)) sender.sendStartMessage(id);
 
-        if ("_contacts".equals(data)) contactBlock.sendMessageToTakeName(id, dogShelter);
+        if ("_contacts".equals(data)) contactBlock.sendMessageToTakeName(id);
         if ("_report".equals(data)) reportRequestBlock.startReportFromPetOwner(id);
 
         if ("volunteer".equals(data)) {

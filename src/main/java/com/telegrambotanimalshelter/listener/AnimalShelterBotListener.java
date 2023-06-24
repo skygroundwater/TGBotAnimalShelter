@@ -68,25 +68,59 @@ public class AnimalShelterBotListener<A extends Animal, R extends Report, I exte
                     .filter(Objects::nonNull)
                     .forEach(update ->
                     {
+                        /*
+                           Производится проверка на наличие скрытых данных в обновлении от кнопок
+                         */
                         if (update.callbackQuery() != null) {
+
+                            /*
+                          Если есть, то, используя отдельную сущность CallBackChecker осуществляем проверку этих данных
+                             */
                             checker.callbackQueryCheck(update.callbackQuery());
+
                         } else {
+                            /*
+                            Если таких данных нет, то отправляемся проверять сообщение
+                             */
                             Message message = update.message();
                             Long chatId = message.chat().id();
                             String text = message.text();
+                            /*
+                            Сначала проверяем текст сообщения на команды
+                             */
                             if ("/start".equals(message.text())) {
                                 contactBlock.savePotentialPetOwner(update);
                                 sender.sendStartMessage(chatId);
                             }
+
+                            /*
+                            Если команды не поступало, то приступаем к
+                            проверкам статуса пользователя на данном этапе
+                             */
+
+                            /*
+                            Сначала проверяем на статус записи контактов пользователя
+                             */
                             if (contactBlock.checkContactRequestStatus(chatId)) {
                                 contactBlock.contactsRequestBlock(chatId, message);
                             }
+
+                            /*
+                            Далее проверяем на статус записи отчета о питомце
+                             */
                             if (reportRequestBlock.checkReportRequestStatus(chatId)) {
                                 reportRequestBlock.reportFromPetOwnerBlock(chatId, message);
                             }
+                            /*
+                            Далее проверяем на статус того, является ли пользователь
+                            на данный момент в чате с волонтёром
+                             */
                             if (chat.checkPetOwnerChatStatus(chatId)) {
                                 chat.continueChat(chatId, null, text);
                             }
+                            /*
+                            Здесь мы проверяем является ли пользователь самим волонтером
+                             */
                             if (chat.checkVolunteer(chatId)) {
                                 chat.continueChat(null, chatId, text);
                             }
