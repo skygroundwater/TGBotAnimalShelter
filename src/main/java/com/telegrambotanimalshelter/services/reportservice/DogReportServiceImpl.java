@@ -25,11 +25,7 @@ public class DogReportServiceImpl implements ReportService<DogReport, Dog, DogIm
 
     @Override
     public DogReport postReport(DogReport dogReport, MultipartFile... multipartFiles) {
-        List<DogImage> images = null;
-        if (multipartFiles.length > 0) {
 
-        }
-        dogReport.setImages(images);
         reportsRepository.save(dogReport);
         return reportsRepository.save(dogReport);
     }
@@ -54,5 +50,11 @@ public class DogReportServiceImpl implements ReportService<DogReport, Dog, DogIm
     @Override
     public List<DogReport> findReportsFromPet(Dog dog) {
         return reportsRepository.findDogReportsByDog(dog);
+    }
+
+    @Override
+    public HttpStatus deleteReport(DogReport report) {
+        reportsRepository.delete(report);
+        return HttpStatus.OK;
     }
 }

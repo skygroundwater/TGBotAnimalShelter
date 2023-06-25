@@ -10,6 +10,7 @@ import com.telegrambotanimalshelter.listener.parts.IntroductionPart;
 import com.telegrambotanimalshelter.listener.parts.requests.ContactRequestBlock;
 import com.telegrambotanimalshelter.listener.parts.requests.ReportRequestBlock;
 import com.telegrambotanimalshelter.listener.parts.requests.VolunteerAndPetOwnerChat;
+import com.telegrambotanimalshelter.listener.parts.volunteerblock.VolunteerBlock;
 import com.telegrambotanimalshelter.models.Shelter;
 import com.telegrambotanimalshelter.models.animals.Animal;
 import com.telegrambotanimalshelter.models.images.AppImage;
@@ -23,6 +24,7 @@ import static com.telegrambotanimalshelter.utils.Constants.dogShelterName;
 
 /**
  * Сущность, отвечающая за проверку скрытых данных от кнопок.
+ *
  * @param <A>
  * @param <R>
  * @param <I>
@@ -46,10 +48,17 @@ public class CallbackChecker<A extends Animal, R extends Report, I extends AppIm
 
     private final MessageSender<A> sender;
 
-    public CallbackChecker(ContactRequestBlock<A, R> contactBlock, ReportRequestBlock<A, R, I> reportRequestBlock,
-                           VolunteerAndPetOwnerChat<A, R> chat, IntroductionPart introductionPart,
-                           BecomingPetOwnerPart becomingPart, MessageSender<A> sender,
-                           @Qualifier("dogShelter") Shelter dogShelter, @Qualifier("catShelter") Shelter catShelter) {
+    private final VolunteerBlock volunteerBlock;
+
+    public CallbackChecker(ContactRequestBlock<A, R> contactBlock,
+                           ReportRequestBlock<A, R, I> reportRequestBlock,
+                           VolunteerAndPetOwnerChat<A, R> chat,
+                           IntroductionPart introductionPart,
+                           BecomingPetOwnerPart becomingPart,
+                           MessageSender<A> sender,
+                           @Qualifier("dogShelter") Shelter dogShelter,
+                           @Qualifier("catShelter") Shelter catShelter,
+                           VolunteerBlock volunteerBlock) {
         this.contactBlock = contactBlock;
         this.reportRequestBlock = reportRequestBlock;
         this.chat = chat;
@@ -58,24 +67,26 @@ public class CallbackChecker<A extends Animal, R extends Report, I extends AppIm
         this.dogShelter = dogShelter;
         this.catShelter = catShelter;
         this.sender = sender;
+        this.volunteerBlock = volunteerBlock;
     }
 
 
     public void callbackQueryCheck(CallbackQuery callbackQuery) {
 
         String data = callbackQuery.data();
-        Long id = callbackQuery.from().id();
+        Long chatId = callbackQuery.from().id();
 
-        if ("cat_shelter".equals(data)) shelterMenu(id, catShelter);
-        if ("dog_shelter".equals(data)) shelterMenu(id, dogShelter);
+        if ("cat_shelter".equals(data)) shelterMenu(chatId, catShelter);
+        if ("dog_shelter".equals(data)) shelterMenu(chatId, dogShelter);
 
-        if ("back".equals(data)) sender.sendStartMessage(id);
+        if ("back".equals(data)) sender.sendStartMessage(chatId);
 
-        if ("_contacts".equals(data)) contactBlock.sendMessageToTakeName(id);
-        if ("_report".equals(data)) reportRequestBlock.startReportFromPetOwner(id);
+        if ("_contacts".equals(data)) contactBlock.sendMessageToTakeName(chatId);
+        if ("_report".equals(data)) reportRequestBlock.startReportFromPetOwner(chatId);
+        if ("i_am_volunteer".equals(data)) volunteerBlock.startWorkWithVolunteer(chatId);
 
         if ("volunteer".equals(data)) {
-            chat.startChat(id, "Здравствуйте. С вами хочет поговорить усыновитель. " + callbackQuery.from().firstName());
+            chat.startChat(chatId, "Здравствуйте. С вами хочет поговорить усыновитель. " + callbackQuery.from().firstName());
         }
         if ((dogShelterName + "_first_meeting").equals(data)) {
             becomingPart.firstMeetingWithDog(callbackQuery.from().id(), dogShelter);

@@ -20,6 +20,6 @@ public interface ReportService<R extends Report, A extends Animal, I extends App
 
     List<R> findReportsFromPet(A animal);
 
-
+    HttpStatus deleteReport(R report);
 
 }

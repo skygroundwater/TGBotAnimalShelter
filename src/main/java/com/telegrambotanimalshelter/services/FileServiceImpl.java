@@ -6,6 +6,8 @@ import com.telegrambotanimalshelter.exceptions.UploadFileException;
 import com.telegrambotanimalshelter.models.images.AppImage;
 import com.telegrambotanimalshelter.models.images.CatImage;
 import com.telegrambotanimalshelter.models.images.DogImage;
+import com.telegrambotanimalshelter.models.reports.CatReport;
+import com.telegrambotanimalshelter.models.reports.DogReport;
 import com.telegrambotanimalshelter.repositories.images.CatImagesRepository;
 import com.telegrambotanimalshelter.repositories.images.DogImagesRepository;
 import org.json.JSONObject;
@@ -19,6 +21,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.List;
 
 @Service
 public class FileServiceImpl<I extends AppImage> implements FileService<I> {
@@ -59,7 +62,7 @@ public class FileServiceImpl<I extends AppImage> implements FileService<I> {
                 return image;
             }
         } else {
-            throw new UploadFileException("Ошибка ответа от телеграма");
+            throw new UploadFileException("Ошибка ответа от телеграмма");
         }
         return null;
     }
@@ -74,6 +77,16 @@ public class FileServiceImpl<I extends AppImage> implements FileService<I> {
         return catImagesRepository.save(catImage);
     }
 
+    @Override
+    public List<DogImage> getAllDogImages() {
+        return dogImagesRepository.findAll();
+    }
+
+    @Override
+    public List<CatImage> gatAllCatImages() {
+        return catImagesRepository.findAll();
+    }
+
     private ResponseEntity<String> getFilePath(String fileId) {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
@@ -86,7 +99,7 @@ public class FileServiceImpl<I extends AppImage> implements FileService<I> {
         String fullUri = this.filePath.replace("{bot.token}", this.botToken)
                 .replace("{filePath}", filePath);
         System.out.println(fullUri);
-        URL urlObj = null;
+        URL urlObj;
         try {
             urlObj = new URL(fullUri);
             System.out.println(urlObj);
