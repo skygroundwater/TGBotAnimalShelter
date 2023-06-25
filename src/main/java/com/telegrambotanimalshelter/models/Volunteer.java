@@ -34,20 +34,14 @@ public class Volunteer {
     @Column(name = "is_free")
     private boolean isFree;
 
+    @Column(name = "checking_reports")
+    private boolean checkingReports;
+
+    @Column(name = "in_office")
+    private boolean inOffice;
+
     @OneToOne
     @JoinColumn(name = "petowner_id", referencedColumnName = "id")
     private PetOwner petOwner;
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        Volunteer volunteer = (Volunteer) o;
-        return getId() != null && Objects.equals(getId(), volunteer.getId());
-    }
-
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
-    }
 }

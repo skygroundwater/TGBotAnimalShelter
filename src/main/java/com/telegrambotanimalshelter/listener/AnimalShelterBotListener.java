@@ -5,10 +5,10 @@ import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
 import com.telegrambotanimalshelter.listener.parts.checker.CallbackChecker;
-import com.telegrambotanimalshelter.listener.parts.keeper.CacheKeeper;
 import com.telegrambotanimalshelter.listener.parts.requests.ContactRequestBlock;
 import com.telegrambotanimalshelter.listener.parts.requests.ReportRequestBlock;
 import com.telegrambotanimalshelter.listener.parts.requests.VolunteerAndPetOwnerChat;
+import com.telegrambotanimalshelter.listener.parts.volunteerblock.VolunteerBlock;
 import com.telegrambotanimalshelter.models.animals.Animal;
 import com.telegrambotanimalshelter.models.images.AppImage;
 import com.telegrambotanimalshelter.models.reports.Report;
@@ -30,9 +30,9 @@ public class AnimalShelterBotListener<A extends Animal, R extends Report, I exte
 
     private final ContactRequestBlock<A, R> contactBlock;
 
-    private final CallbackChecker<A, R, I> checker;
+    private final VolunteerBlock<A, R, I> volunteerBlock;
 
-    private final CacheKeeper<A, R> keeper;
+    private final CallbackChecker<A, R, I> checker;
 
     private final MessageSender<A> sender;
 
@@ -41,15 +41,18 @@ public class AnimalShelterBotListener<A extends Animal, R extends Report, I exte
     private final ReportRequestBlock<A, R, I> reportRequestBlock;
 
     @Autowired
-    public AnimalShelterBotListener(TelegramBot telegramBot, VolunteerAndPetOwnerChat<A, R> chat,
+    public AnimalShelterBotListener(TelegramBot telegramBot,
+                                    VolunteerAndPetOwnerChat<A, R> chat,
+                                    VolunteerBlock<A, R, I> volunteerBlock,
                                     CallbackChecker<A, R, I> checker,
-                                    CacheKeeper<A, R> keeper, MessageSender<A> sender,
+                                    MessageSender<A> sender,
                                     ReportRequestBlock<A, R, I> reportRequestBlock,
-                                    ContactRequestBlock<A, R> contactBlock, Logger logger) {
+                                    ContactRequestBlock<A, R> contactBlock,
+                                    Logger logger) {
         this.telegramBot = telegramBot;
         this.chat = chat;
+        this.volunteerBlock = volunteerBlock;
         this.checker = checker;
-        this.keeper = keeper;
         this.sender = sender;
         this.contactBlock = contactBlock;
         this.logger = logger;
@@ -77,7 +80,6 @@ public class AnimalShelterBotListener<A extends Animal, R extends Report, I exte
                           Если есть, то, используя отдельную сущность CallBackChecker осуществляем проверку этих данных
                              */
                             checker.callbackQueryCheck(update.callbackQuery());
-
                         } else {
                             /*
                             Если таких данных нет, то отправляемся проверять сообщение
@@ -92,7 +94,6 @@ public class AnimalShelterBotListener<A extends Animal, R extends Report, I exte
                                 contactBlock.savePotentialPetOwner(update);
                                 sender.sendStartMessage(chatId);
                             }
-
                             /*
                             Если команды не поступало, то приступаем к
                             проверкам статуса пользователя на данном этапе
@@ -112,6 +113,13 @@ public class AnimalShelterBotListener<A extends Animal, R extends Report, I exte
                                 reportRequestBlock.reportFromPetOwnerBlock(chatId, message);
                             }
                             /*
+                            Далее проверяем, если это волонтёр, то сначала на то,
+                            находится ли он в статусе проверяющего отчеты
+                             */
+                            if(volunteerBlock.checkOfficeStatusForVolunteer(chatId)){
+                                volunteerBlock.reportCheckingByVolunteerBlock(chatId, message);
+                            }
+                            /*
                             Далее проверяем на статус того, является ли пользователь
                             на данный момент в чате с волонтёром
                              */
@@ -124,6 +132,7 @@ public class AnimalShelterBotListener<A extends Animal, R extends Report, I exte
                             if (chat.checkVolunteer(chatId)) {
                                 chat.continueChat(null, chatId, text);
                             }
+
                         }
                     });
         } catch (Exception e) {

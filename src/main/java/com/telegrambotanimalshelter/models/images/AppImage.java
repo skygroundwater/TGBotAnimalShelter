@@ -21,4 +21,7 @@ public abstract class AppImage {
 
     private boolean isPreview;
 
+    @Column(name = "copied_report_id")
+    private Long copiedReportId;
+
 }

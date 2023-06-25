@@ -18,4 +18,5 @@ public interface CatReportsRepository extends JpaRepository<CatReport, Long> {
 
     void deleteCatReportsByCat(Cat cat);
 
+
 }

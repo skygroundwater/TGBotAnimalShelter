@@ -29,7 +29,8 @@ public class MessageSender<A extends Animal> {
                         "На данном этапе вы будете взимодействовать с нашим ботом. Выберите к какому приюту вы бы хотели обратиться");
         sendMessage.replyMarkup(new InlineKeyboardMarkup(
                 new InlineKeyboardButton("Приют для собак ").callbackData("dog_shelter"),
-                new InlineKeyboardButton("Приют для кошек ").callbackData("cat_shelter")));
+                new InlineKeyboardButton("Приют для кошек ").callbackData("cat_shelter"))
+                .addRow(new InlineKeyboardButton("Вы волонтёр").callbackData("i_am_volunteer")));
         sendResponse(sendMessage);
     }
 
@@ -55,6 +56,7 @@ public class MessageSender<A extends Animal> {
     }
 
     public void sendResponse(SendMessage sendMessage) {
+        sendMessage.parseMode(ParseMode.Markdown);
         SendResponse sendResponse = telegramBot.execute(sendMessage);
         if (!sendResponse.isOk()) {
             logger.error("Error during sending message: {}", sendResponse.message());

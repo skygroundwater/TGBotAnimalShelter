@@ -81,43 +81,42 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
         */
         if (checkIsMessageAPhoto(chatId, message)) {
             sendMessageToTakeDiet(chatId);
-            return;
-        }
+        } else
         /*
         просим отправить фотографию животного,
         если проверка прошла успешно
         */
-        if (checkIsMessageANameOfPet(chatId, message)) {
-            sendMessageToTakePhoto(chatId);
-            return;
-        }
+            if (checkIsMessageANameOfPet(chatId, message)) {
+                sendMessageToTakePhoto(chatId);
+            } else if (message.text() != null) {
         /*
-        отрезем от сообщения префикс и проверяем его
+        отрезаем от сообщения префикс и проверяем его
          */
-        String text = message.text();
-        String preFix = text.split(" ")[0];
-
-        switch (preFix) {
-            case "Диета:" -> {
-                sendMessageToTakeCommonStatus(chatId, message);
+                String text = message.text();
+                String preFix = text.split(" ")[0];
+                String info = text.substring(preFix.length());
+                switch (preFix) {
+                    case "Диета:" -> {
+                        sendMessageToTakeCommonStatus(chatId, info);
+                    }
+                    case "Состояние:" -> {
+                        sendMessageToTakeChanges(chatId, info);
+                    }
+                    case "Изменения:" -> {
+                        stopReport(chatId, info);
+                    }
+                    case "/break" -> {
+                        forcedStopReport(chatId);
+                    }
+                    default -> sendWarningLetter(chatId);
+                }
             }
-            case "Состояние:" -> {
-                sendMessageToTakeChanges(chatId, message);
-            }
-            case "Изменения:" -> {
-                stopReport(chatId, message);
-            }
-            case "/break" -> {
-                forcedStopReport(chatId);
-            }
-            default -> sendWarningLetter(chatId);
-        }
     }
 
     /**
      * Метод, предлагающий выбор пользователю того,
-     * для какого из имеющихся у него питомнцев, взятых
-     * из приюта от желает отправить отчет.
+     * для какого из имеющихся у него питомцев, взятых
+     * из приюта он желает отправить отчет.
      *
      * @param chatId личный id пользователя
      */
@@ -126,7 +125,7 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
         создаем сущность сообщения
          */
         SendMessage sendMessage = new SendMessage(chatId,
-                "Выберите животное, на которого хотите отправить отет по его кличке");
+                "Выберите животное, на которого хотите отправить отчет по его кличке");
         /*
         задаем клавиатуру
          */
@@ -148,24 +147,24 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
                 // сохраняем кошку в кеше
                 cashedNoneReportedPetNames.get(chatId).add((A) cat);
             }
-            for (Dog dog : keeper.getDogByPetOwnerIdFromCache(chatId)) {
-                if (!dog.isReported()) {
-                    choosePetMarkup.addRow(dog.getNickName());
-                    // сохраняем собаку в кеше
-                    cashedNoneReportedPetNames.get(chatId).add((A) dog);
-                }
-                /*
-                задаем отправляемому сообщению
-                клавиатуру после ее структуризации
-                 */
-                sendMessage.replyMarkup(choosePetMarkup);
+        }
+        for (Dog dog : keeper.getDogByPetOwnerIdFromCache(chatId)) {
+            if (!dog.isReported()) {
+                choosePetMarkup.addRow(dog.getNickName());
+                // сохраняем собаку в кеше
+                cashedNoneReportedPetNames.get(chatId).add((A) dog);
             }
         }
+        /*
+         задаем отправляемому сообщению
+         клавиатуру после ее структуризации
+        */
+        sendMessage.replyMarkup(choosePetMarkup);
         sender.sendResponse(sendMessage);
     }
 
     /**
-     * В этом метода реашется, начинать работу с
+     * В этом метода решается, начинать работу с
      * пользователем по отправке отчета или нет.
      *
      * @param chatId личный id пользователя
@@ -176,10 +175,10 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
      * в кеш и в базу данных.
      */
     public void startReportFromPetOwner(Long chatId) {
-        if (keeper.getPetOwners().get(chatId).isHasPets()) {
+        PetOwner petOwner = keeper.getPetOwners().get(chatId);
+        if (petOwner != null && petOwner.isHasPets()) {
             keeper.getPetOwners().put(chatId,
-                    petOwnersService
-                            .setPetOwnerReportRequest(chatId, true));
+                    petOwnersService.setPetOwnerReportRequest(chatId, true));
             chooseAnyPetMessages(chatId);
         } else sender.sendMessage(chatId, "У вас нет животных");
     }
@@ -209,21 +208,13 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
                     keeper.createReportForAnimal(chatId, animal);
                     return true;
                 }
-            } else {
-                /*
-                если проверка на прошла и животное не нашлось,
-                или пользователь решил отправить какое-то
-                другое сообщение, то высылаем ответ
-                 */
-                sender.sendMessage(chatId,
-                        "Такого животного не найдено в вашем списке");
             }
         }
         return false;
     }
 
     /**
-     * Проверяет является ли полученное сообщение от
+     * Проверяет, является ли полученное сообщение от
      * пользователя фотографией. Если является, то
      * сразу применяет его к созданной сущности отчета
      * в кеше. Если нет то, отправляет ответ пользователю.
@@ -237,7 +228,7 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
             /*
             берем активную сущность отчета пользователя из кеша
              */
-            R report = keeper.getActualReportsByPetOwnerId().get(chatId);
+            R report = keeper.getActualReportByPetOwnerId().get(chatId);
             /*
             осуществляем проверку сущности отчета на соответствие
             отчета для кота или же для собаки.
@@ -256,8 +247,7 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
                 ((DogReport) report).setImages(images);
                 return true;
             }
-
-        } else sender.sendMessage(chatId, "Вы не отправили фотографию.");
+        }
         return false;
     }
 
@@ -293,28 +283,39 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
      * Сохраняет отчет в базу данных, с привязкой
      * его к животному. Также привязывает животное к отчёту.
      *
-     * @param chatId  личный id пользователя
-     * @param message сообщение от пользователя
+     * @param chatId            личный id пользователя
+     * @param behavioralChanges сообщение от пользователя, описывающее
+     *                          какие изменения произошли с питомцем
      */
-    private void stopReport(Long chatId, Message message) {
+    private void stopReport(Long chatId, String behavioralChanges) {
         //получаем отчет из кеша и заполняем в нем переменную behavioralChanges
-        R report = keeper.getActualReportsByPetOwnerId().get(chatId);
-        report.setBehavioralChanges(message.text());
+        R report = keeper.getActualReportByPetOwnerId().get(chatId);
+        report.setBehavioralChanges(behavioralChanges);
         /*
         производим проверку соответствия отчета к определенному классу
         и производим манипуляции с данными для привязок и сохранения в базу данных
          */
-        if (report instanceof CatReport) {
-            CatImage catImage = ((CatReport) report).getImages().get(0);
-            catImage.setCat((Cat) keeper.getActualPetsInReportProcess().get(chatId));
-            catImage.setCatReport((CatReport) report);
-            catReportService.putReport((CatReport) report);
+        if (report instanceof CatReport catReport) {
+            CatImage catImage = (catReport.getImages().get(0));
+            catReport.setCopiedPetOwnerId(chatId);
+            Cat cat = (Cat) keeper.getActualPetsInReportProcess().get(chatId);
+            cat.setReported(true);
+            catReport.setCopiedAnimalId(cat.getId());
+            catImage.setCat(cat);
+            catImage.setCatReport(catReport);
+            catImage.setCopiedReportId(catReport.getId());
+            catReportService.putReport(catReport);
             fileService.saveCatImage(catImage);
-        } else if (report instanceof DogReport) {
-            DogImage dogImage = ((DogReport) report).getImages().get(0);
-            dogImage.setDog((Dog) keeper.getActualPetsInReportProcess().get(chatId));
-            dogImage.setDogReport((DogReport) report);
-            dogReportService.putReport((DogReport) report);
+        } else if (report instanceof DogReport dogReport) {
+            DogImage dogImage = (dogReport.getImages().get(0));
+            dogReport.setCopiedPetOwnerId(chatId);
+            Dog dog = (Dog) keeper.getActualPetsInReportProcess().get(chatId);
+            dog.setReported(true);
+            dogReport.setCopiedAnimalId(dog.getId());
+            dogImage.setDog(dog);
+            dogImage.setDogReport(dogReport);
+            dogImage.setCopiedReportId(dogReport.getId());
+            dogReportService.putReport(dogReport);
             fileService.saveDogImage(dogImage);
         }
         //отправляем ответ и обновляем данные о пользователе в кеше и в базе данных
@@ -351,14 +352,15 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
      * питомца. И предлагает последующим сообщением описать
      * общее состояние животного.
      *
-     * @param chatId  личный id пользователя
-     * @param message сообщение от пользоваетеля
+     * @param chatId личный id пользователя
+     * @param diet   сообщение от пользователя,
+     *               описывающее диету собаки
      * @hidden также метод сохраняет эти данные в кеше
      */
-    private void sendMessageToTakeCommonStatus(Long chatId, Message message) {
+    private void sendMessageToTakeCommonStatus(Long chatId, String diet) {
         sender.sendMessage(chatId, "Мы уже близки к завершению. Поделитесь общим состоянием животного.\n" +
                 " Как его самочувствие и процесс привыкания к новому месту? Префикс *Состояние: *");
-        keeper.getActualReportsByPetOwnerId().get(chatId).setDiet(message.text());
+        keeper.getActualReportByPetOwnerId().get(chatId).setDiet(diet);
     }
 
     /**
@@ -366,22 +368,24 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
      * состоянии питомца. И предлагает последующим сообщением
      * описать изменения, которые произошли с животным
      *
-     * @param chatId  личный id пользователя
-     * @param message сообщение от пользоваетеля
+     * @param chatId       личный id пользователя
+     * @param commonStatus сообщение от пользователя, описывающее
+     *                     общее состояние питомца
      * @hidden также метод сохраняет данные в кеше
      */
-    private void sendMessageToTakeChanges(Long chatId, Message message) {
+    private void sendMessageToTakeChanges(Long chatId, String commonStatus) {
         sender.sendMessage(chatId, """
                 Последняя наша просьба - поделиться процессом изменения животного.
                 Как идет процесс восчпитания? Может быть, животное стало проявлять
                  новые черты в своем поведении? Префикс *Изменения: *
                 """);
-        keeper.getActualReportsByPetOwnerId().get(chatId).setCommonDescriptionOfStatus(message.text());
+        keeper.getActualReportByPetOwnerId().get(chatId).setCommonDescriptionOfStatus(commonStatus);
     }
 
     /**
      * Метод отправляет предупреждение о том, что
      * пользователь не соблюдает алгоритм заполнения отчета.
+     *
      * @param chatId личный id пользователя
      */
     private void sendWarningLetter(Long chatId) {

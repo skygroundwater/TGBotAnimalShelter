@@ -32,7 +32,7 @@ public class CatReport extends Report {
     @JoinColumn(referencedColumnName = "id")
     private Cat cat;
 
-    @OneToMany(targetEntity = CatImage.class, mappedBy = "catReport", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "catReport", cascade = CascadeType.ALL)
     private List<CatImage> images;
 
 

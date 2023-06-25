@@ -30,11 +30,9 @@ public class DogReport extends Report {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(referencedColumnName = "id")
-    @ToString.Exclude
     private Dog dog;
 
-    @OneToMany(targetEntity = DogImage.class, mappedBy = "dogReport", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @ToString.Exclude
+    @OneToMany(mappedBy = "dogReport", cascade = CascadeType.ALL)
     private List<DogImage> images;
 
 
