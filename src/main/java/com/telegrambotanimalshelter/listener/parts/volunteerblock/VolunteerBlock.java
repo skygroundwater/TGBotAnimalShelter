@@ -17,11 +17,9 @@ import com.telegrambotanimalshelter.models.reports.Report;
 import com.telegrambotanimalshelter.utils.MessageSender;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Component
 public class VolunteerBlock<A extends Animal, R extends Report, I extends AppImage> {
@@ -72,7 +70,10 @@ public class VolunteerBlock<A extends Animal, R extends Report, I extends AppIma
     }
 
     public boolean checkOfficeStatusForVolunteer(Long chatId) {
-        return cacheKeeper.getVolunteers().get(chatId).isInOffice();
+        Volunteer volunteer = cacheKeeper.getVolunteers().get(chatId);
+        if(volunteer != null) {
+            return volunteer.isInOffice();
+        }else return false;
     }
 
     private void acceptReport(Long chatId) {
@@ -190,6 +191,7 @@ public class VolunteerBlock<A extends Animal, R extends Report, I extends AppIma
 
     private ReplyKeyboardMarkup volunteerKeyboardInOffice() {
         return new ReplyKeyboardMarkup("Проверить отчеты")
-                .addRow("Выйти из кабинета волонтёра");
+                .addRow("Выйти из кабинета волонтёра")
+                .oneTimeKeyboard(true);
     }
 }
