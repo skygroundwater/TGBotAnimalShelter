@@ -16,6 +16,7 @@ import com.telegrambotanimalshelter.utils.MessageSender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.scheduling.annotation.Schedules;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -46,7 +47,7 @@ public class ReportNotificationTimer<A extends Animal> {
         this.cacheKeeper = cacheKeeper;
     }
 
-    @Scheduled(fixedDelay = 1, timeUnit = TimeUnit.DAYS)
+    @Scheduled(cron = "0 0 8 * * *")
     public void notificationToSendReport() {
         StringBuilder stringBuilder = new StringBuilder();
 
@@ -66,6 +67,11 @@ public class ReportNotificationTimer<A extends Animal> {
                 sender.sendMessageToSendReport(petOwnerId, stringBuilder.toString());
             }
         }
+    }
+
+    @Scheduled(cron = "0 50 7 * * *")
+    public void resetReporting() {
+        cacheKeeper.setAllAnimalsReportedToFalse();
     }
 
     private void checkLastReportFromPet(Long chatId, A animal) {

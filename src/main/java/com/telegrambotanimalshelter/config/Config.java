@@ -4,6 +4,7 @@ import com.pengrad.telegrambot.TelegramBot;
 import com.telegrambotanimalshelter.enums.ShelterType;
 import com.telegrambotanimalshelter.listener.AnimalShelterBotListener;
 import com.telegrambotanimalshelter.models.Shelter;
+import com.telegrambotanimalshelter.models.Volunteer;
 import com.telegrambotanimalshelter.models.animals.Cat;
 import com.telegrambotanimalshelter.models.animals.Dog;
 import lombok.Data;
@@ -11,11 +12,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
+import org.springframework.cache.concurrent.ConcurrentMapCache;
+import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import static com.telegrambotanimalshelter.utils.Constants.*;
 
