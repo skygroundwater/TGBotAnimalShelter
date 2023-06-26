@@ -276,7 +276,7 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
         sender.sendMessage(chatId, "Вы прервали отправку отчета. Пожалуйста, не забудьте отправить его позже.");
         cacheKeeper.getPetOwners().put(chatId, petOwnersService.setPetOwnerReportRequest(chatId, false));
         cacheKeeper.getActualReportByPetOwnerId().remove(chatId);
-        cacheKeeper.getActualReportByPetOwnerId().remove(chatId);
+        cacheKeeper.getActualPetsInReportProcess().remove(chatId);
     }
 
     /**
@@ -324,7 +324,7 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
         sender.sendMessage(chatId, "Спасибо Вам за ваш отчет. Если будет что-то не так - волонтёр отпишетися вам. Желаем удачи.");
         cacheKeeper.getPetOwners().put(chatId, petOwnersService.setPetOwnerReportRequest(chatId, false));
         cacheKeeper.getActualReportByPetOwnerId().remove(chatId);
-        cacheKeeper.getActualReportByPetOwnerId().remove(chatId);
+        cacheKeeper.getActualPetsInReportProcess().remove(chatId);
     }
 
     /**
