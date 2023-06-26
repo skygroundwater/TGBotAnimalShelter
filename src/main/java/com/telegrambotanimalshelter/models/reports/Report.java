@@ -32,6 +32,7 @@ public abstract class Report {
     private Long copiedAnimalId;
 
     @Column(name = "checked_by_volunteer")
+    @ToString.Exclude
     private boolean checkedByVolunteer;
 
     @PrePersist
