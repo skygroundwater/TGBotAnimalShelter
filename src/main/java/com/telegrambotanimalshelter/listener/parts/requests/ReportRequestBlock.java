@@ -47,7 +47,7 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
 
     private final FileService<I> fileService;
 
-    private final CacheKeeper<A, R> keeper;
+    private final CacheKeeper<A, R> cacheKeeper;
 
     private HashMap<Long, ArrayList<A>> cashedNoneReportedPetNames;
 
@@ -56,13 +56,13 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
                               @Qualifier("catReportServiceImpl") ReportService<CatReport, Cat, CatImage> catReportService,
                               @Qualifier("dogReportServiceImpl") ReportService<DogReport, Dog, DogImage> dogReportService,
                               FileService<I> fileService,
-                              CacheKeeper<A, R> keeper) {
+                              CacheKeeper<A, R> cacheKeeper) {
         this.sender = sender;
         this.petOwnersService = petOwnersService;
         this.catReportService = catReportService;
         this.dogReportService = dogReportService;
         this.fileService = fileService;
-        this.keeper = keeper;
+        this.cacheKeeper = cacheKeeper;
         this.cashedNoneReportedPetNames = new HashMap<>();
     }
 
@@ -141,14 +141,14 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
         берем из держателя кеша котов и собак пользователя
         и добавляем их имена к клавиатуре, предоставляя выбор
          */
-        for (Cat cat : keeper.getCatsByPetOwnerIdFromCache(chatId)) {
+        for (Cat cat : cacheKeeper.getCatsByPetOwnerIdFromCache(chatId)) {
             if (!cat.isReported()) {
                 choosePetMarkup.addRow(cat.getNickName());
                 // сохраняем кошку в кеше
                 cashedNoneReportedPetNames.get(chatId).add((A) cat);
             }
         }
-        for (Dog dog : keeper.getDogByPetOwnerIdFromCache(chatId)) {
+        for (Dog dog : cacheKeeper.getDogByPetOwnerIdFromCache(chatId)) {
             if (!dog.isReported()) {
                 choosePetMarkup.addRow(dog.getNickName());
                 // сохраняем собаку в кеше
@@ -175,9 +175,9 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
      * в кеш и в базу данных.
      */
     public void startReportFromPetOwner(Long chatId) {
-        PetOwner petOwner = keeper.getPetOwners().get(chatId);
+        PetOwner petOwner = cacheKeeper.getPetOwners().get(chatId);
         if (petOwner != null && petOwner.isHasPets()) {
-            keeper.getPetOwners().put(chatId,
+            cacheKeeper.getPetOwners().put(chatId,
                     petOwnersService.setPetOwnerReportRequest(chatId, true));
             chooseAnyPetMessages(chatId);
         } else sender.sendMessage(chatId, "У вас нет животных");
@@ -202,10 +202,10 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
                 if (animal instanceof Dog) {
                     //в кеше создаем сущность отчета и наполнять
                     //его будем по мере прохождения этапов блока
-                    keeper.createReportForAnimal(chatId, animal);
+                    cacheKeeper.createReportForAnimal(chatId, animal);
                     return true;
                 } else if (animal instanceof Cat) {
-                    keeper.createReportForAnimal(chatId, animal);
+                    cacheKeeper.createReportForAnimal(chatId, animal);
                     return true;
                 }
             }
@@ -228,7 +228,7 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
             /*
             берем активную сущность отчета пользователя из кеша
              */
-            R report = keeper.getActualReportByPetOwnerId().get(chatId);
+            R report = cacheKeeper.getActualReportByPetOwnerId().get(chatId);
             /*
             осуществляем проверку сущности отчета на соответствие
             отчета для кота или же для собаки.
@@ -259,7 +259,7 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
      * @return true или false
      */
     public boolean checkReportRequestStatus(Long chatId) {
-        PetOwner petOwner = keeper.getPetOwners().get(chatId);
+        PetOwner petOwner = cacheKeeper.getPetOwners().get(chatId);
         if (petOwner != null) {
             return petOwner.isReportRequest();
         } else return false;
@@ -274,7 +274,9 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
      */
     private void forcedStopReport(Long chatId) {
         sender.sendMessage(chatId, "Вы прервали отправку отчета. Пожалуйста, не забудьте отправить его позже.");
-        keeper.getPetOwners().put(chatId, petOwnersService.setPetOwnerReportRequest(chatId, false));
+        cacheKeeper.getPetOwners().put(chatId, petOwnersService.setPetOwnerReportRequest(chatId, false));
+        cacheKeeper.getActualReportByPetOwnerId().remove(chatId);
+        cacheKeeper.getActualPetsInReportProcess().remove(chatId);
     }
 
     /**
@@ -289,7 +291,7 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
      */
     private void stopReport(Long chatId, String behavioralChanges) {
         //получаем отчет из кеша и заполняем в нем переменную behavioralChanges
-        R report = keeper.getActualReportByPetOwnerId().get(chatId);
+        R report = cacheKeeper.getActualReportByPetOwnerId().get(chatId);
         report.setBehavioralChanges(behavioralChanges);
         /*
         производим проверку соответствия отчета к определенному классу
@@ -298,7 +300,7 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
         if (report instanceof CatReport catReport) {
             CatImage catImage = (catReport.getImages().get(0));
             catReport.setCopiedPetOwnerId(chatId);
-            Cat cat = (Cat) keeper.getActualPetsInReportProcess().get(chatId);
+            Cat cat = (Cat) cacheKeeper.getActualPetsInReportProcess().get(chatId);
             cat.setReported(true);
             catReport.setCopiedAnimalId(cat.getId());
             catImage.setCat(cat);
@@ -309,7 +311,7 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
         } else if (report instanceof DogReport dogReport) {
             DogImage dogImage = (dogReport.getImages().get(0));
             dogReport.setCopiedPetOwnerId(chatId);
-            Dog dog = (Dog) keeper.getActualPetsInReportProcess().get(chatId);
+            Dog dog = (Dog) cacheKeeper.getActualPetsInReportProcess().get(chatId);
             dog.setReported(true);
             dogReport.setCopiedAnimalId(dog.getId());
             dogImage.setDog(dog);
@@ -320,7 +322,9 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
         }
         //отправляем ответ и обновляем данные о пользователе в кеше и в базе данных
         sender.sendMessage(chatId, "Спасибо Вам за ваш отчет. Если будет что-то не так - волонтёр отпишетися вам. Желаем удачи.");
-        keeper.getPetOwners().put(chatId, petOwnersService.setPetOwnerReportRequest(chatId, false));
+        cacheKeeper.getPetOwners().put(chatId, petOwnersService.setPetOwnerReportRequest(chatId, false));
+        cacheKeeper.getActualReportByPetOwnerId().remove(chatId);
+        cacheKeeper.getActualPetsInReportProcess().remove(chatId);
     }
 
     /**
@@ -360,7 +364,7 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
     private void sendMessageToTakeCommonStatus(Long chatId, String diet) {
         sender.sendMessage(chatId, "Мы уже близки к завершению. Поделитесь общим состоянием животного.\n" +
                 " Как его самочувствие и процесс привыкания к новому месту? Префикс *Состояние: *");
-        keeper.getActualReportByPetOwnerId().get(chatId).setDiet(diet);
+        cacheKeeper.getActualReportByPetOwnerId().get(chatId).setDiet(diet);
     }
 
     /**
@@ -379,7 +383,7 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
                 Как идет процесс восчпитания? Может быть, животное стало проявлять
                  новые черты в своем поведении? Префикс *Изменения: *
                 """);
-        keeper.getActualReportByPetOwnerId().get(chatId).setCommonDescriptionOfStatus(commonStatus);
+        cacheKeeper.getActualReportByPetOwnerId().get(chatId).setCommonDescriptionOfStatus(commonStatus);
     }
 
     /**
