@@ -30,9 +30,11 @@ public class CatReport extends Report {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(referencedColumnName = "id")
+    @ToString.Exclude
     private Cat cat;
 
     @OneToMany(mappedBy = "catReport", cascade = CascadeType.ALL)
+    @ToString.Exclude
     private List<CatImage> images;
 
 

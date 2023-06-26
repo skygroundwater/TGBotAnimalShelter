@@ -57,7 +57,7 @@ public class VolunteerBlock<A extends Animal, R extends Report, I extends AppIma
     }
 
     public void startWorkWithVolunteer(Long chatId) {
-        if (!chat.checkVolunteer(chatId)) {
+        if (checkVolunteer(chatId)) {
             Volunteer volunteer = cacheKeeper.getVolunteers().get(chatId);
             if (volunteer != null) {
                 volunteer.setInOffice(true);
@@ -71,24 +71,22 @@ public class VolunteerBlock<A extends Animal, R extends Report, I extends AppIma
 
     public boolean checkOfficeStatusForVolunteer(Long chatId) {
         Volunteer volunteer = cacheKeeper.getVolunteers().get(chatId);
-        if(volunteer != null) {
+        if (volunteer != null) {
             return volunteer.isInOffice();
-        }else return false;
+        } else return false;
     }
 
     private void acceptReport(Long chatId) {
         R report = cachedCheckingReports.get(chatId);
         report.setCheckedByVolunteer(true);
-        cacheKeeper.volunteerAcceptReport(report);
-        setVolunteerCheckingReportsToFalse(chatId);
+        cacheKeeper.volunteerAcceptReport(chatId, report);
         sender.sendResponse(new SendMessage(chatId, "Вы приняли отчёт. Продолжим или хотите прервать процесс?")
                 .replyMarkup(volunteerKeyboardInOffice()));
     }
 
     private void rejectReport(Long chatId) {
         R report = cachedCheckingReports.get(chatId);
-        cacheKeeper.volunteerRejectReport(report);
-        setVolunteerCheckingReportsToFalse(chatId);
+        cacheKeeper.volunteerRejectReport(chatId, report);
         sender.sendMessage(report.getCopiedPetOwnerId(), """
                 Дорогой усыновитель, мы заметили, что ты заполняешь отчет не так подробно,
                  как необходимо. Пожалуйста, подойди ответственнее к этому занятию.
@@ -98,11 +96,6 @@ public class VolunteerBlock<A extends Animal, R extends Report, I extends AppIma
                 .replyMarkup(volunteerKeyboardInOffice()));
     }
 
-    private void setVolunteerCheckingReportsToFalse(Long chatId) {
-        Volunteer volunteer = cacheKeeper.getVolunteers().get(chatId);
-        volunteer.setCheckingReports(false);
-        cacheKeeper.getVolunteers().put(chatId, volunteer);
-    }
 
     private void forcedStopCheckReport(Long chatId) {
         cacheKeeper.volunteerWantsToGetOutFromOffice(chatId);
@@ -116,21 +109,31 @@ public class VolunteerBlock<A extends Animal, R extends Report, I extends AppIma
         sender.sendStartMessage(chatId);
     }
 
-
     public void startCheckingReports(Long chatId) {
-        if (!chat.checkVolunteer(chatId)) {
-            Volunteer volunteer = cacheKeeper.appointVolunteerToCheckReports(chatId);
-            if (volunteer != null) {
-                checkNoneCheckedReportsFromCacheKeeper(chatId);
-            }
+        Volunteer volunteer = cacheKeeper.appointVolunteerToCheckReports(chatId);
+        if (volunteer != null) {
+            checkNoneCheckedReportsFromCacheKeeper(chatId);
         }
+    }
+
+    private boolean checkVolunteer(Long chatId) {
+        Volunteer volunteer = cacheKeeper.getVolunteers().get(chatId);
+        if (volunteer != null) {
+            if (volunteer.isFree()) {
+                return true;
+            }
+            return volunteer.isInOffice();
+        }
+        return false;
     }
 
     private void checkNoneCheckedReportsFromCacheKeeper(Long chatId) {
         List<R> reports = cacheKeeper.getCashedReports()
                 .stream().filter(r -> !r.isCheckedByVolunteer()).toList();
         if (reports.isEmpty()) {
-            sender.sendMessage(chatId, "На данный момент отчетов усыновители не предоставляли");
+            sender.sendResponse(new SendMessage(chatId,
+                    "На данный момент отчетов усыновители не предоставляли")
+                    .replyMarkup(volunteerKeyboardInOffice()));
             Volunteer volunteer = cacheKeeper.getVolunteers().get(chatId);
             volunteer.setCheckingReports(false);
             cacheKeeper.getVolunteers().put(chatId, volunteer);
