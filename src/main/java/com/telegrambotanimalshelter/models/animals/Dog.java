@@ -27,7 +27,7 @@ public class Dog extends Animal {
     @JoinColumn(referencedColumnName = "id")
     private PetOwner petOwner;
 
-    @OneToMany(mappedBy = "dog", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "dog", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @ToString.Exclude
     private List<DogReport> reports;
 

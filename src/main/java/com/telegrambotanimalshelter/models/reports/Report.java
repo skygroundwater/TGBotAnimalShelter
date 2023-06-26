@@ -28,6 +28,9 @@ public abstract class Report {
     @Column(name="copied_owner_id")
     private Long copiedPetOwnerId;
 
+    @Column(name = "copied_animal_id")
+    private Long copiedAnimalId;
+
     @Column(name = "checked_by_volunteer")
     private boolean checkedByVolunteer;
 

@@ -37,7 +37,6 @@ public class CatReportServiceImpl implements ReportService<CatReport, Cat, CatIm
     }
 
 
-
     @Override
     public CatReport putReport(CatReport catReport) {
         return reportsRepository.save(catReport);
@@ -57,5 +56,11 @@ public class CatReportServiceImpl implements ReportService<CatReport, Cat, CatIm
     @Override
     public List<CatReport> findReportsFromPet(Cat cat) {
         return reportsRepository.findCatReportsByCat(cat);
+    }
+
+    @Override
+    public HttpStatus deleteReport(CatReport report) {
+        reportsRepository.delete(report);
+        return HttpStatus.OK;
     }
 }
