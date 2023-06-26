@@ -274,6 +274,10 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
      */
     private void forcedStopReport(Long chatId) {
         sender.sendMessage(chatId, "Вы прервали отправку отчета. Пожалуйста, не забудьте отправить его позже.");
+        breakReport(chatId);
+    }
+
+    private void breakReport(Long chatId){
         cacheKeeper.getPetOwners().put(chatId, petOwnersService.setPetOwnerReportRequest(chatId, false));
         cacheKeeper.getActualReportByPetOwnerId().remove(chatId);
         cacheKeeper.getActualPetsInReportProcess().remove(chatId);
@@ -322,9 +326,7 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
         }
         //отправляем ответ и обновляем данные о пользователе в кеше и в базе данных
         sender.sendMessage(chatId, "Спасибо Вам за ваш отчет. Если будет что-то не так - волонтёр отпишетися вам. Желаем удачи.");
-        cacheKeeper.getPetOwners().put(chatId, petOwnersService.setPetOwnerReportRequest(chatId, false));
-        cacheKeeper.getActualReportByPetOwnerId().remove(chatId);
-        cacheKeeper.getActualPetsInReportProcess().remove(chatId);
+        breakReport(chatId);
     }
 
     /**
