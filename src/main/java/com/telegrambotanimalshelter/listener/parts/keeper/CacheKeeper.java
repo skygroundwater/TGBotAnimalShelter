@@ -135,22 +135,31 @@ public class CacheKeeper<A extends Animal, R extends Report> {
             volunteer.setFree(false);
             return volunteers.put(chatId, volunteerService.putVolunteer(volunteer));
         }
+        if (!volunteer.isFree() && volunteer.isInOffice() && !volunteer.isCheckingReports()) {
+            volunteer.setCheckingReports(true);
+            return volunteers.put(chatId, volunteerService.putVolunteer(volunteer));
+        }
         return null;
     }
 
-    public void volunteerAcceptReport(R report) {
+    public void volunteerAcceptReport(Long volunteerId, R report) {
         cashedReports.remove(report);
         if (report instanceof DogReport dogReport) {
             dogReport.setCheckedByVolunteer(true);
-            dogReportService.putReport(dogReport);
+            cashedReports.add((R) dogReportService.putReport(dogReport));
+            System.out.println(cashedReports);
         } else if (report instanceof CatReport catReport) {
             catReport.setCheckedByVolunteer(true);
             catReportService.putReport(catReport);
+            cashedReports.add((R) catReportService.putReport(catReport));
+            System.out.println(cashedReports);
         }
-        cashedReports.add(report);
+        Volunteer volunteer = volunteers.get(volunteerId);
+        volunteer.setCheckingReports(false);
+        volunteers.put(volunteerId, volunteer);
     }
 
-    public void volunteerRejectReport(R report) {
+    public void volunteerRejectReport(Long volunteerId, R report) {
         cashedReports.remove(report);
         if (report instanceof DogReport dogReport) {
             dogReportService.deleteReport(dogReport);
@@ -161,7 +170,6 @@ public class CacheKeeper<A extends Animal, R extends Report> {
             if (optionalDog.isPresent()) {
                 Dog dog = optionalDog.get();
                 dog.setReported(false);
-                dog.getReports().remove(dogReport);
                 dogService.putPet(dog);
             }
         } else if (report instanceof CatReport catReport) {
@@ -173,10 +181,12 @@ public class CacheKeeper<A extends Animal, R extends Report> {
             if (optionalCat.isPresent()) {
                 Cat cat = optionalCat.get();
                 cat.setReported(false);
-                cat.getReports().remove(catReport);
                 catService.putPet(cat);
             }
         }
+        Volunteer volunteer = volunteers.get(volunteerId);
+        volunteer.setCheckingReports(false);
+        volunteers.put(volunteerId, volunteer);
     }
 
     public void volunteerWantsToGetOutFromOffice(Long chatId) {
@@ -192,12 +202,14 @@ public class CacheKeeper<A extends Animal, R extends Report> {
         if (animal instanceof Cat) {
             CatReport catReport = CatReport.builder().cat((Cat) animal).petOwner(petOwner).images(new ArrayList<>()).build();
             catReport.setPetOwner(petOwner);
-            actualReportByPetOwnerId.put(chatId, (R) catReport);
+            CatReport catReportWithId = catReportService.putReport(catReport);
+            actualReportByPetOwnerId.put(chatId, (R) catReportWithId);
             actualPetsInReportProcess.put(chatId, animal);
-        } else if (animal instanceof Dog) {
-            DogReport dogReport = DogReport.builder().dog((Dog) animal).petOwner(petOwner).images(new ArrayList<>()).build();
+        } else if (animal instanceof Dog dog) {
+            DogReport dogReport = DogReport.builder().dog(dog).petOwner(petOwner).images(new ArrayList<>()).build();
             dogReport.setPetOwner(petOwner);
-            actualReportByPetOwnerId.put(chatId, (R) dogReport);
+            DogReport dogReportWithId = dogReportService.putReport(dogReport);
+            actualReportByPetOwnerId.put(chatId, (R) dogReportWithId);
             actualPetsInReportProcess.put(chatId, animal);
         }
     }

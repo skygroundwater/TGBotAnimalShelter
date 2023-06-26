@@ -234,17 +234,19 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
             отчета для кота или же для собаки.
             далее производим манипуляции по его наполнению
              */
-            if (report instanceof CatReport) {
-                List<CatImage> images = ((CatReport) report).getImages();
+            if (report instanceof CatReport catReport) {
+                List<CatImage> images = catReport.getImages();
                 CatImage catImage = new CatImage();
+                catImage.setCopiedReportId(catReport.getId());
                 images.add((CatImage) fileService.processDoc((I) catImage, message));
-                ((CatReport) report).setImages(images);
+                catReport.setImages(images);
                 return true;
-            } else if (report instanceof DogReport) {
-                List<DogImage> images = ((DogReport) report).getImages();
+            } else if (report instanceof DogReport dogReport) {
+                List<DogImage> images = dogReport.getImages();
                 DogImage dogImage = new DogImage();
+                dogImage.setCopiedReportId(dogReport.getId());
                 images.add((DogImage) fileService.processDoc((I) dogImage, message));
-                ((DogReport) report).setImages(images);
+                dogReport.setImages(images);
                 return true;
             }
         }
@@ -274,10 +276,16 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
      */
     private void forcedStopReport(Long chatId) {
         sender.sendMessage(chatId, "Вы прервали отправку отчета. Пожалуйста, не забудьте отправить его позже.");
+        R report = cacheKeeper.getActualReportByPetOwnerId().remove(chatId);
+        if (report instanceof CatReport catReport) {
+            catReportService.deleteReport(catReport);
+        } else if (report instanceof DogReport dogReport) {
+            dogReportService.deleteReport(dogReport);
+        }
         breakReport(chatId);
     }
 
-    private void breakReport(Long chatId){
+    private void breakReport(Long chatId) {
         cacheKeeper.getPetOwners().put(chatId, petOwnersService.setPetOwnerReportRequest(chatId, false));
         cacheKeeper.getActualReportByPetOwnerId().remove(chatId);
         cacheKeeper.getActualPetsInReportProcess().remove(chatId);
@@ -306,6 +314,8 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
             catReport.setCopiedPetOwnerId(chatId);
             Cat cat = (Cat) cacheKeeper.getActualPetsInReportProcess().get(chatId);
             cat.setReported(true);
+            cacheKeeper.getActualPetsInReportProcess()
+                    .put(chatId, (A) cacheKeeper.getCatService().putPet(cat));
             catReport.setCopiedAnimalId(cat.getId());
             catImage.setCat(cat);
             catImage.setCatReport(catReport);
@@ -317,6 +327,8 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
             dogReport.setCopiedPetOwnerId(chatId);
             Dog dog = (Dog) cacheKeeper.getActualPetsInReportProcess().get(chatId);
             dog.setReported(true);
+            cacheKeeper.getActualPetsInReportProcess()
+                    .put(chatId, (A) cacheKeeper.getDogService().putPet(dog));
             dogReport.setCopiedAnimalId(dog.getId());
             dogImage.setDog(dog);
             dogImage.setDogReport(dogReport);

@@ -191,9 +191,9 @@ public class VolunteerAndPetOwnerChat<A extends Animal, R extends Report> {
      * @hidden все данные о волонтере берутся из кеша
      */
     private void sendToVolunteer(Long petOwnerId, String msg) {
-        Long volunteerId = cacheKeeper.getPetOwners().get(petOwnerId).getVolunteer().getId();
-        if (volunteerId != null) {
-            sender.sendMessage(volunteerId, msg);
+        Volunteer volunteer = cacheKeeper.getPetOwners().get(petOwnerId).getVolunteer();
+        if (volunteer != null) {
+            sender.sendMessage(volunteer.getId(), msg);
         }
     }
 
@@ -205,9 +205,9 @@ public class VolunteerAndPetOwnerChat<A extends Animal, R extends Report> {
      * @hidden все данные о об усыновителе берутся из кеша
      */
     private void sendToPetOwner(Long volunteerId, String msg) {
-        Long petOwnerId = cacheKeeper.getVolunteers().get(volunteerId).getPetOwner().getId();
-        if (petOwnerId != null) {
-            sender.sendMessage(petOwnerId, msg);
+        PetOwner petOwner = cacheKeeper.getVolunteers().get(volunteerId).getPetOwner();
+        if (petOwner != null) {
+            sender.sendMessage(petOwner.getId(), msg);
         }
     }
 }
