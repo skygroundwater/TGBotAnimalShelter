@@ -20,10 +20,10 @@ import com.telegrambotanimalshelter.services.volunteerservice.VolunteerService;
 import jakarta.annotation.PostConstruct;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Component
 @Data
@@ -126,6 +126,21 @@ public class CacheKeeper<A extends Animal, R extends Report> {
 
     public PetOwner findCashedPetOwnerById(Long chatId) {
         return petOwners.get(chatId);
+    }
+
+    public void setAllAnimalsReportedToFalse() {
+        for (Map.Entry<Long, List<Cat>> entry : cats.entrySet()) {
+            for (Cat cat : entry.getValue()) {
+                cat.setReported(false);
+                catService.putPet(cat);
+            }
+        }
+        for (Map.Entry<Long, List<Dog>> entry : dogs.entrySet()) {
+            for (Dog dog : entry.getValue()) {
+                dog.setReported(false);
+                dogService.putPet(dog);
+            }
+        }
     }
 
     public Volunteer appointVolunteerToCheckReports(Long chatId) {
