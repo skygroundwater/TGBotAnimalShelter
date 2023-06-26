@@ -55,12 +55,12 @@ public class ReportNotificationTimer<A extends Animal> {
                 Long petOwnerId = petOwner.getId();
                 for (Dog dog : cacheKeeper.getDogs().get(petOwnerId)) {
                     if (!dog.isReported()) {
-                        stringBuilder.append(dog.getNickName()).append(",");
+                        stringBuilder.append(dog.getNickName()).append(" ");
                     }
                 }
                 for (Cat cat : cacheKeeper.getCats().get(petOwnerId)) {
                     if (!cat.isReported()) {
-                        stringBuilder.append(cat.getNickName()).append(",");
+                        stringBuilder.append(cat.getNickName()).append(" ");
                     }
                 }
                 sender.sendMessageToSendReport(petOwnerId, stringBuilder.toString());
@@ -75,7 +75,8 @@ public class ReportNotificationTimer<A extends Animal> {
         } else if (animal instanceof Cat) {
             reports = getReportsFromCat((Cat) animal);
         }
-        if (reports.isEmpty() || reports.get(reports.size() - 1).getDate().equals(LocalDateTime.now().toLocalDate().minusDays(1))) {
+        if (reports.isEmpty() || reports.get(reports.size() - 1).getDate()
+                .equals(LocalDateTime.now().toLocalDate().minusDays(1))) {
             sender.sendMessageToSendReport(chatId, "animal");
         }
     }
