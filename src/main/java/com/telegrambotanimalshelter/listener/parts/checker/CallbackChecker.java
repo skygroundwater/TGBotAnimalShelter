@@ -1,10 +1,12 @@
 package com.telegrambotanimalshelter.listener.parts.checker;
 
 import com.pengrad.telegrambot.model.CallbackQuery;
+import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.telegrambotanimalshelter.enums.ShelterType;
+import com.telegrambotanimalshelter.listener.AnimalShelterBotListener;
 import com.telegrambotanimalshelter.listener.parts.BecomingPetOwnerPart;
 import com.telegrambotanimalshelter.listener.parts.IntroductionPart;
 import com.telegrambotanimalshelter.listener.parts.requests.ContactRequestBlock;
@@ -70,7 +72,14 @@ public class CallbackChecker<A extends Animal, R extends Report, I extends AppIm
         this.volunteerBlock = volunteerBlock;
     }
 
-
+    /** Если пользователь юзает одну из предложенных ботом кнопку, метод принимает параметр <b>callbackQuery</b> ({@link Update#callbackQuery()})
+     * и, в зависимости от выбранной кнопки, бот выдает сообщение и список из последующих кнопок для дальнейшего взаимодействия. <br> <br>
+     * <i> Все взаимодействия пользователя с кнопками проходят через эти методы: {@link CallbackChecker#callbackQueryCheck(CallbackQuery)} и {@link CallbackChecker#callBackQueryConstantCheck(CallbackQuery, Shelter)} </i>
+     * @param callbackQuery
+     * @see BecomingPetOwnerPart
+     * @see IntroductionPart
+     * @see MessageSender
+     */
     public void callbackQueryCheck(CallbackQuery callbackQuery) {
 
         String data = callbackQuery.data();
@@ -101,6 +110,14 @@ public class CallbackChecker<A extends Animal, R extends Report, I extends AppIm
         }
     }
 
+    /** Если пользователь юзает одну из предложенных ботом кнопку, метод принимает параметр <b>callbackQuery</b> ({@link Update#callbackQuery()})
+     * и, в зависимости от выбранной кнопки, бот выдает сообщение и список из последующих кнопок для дальнейшего взаимодействия. <br> <br>
+     * <i> Все взаимодействия пользователя с кнопками проходят через эти методы: {@link CallbackChecker#callbackQueryCheck(CallbackQuery)} и {@link CallbackChecker#callBackQueryConstantCheck(CallbackQuery, Shelter)} </i>
+     * @param callbackQuery
+     * @see BecomingPetOwnerPart
+     * @see IntroductionPart
+     * @see MessageSender
+     */
     private void callBackQueryConstantCheck(CallbackQuery callbackQuery, Shelter shelter) {
         String shelterName = shelter.getName();
         String data = callbackQuery.data();
@@ -120,6 +137,12 @@ public class CallbackChecker<A extends Animal, R extends Report, I extends AppIm
         if ((shelterName + "_reasons_for_refusal").equals(data)) becomingPart.reasonsForRefusal(id, shelter);
     }
 
+    /** После приветственного сообщения из {@link MessageSender#sendStartMessage(Long)} и выбора одной из предложенных кнопок
+     * бот, в зависимости от выбора приюта, выводит его название ({@link Shelter#getName()}) и список последующих кнопок для взаимодействия с выбранным приютом. <br> <br>
+     * <i> список выводимых кнопок в этом методе --> {@link CallbackChecker#shelterMenuMarkup(Shelter)} <i>
+     * @param chatId
+     * @param shelter
+     */
     private void shelterMenu(Long chatId, Shelter shelter) {
         SendMessage sendMessage = null;
         String shelterName = shelter.getName();
@@ -133,6 +156,13 @@ public class CallbackChecker<A extends Animal, R extends Report, I extends AppIm
         sender.sendResponse(sendMessage);
     }
 
+    /**
+     * Кнопки, выводимые для взаимодействия с пользователем, из метода {@link CallbackChecker#shelterMenu(Long, Shelter)}
+     * @param shelter
+     * @see MessageSender
+     * @see IntroductionPart
+     * @see BecomingPetOwnerPart
+     */
     private InlineKeyboardMarkup shelterMenuMarkup(Shelter shelter) {
         String shelterName = shelter.getName();
         return new InlineKeyboardMarkup(

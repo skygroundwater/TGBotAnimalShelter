@@ -38,7 +38,7 @@ public class ContactRequestBlock<A extends Animal, R extends Report> {
      * в блоке запроса контактов, его сообщения попадают
      * в этот блок и проходят проверку на соответствие
      *
-     * @param chatId  личный id поьзователя
+     * @param chatId  личный id пользователя
      * @param message сообщение от пользователя
      */
     public void contactsRequestBlock(Long chatId, Message message) {
@@ -126,7 +126,7 @@ public class ContactRequestBlock<A extends Animal, R extends Report> {
     }
 
     /**
-     * В этом метода изменияем <b>фамилию</b> пользователя в кеше,
+     * В этом метода изменяем <b>фамилию</b> пользователя в кеше,
      * принимая его от пользователя. Далее отправляем просьбу
      * записать номер телефона
      *
@@ -139,7 +139,7 @@ public class ContactRequestBlock<A extends Animal, R extends Report> {
     }
 
     /**
-     * В этом методе изменияем <b>номер телефона</b> пользователя в кеше,
+     * В этом методе изменяем <b>номер телефона</b> пользователя в кеше,
      * принимая его от пользователя. И сохраняем его в базу данных.
      *
      * @param chatId      личный id пользователя
