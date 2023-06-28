@@ -7,6 +7,7 @@ import com.pengrad.telegrambot.request.SendMessage;
 import com.telegrambotanimalshelter.enums.ShelterType;
 import com.telegrambotanimalshelter.listener.parts.BecomingPetOwnerPart;
 import com.telegrambotanimalshelter.listener.parts.IntroductionPart;
+import com.telegrambotanimalshelter.listener.parts.requests.ChoosePetForPotentialOwnerBlock;
 import com.telegrambotanimalshelter.listener.parts.requests.ContactRequestBlock;
 import com.telegrambotanimalshelter.listener.parts.requests.ReportRequestBlock;
 import com.telegrambotanimalshelter.listener.parts.requests.VolunteerAndPetOwnerChat;
@@ -50,6 +51,8 @@ public class CallbackChecker<A extends Animal, R extends Report, I extends AppIm
 
     private final VolunteerBlock volunteerBlock;
 
+    private final ChoosePetForPotentialOwnerBlock choosePetForPotentialOwnerBlock;
+
     public CallbackChecker(ContactRequestBlock<A, R> contactBlock,
                            ReportRequestBlock<A, R, I> reportRequestBlock,
                            VolunteerAndPetOwnerChat<A, R> chat,
@@ -58,7 +61,8 @@ public class CallbackChecker<A extends Animal, R extends Report, I extends AppIm
                            MessageSender<A> sender,
                            @Qualifier("dogShelter") Shelter dogShelter,
                            @Qualifier("catShelter") Shelter catShelter,
-                           VolunteerBlock volunteerBlock) {
+                           VolunteerBlock volunteerBlock,
+                           ChoosePetForPotentialOwnerBlock choosePetForPotentialOwnerBlock) {
         this.contactBlock = contactBlock;
         this.reportRequestBlock = reportRequestBlock;
         this.chat = chat;
@@ -68,6 +72,7 @@ public class CallbackChecker<A extends Animal, R extends Report, I extends AppIm
         this.catShelter = catShelter;
         this.sender = sender;
         this.volunteerBlock = volunteerBlock;
+        this.choosePetForPotentialOwnerBlock = choosePetForPotentialOwnerBlock;
     }
 
 
@@ -84,6 +89,12 @@ public class CallbackChecker<A extends Animal, R extends Report, I extends AppIm
         if ("_contacts".equals(data)) contactBlock.sendMessageToTakeName(chatId);
         if ("_report".equals(data)) reportRequestBlock.startReportFromPetOwner(chatId);
         if ("i_am_volunteer".equals(data)) volunteerBlock.startWorkWithVolunteer(chatId);
+
+        if ("_get_cat".equals(data) || "_get_dog".equals(data)) {
+            if(choosePetForPotentialOwnerBlock.sendNotShelteredAnimals(chatId, callbackQuery)) {
+
+            }
+        }
 
         if ("volunteer".equals(data)) {
             chat.startChat(chatId, "Здравствуйте. С вами хочет поговорить усыновитель. " + callbackQuery.from().firstName());

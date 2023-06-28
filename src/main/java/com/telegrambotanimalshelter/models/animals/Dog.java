@@ -23,6 +23,9 @@ public class Dog extends Animal {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "about_dog")
+    private String aboutDog;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(referencedColumnName = "id")
     private PetOwner petOwner;

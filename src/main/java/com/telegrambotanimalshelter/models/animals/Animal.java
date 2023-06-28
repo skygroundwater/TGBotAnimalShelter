@@ -20,8 +20,8 @@ public abstract class Animal {
     @Column(name = "nickname")
     private String nickName;
 
-    @Column(name = "is_chipped")
-    private boolean isChipped;
+    @Column(name = "sheltered")
+    private boolean sheltered;
 
     @Column(name = "reported")
     private boolean reported;
@@ -29,9 +29,9 @@ public abstract class Animal {
     @Column(name = "registered_at")
     private LocalDateTime registeredAt;
 
-    public Animal(String nickname, boolean isChipped, LocalDateTime registeredAt){
+    public Animal(String nickname, boolean sheltered, LocalDateTime registeredAt){
         this.nickName = nickname;
-        this.isChipped = isChipped;
+        this.sheltered = sheltered;
         this.registeredAt = registeredAt;
     }
 }
