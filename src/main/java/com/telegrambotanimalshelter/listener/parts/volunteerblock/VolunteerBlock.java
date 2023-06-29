@@ -30,7 +30,7 @@ public class VolunteerBlock<A extends Animal, R extends Report, I extends AppIma
 
     private final CacheKeeper<A, R> cacheKeeper;
 
-    private HashMap<Long, R> cachedCheckingReports;
+    private final HashMap<Long, R> cachedCheckingReports;
 
 
     public VolunteerBlock(VolunteerAndPetOwnerChat<A, R> chat,

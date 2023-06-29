@@ -175,9 +175,9 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
      * в кеш и в базу данных.
      */
     public void startReportFromPetOwner(Long chatId) {
-        PetOwner petOwner = cacheKeeper.getPetOwners().get(chatId);
+        PetOwner petOwner = cacheKeeper.getPetOwnersById().get(chatId);
         if (petOwner != null && petOwner.isHasPets()) {
-            cacheKeeper.getPetOwners().put(chatId,
+            cacheKeeper.getPetOwnersById().put(chatId,
                     petOwnersService.setPetOwnerReportRequest(chatId, true));
             chooseAnyPetMessages(chatId);
         } else sender.sendMessage(chatId, "У вас нет животных");
@@ -261,7 +261,7 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
      * @return true или false
      */
     public boolean checkReportRequestStatus(Long chatId) {
-        PetOwner petOwner = cacheKeeper.getPetOwners().get(chatId);
+        PetOwner petOwner = cacheKeeper.getPetOwnersById().get(chatId);
         if (petOwner != null) {
             return petOwner.isReportRequest();
         } else return false;
@@ -286,9 +286,8 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
     }
 
     private void breakReport(Long chatId) {
-        cacheKeeper.getPetOwners().put(chatId, petOwnersService.setPetOwnerReportRequest(chatId, false));
-        cacheKeeper.getActualReportByPetOwnerId().remove(chatId);
-        cacheKeeper.getActualPetsInReportProcess().remove(chatId);
+        cacheKeeper.getPetOwnersById().put(chatId,
+                petOwnersService.setPetOwnerReportRequest(chatId, false));
     }
 
     /**
@@ -312,10 +311,9 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
         if (report instanceof CatReport catReport) {
             CatImage catImage = (catReport.getImages().get(0));
             catReport.setCopiedPetOwnerId(chatId);
-            Cat cat = (Cat) cacheKeeper.getActualPetsInReportProcess().get(chatId);
+            Cat cat = (Cat) cacheKeeper.getActualPetsInReportProcess().remove(chatId);
             cat.setReported(true);
-            cacheKeeper.getActualPetsInReportProcess()
-                    .put(chatId, (A) cacheKeeper.getCatService().putPet(cat));
+            cacheKeeper.getCatService().putPet(cat);
             catReport.setCopiedAnimalId(cat.getId());
             catImage.setCat(cat);
             catImage.setCatReport(catReport);
@@ -325,10 +323,9 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
         } else if (report instanceof DogReport dogReport) {
             DogImage dogImage = (dogReport.getImages().get(0));
             dogReport.setCopiedPetOwnerId(chatId);
-            Dog dog = (Dog) cacheKeeper.getActualPetsInReportProcess().get(chatId);
+            Dog dog = (Dog) cacheKeeper.getActualPetsInReportProcess().remove(chatId);
             dog.setReported(true);
-            cacheKeeper.getActualPetsInReportProcess()
-                    .put(chatId, (A) cacheKeeper.getDogService().putPet(dog));
+            cacheKeeper.getDogService().putPet(dog);
             dogReport.setCopiedAnimalId(dog.getId());
             dogImage.setDog(dog);
             dogImage.setDogReport(dogReport);
