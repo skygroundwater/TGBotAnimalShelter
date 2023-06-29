@@ -1,9 +1,12 @@
 package com.telegrambotanimalshelter.listener.parts;
 
+import com.pengrad.telegrambot.model.CallbackQuery;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.telegrambotanimalshelter.enums.ShelterType;
+import com.telegrambotanimalshelter.listener.AnimalShelterBotListener;
+import com.telegrambotanimalshelter.listener.parts.checker.CallbackChecker;
 import com.telegrambotanimalshelter.models.Shelter;
 import com.telegrambotanimalshelter.models.animals.Animal;
 import com.telegrambotanimalshelter.utils.MessageSender;
@@ -26,6 +29,12 @@ public class BecomingPetOwnerPart {
         this.sender = sender;
     }
 
+    /** Метод выводит сообщение и предлагает ряд кнопок с информацией о том, что необходимо для опекунства животины. <br> <br>
+     * <i> список выводимых кнопок в этом методе --> {@link BecomingPetOwnerPart#becomingPartMarkup(Shelter)}  </i>
+     * @param chatId
+     * @param shelter
+     * @see CallbackChecker#callBackQueryConstantCheck(CallbackQuery, Shelter)
+     */
     public void welcome(Long chatId, Shelter shelter) {
         String shelterName = shelter.getName();
         if (shelterName.equals(dogShelterName)) {
@@ -37,34 +46,82 @@ public class BecomingPetOwnerPart {
         }
     }
 
+    /** При нажатии пользователя на кнопку <b> "Знакомство с животным" </b> ({@link BecomingPetOwnerPart#welcome(Long, Shelter)}) вызывается данный метод.
+     * @param chatId
+     * @param shelter
+     * @return Выводит информацию и список тех же кнопок
+     * @see CallbackChecker#callBackQueryConstantCheck(CallbackQuery, Shelter)
+     */
     public void acquaintanceWithPet(Long chatId, Shelter shelter) {
         sender.sendResponse(becomingPart(chatId, shelter.getAcquaintance(), becomingPartMarkup(shelter)));
     }
 
+    /** При нажатии пользователя на кнопку <b> "Документы от опекуна" </b> ({@link BecomingPetOwnerPart#welcome(Long, Shelter)}) вызывается данный метод.
+     * @param chatId
+     * @param shelter
+     * @return Выводит информацию и список тех же кнопок
+     * @see CallbackChecker#callBackQueryConstantCheck(CallbackQuery, Shelter)
+     */
     public void documentsForPetOwner(Long chatId, Shelter shelter) {
         sender.sendResponse(becomingPart(chatId, shelter.getContractDocuments(), becomingPartMarkup(shelter)));
     }
 
+    /** При нажатии пользователя на кнопку <b> "Транспортировка собаки" </b> ({@link BecomingPetOwnerPart#welcome(Long, Shelter)}) вызывается данный метод.
+     * @param chatId
+     * @param shelter
+     * @return Выводит информацию и список тех же кнопок
+     * @see CallbackChecker#callBackQueryConstantCheck(CallbackQuery, Shelter)
+     */
     public void transportation(Long chatId, Shelter shelter) {
         sender.sendResponse(becomingPart(chatId, shelter.getTransportation(), becomingPartMarkup(shelter)));
     }
 
+    /** При нажатии пользователя на кнопку <b> "Дом для щенка/котенка" </b> ({@link BecomingPetOwnerPart#welcome(Long, Shelter)}) вызывается данный метод.
+     * @param chatId
+     * @param shelter
+     * @return Выводит информацию и список тех же кнопок
+     * @see CallbackChecker#callBackQueryConstantCheck(CallbackQuery, Shelter)
+     */
     public void homeForLittlePet(Long chatId, Shelter shelter) {
         sender.sendResponse(becomingPart(chatId, shelter.getHomeForLittle(), becomingPartMarkup(shelter)));
     }
 
+    /** При нажатии пользователя на кнопку <b> "Дом для взрослого щенка/котенка" </b> ({@link BecomingPetOwnerPart#welcome(Long, Shelter)}) вызывается данный метод.
+     * @param chatId
+     * @param shelter
+     * @return Выводит информацию и список тех же кнопок
+     * @see CallbackChecker#callBackQueryConstantCheck(CallbackQuery, Shelter)
+     */
     public void homeForAdultPet(Long chatId, Shelter shelter) {
         sender.sendResponse(becomingPart(chatId, shelter.getHomeForAdult(), becomingPartMarkup(shelter)));
     }
 
+    /** При нажатии пользователя на кнопку <b> "Дом для собаки/котов с ограничениями" </b> ({@link BecomingPetOwnerPart#welcome(Long, Shelter)}) вызывается данный метод.
+     * @param chatId
+     * @param shelter
+     * @return Выводит информацию и список тех же кнопок
+     * @see CallbackChecker#callBackQueryConstantCheck(CallbackQuery, Shelter)
+     */
     public void homeForRestrictedPet(Long chatId, Shelter shelter) {
         sender.sendResponse(becomingPart(chatId, shelter.getHomeForRestricted(), becomingPartMarkup(shelter)));
     }
 
+    /** При нажатии пользователя на кнопку <b> "Причины отказа приюта отдать собаку/кота" </b> ({@link BecomingPetOwnerPart#welcome(Long, Shelter)}) вызывается данный метод.
+     * @param chatId
+     * @param shelter
+     * @return Выводит информацию и список тех же кнопок
+     * @see CallbackChecker#callBackQueryConstantCheck(CallbackQuery, Shelter)
+     */
     public void reasonsForRefusal(Long chatId, Shelter shelter) {
         sender.sendResponse(becomingPart(chatId, REASONS_FOR_REFUSAL, becomingPartMarkup(shelter)));
     }
 
+    /** При нажатии пользователя на кнопку <b> "Первое общение с собакой/кошкой" </b> ({@link BecomingPetOwnerPart#welcome(Long, Shelter)}) вызывается данный метод.
+     * @param chatId
+     * @param shelter
+     * @return Выводит информацию и список тех же кнопок
+     * @see CallbackChecker#callBackQueryConstantCheck(CallbackQuery, Shelter)
+     */
     public void firstMeetingWithDog(Long chatId, Shelter shelter) {
         sender.sendResponse(becomingPart(chatId, FIRST_MEETING_WITH_DOG, becomingPartMarkup(shelter)));
     }
@@ -73,6 +130,13 @@ public class BecomingPetOwnerPart {
         return new SendMessage(chatId, message).replyMarkup(inlineKeyboardMarkup);
     }
 
+    /**
+     * Кнопки, выводимые для взаимодействия с пользователем, из метода {@link BecomingPetOwnerPart#welcome(Long, Shelter)}
+     * @param shelter
+     * @see MessageSender
+     * @see BecomingPetOwnerPart
+     * @see CallbackChecker#callBackQueryConstantCheck(CallbackQuery, Shelter)
+     */
     private InlineKeyboardMarkup becomingPartMarkup(Shelter shelter) {
         String shelterName = shelter.getName();
         InlineKeyboardMarkup keyboard = null;
