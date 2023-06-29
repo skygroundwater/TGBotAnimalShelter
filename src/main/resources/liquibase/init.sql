@@ -1,6 +1,5 @@
---l liquibase formatted sql
-
--- changeset oleg:1
+--liquibase formatted sql
+--changeset oleg:1
 
 create table petowners
 (
