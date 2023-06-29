@@ -1,15 +1,18 @@
 package com.telegrambotanimalshelter.listener.parts.requests;
 
-import com.pengrad.telegrambot.model.CallbackQuery;
-import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
-import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
+import com.pengrad.telegrambot.request.SendMessage;
+import com.telegrambotanimalshelter.exceptions.NotFoundInDataBaseException;
 import com.telegrambotanimalshelter.listener.parts.keeper.CacheKeeper;
+import com.telegrambotanimalshelter.models.PetOwner;
 import com.telegrambotanimalshelter.models.animals.Animal;
 import com.telegrambotanimalshelter.models.animals.Cat;
 import com.telegrambotanimalshelter.models.animals.Dog;
 import com.telegrambotanimalshelter.models.reports.Report;
 import com.telegrambotanimalshelter.repositories.animals.CatsRepository;
 import com.telegrambotanimalshelter.repositories.animals.DogsRepository;
+import com.telegrambotanimalshelter.services.petownerservice.PetOwnersService;
+import com.telegrambotanimalshelter.services.petservice.CatsServiceImpl;
+import com.telegrambotanimalshelter.services.petservice.DogsServiceImpl;
 import com.telegrambotanimalshelter.utils.MessageSender;
 import org.springframework.stereotype.Component;
 
@@ -18,48 +21,48 @@ import java.util.List;
 @Component
 public class ChoosePetForPotentialOwnerBlock<A extends Animal, R extends Report> {
 
-
+    boolean sendNotShelteredAnimalsFlag = false;
     private final MessageSender<A> sender;
+
+    private final CatsServiceImpl catsService;
+    private final DogsServiceImpl dogsService;
     private final CatsRepository catsRepository;
 
     private final DogsRepository dogsRepository;
 
+    private final PetOwnersService petOwnersService;
+
     private final CacheKeeper<A, R> cacheKeeper;
 
     public ChoosePetForPotentialOwnerBlock(MessageSender<A> sender,
-                                           CatsRepository catsRepository,
-                                           DogsRepository dogsRepository, CacheKeeper<A, R> cacheKeeper) {
+                                           CatsServiceImpl catsService, DogsServiceImpl dogsService, CatsRepository catsRepository,
+                                           DogsRepository dogsRepository, PetOwnersService petOwnersService, CacheKeeper<A, R> cacheKeeper) {
         this.sender = sender;
+        this.catsService = catsService;
+        this.dogsService = dogsService;
         this.catsRepository = catsRepository;
         this.dogsRepository = dogsRepository;
+        this.petOwnersService = petOwnersService;
         this.cacheKeeper = cacheKeeper;
     }
 
-    public List<Cat> getAllNotShelteredCats() {
+    private List<Cat> getAllNotShelteredCats() {
         return catsRepository.findCatsBySheltered(false);
     }
 
-    public List<Dog> getAllNotShelteredDogs() {
+    private List<Dog> getAllNotShelteredDogs() {
         return dogsRepository.findDogsBySheltered(false);
     }
 
-    /**
-     * Отправляет пользователю информацию о всех животных в приюте
-     *
-     * @param chatId
-     * @param callbackQuery
-     */
-    public boolean sendNotShelteredAnimals(Long chatId, CallbackQuery callbackQuery) {
+    public boolean sendNotShelteredAnimals(String data, Long chatId) {
         StringBuilder builder = new StringBuilder();
-        boolean flag = false;
 
-
-        if (callbackQuery.data().equals("_get_cat")) {
+        if (data.equals("_get_cat")) {
             List<Cat> allNotShelteredCats = getAllNotShelteredCats();
             if (allNotShelteredCats.size() == 0) {
                 builder.append("На данный момент все животные нашли своих хозяев :)\n");
             } else {
-                flag = true;
+                sendNotShelteredAnimalsFlag = true;
                 builder.append("В нашем приюте проживают:\n");
                 for (Cat cats : allNotShelteredCats) {
                     builder.append(cats.getNickName()).append("\n");
@@ -72,7 +75,7 @@ public class ChoosePetForPotentialOwnerBlock<A extends Animal, R extends Report>
             if (allNotShelteredDogs.size() == 0) {
                 builder.append("На данный момент все животные нашли своих хозяев :)\n");
             } else {
-                flag = true;
+                sendNotShelteredAnimalsFlag = true;
                 builder.append("В нашем приюте проживают:\n");
                 for (Dog dogs : allNotShelteredDogs) {
                     builder.append(dogs.getNickName()).append("\n");
@@ -81,46 +84,70 @@ public class ChoosePetForPotentialOwnerBlock<A extends Animal, R extends Report>
             }
         }
         sender.sendMessage(chatId, builder.toString());
-        return flag;
+
+        return sendNotShelteredAnimalsFlag;
     }
 
-    // todo написать метод для поиска питомца после ввода имени в чате (только после вывода списка доступных в приюте животных)
-//    public Animal getAnimalByNameFromUserRequest(Message message, CallbackQuery callbackQuery) {
-//
-//        String nameInput = message.text().trim();
-//
-//        if (callbackQuery.data().equals("_get_cat")) {
-//            Cat cat = catsRepository.findCatsByNickName(nameInput);
-//            if (cat == null) {
-//                throw new NotFoundInDataBaseException("Кошки с таким именем нет в базе или задан неверный запрос");
-//            } else {
-//                getAnimalInfoMarkup(cat);
-//                return cat;
-//            }
-//        } else if (callbackQuery.data().equals("_get_dog")) {
-//            Dog dog = dogsRepository.findDogsByNickName(nameInput);
-//            if (dog == null) {
-//                throw new NotFoundInDataBaseException("Собаки с таким именем нет в базе или задан неверный запрос");
-//            } else {
-//                getAnimalInfoMarkup(dog);
-//                return dog;
-//            }
-//        } else
-//            throw new NotFoundInDataBaseException("Животного с таким именем нет в базе или задан неверный запрос");
-//    }
+    public Dog getDogByNameFromUserRequest(String name, Long chatId) {
+        SendMessage sendMessage;
 
-    private InlineKeyboardMarkup getAnimalInfoMarkup(Animal animal) {
-
-        return new InlineKeyboardMarkup(
-                new InlineKeyboardButton("Посмотреть информацию о будущем питомце: " + animal.getNickName())
-                        .callbackData("_animal_info"),
-                new InlineKeyboardButton("Посмотреть фото будущего питомца")
-                        .callbackData("_animal_photo"),
-                new InlineKeyboardButton("Приютить животное")
-                        .callbackData("_animal_approve"),
-                new InlineKeyboardButton("Назад к выбору приюта")
-                        .callbackData("back")
-        );
+        Dog dog = dogsRepository.findDogsByNickName(name);
+        if (dog == null) {
+            sendMessage = new SendMessage(chatId, "Собаки с таким именем нет в базе или задан неверный запрос");
+            sender.sendResponse(sendMessage);
+            throw new NotFoundInDataBaseException("Собаки с таким именем нет в базе или задан неверный запрос");
+        } else {
+            return dog;
+        }
     }
 
+    public Cat getCatByNameFromUserRequest(String name, Long chatId) {
+        SendMessage sendMessage;
+        Cat cat = catsRepository.findCatsByNickName(name);
+        if (cat == null) {
+            sendMessage = new SendMessage(chatId, "Кошки с таким именем нет в базе или задан неверный запрос");
+            sender.sendResponse(sendMessage);
+            throw new NotFoundInDataBaseException("Кошки с таким именем нет в базе или задан неверный запрос");
+        } else {
+            return cat;
+        }
+    }
+
+    public boolean checkNotShelteredAnimals() {
+        return sendNotShelteredAnimalsFlag;
+    }
+
+    public void getAnimalInfo(Animal animal, Long chatId) {
+        SendMessage sendMessage;
+        if (animal != null) {
+            String about = animal.getAbout();
+            sendMessage = new SendMessage(chatId, about);
+
+        } else {
+            sendMessage = new SendMessage(chatId, "Повторите запрос или свяжитесь с волонтером");
+        }
+        sender.sendResponse(sendMessage);
+    }
+
+    public void getPetFromShelter(Animal animal, Long chatId) {
+        PetOwner petOwner = petOwnersService.findPetOwner(chatId);
+        SendMessage sendMessage;
+
+        if (animal != null && petOwner != null) {
+            petOwner.setHasPets(true);
+            petOwnersService.putPetOwner(petOwner);
+
+            if (animal instanceof Cat) {
+                ((Cat) animal).setPetOwner(petOwner);
+                animal.setSheltered(true);
+                catsService.putPet((Cat) animal);
+            } else {
+                ((Dog) animal).setPetOwner(petOwner);
+                animal.setSheltered(true);
+                dogsService.putPet((Dog) animal);
+            }
+            sendMessage = new SendMessage(chatId, "Поздравляю, у вас появился новый друг " + animal.getNickName());
+            sender.sendResponse(sendMessage);
+        }
+    }
 }

@@ -52,6 +52,13 @@ public class CatsServiceImpl implements PetService<Cat> {
     }
 
     @Override
+    public Cat setPetOwner(Cat cat, PetOwner petOwner) {
+        cat.setSheltered(true);
+        cat.setPetOwner(petOwner);
+        return catsRepository.save(cat);
+    }
+
+    @Override
     public List<Cat> findPetsByPetOwner(PetOwner petOwner) {
         return catsRepository.findCatsByPetOwner(petOwner);
     }

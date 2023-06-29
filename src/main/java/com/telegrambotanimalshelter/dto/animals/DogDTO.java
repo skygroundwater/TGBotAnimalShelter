@@ -11,5 +11,5 @@ public class DogDTO {
 
     private String nickName;
     private LocalDateTime registeredAt;
-    private String aboutDog;
+    private String about;
 }

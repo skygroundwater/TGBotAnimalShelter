@@ -17,6 +17,8 @@ public interface PetService<T extends Animal> {
 
     T putPet(T pet);
 
+    T setPetOwner(T pet, PetOwner petOwner);
+
     List<T> findPetsByPetOwner(PetOwner petOwner);
 
     List<T> getAllPets();

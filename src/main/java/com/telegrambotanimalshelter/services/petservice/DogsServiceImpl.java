@@ -29,12 +29,12 @@ public class DogsServiceImpl implements PetService<Dog> {
     }
 
     @Override
-    public Dog postPet(Dog dog){
+    public Dog postPet(Dog dog) {
         return dogsRepository.save(dog);
     }
 
     @Override
-    public HttpStatus deletePet(Dog dog){
+    public HttpStatus deletePet(Dog dog) {
         dogsRepository.delete(dog);
         return HttpStatus.OK;
     }
@@ -46,10 +46,16 @@ public class DogsServiceImpl implements PetService<Dog> {
 
     @Override
     public Dog putPet(Dog dog) {
-        if(dog != null){
+        if (dog != null) {
             return dogsRepository.save(dog);
-        }
-        else throw new NotValidDataException("Отправьте информацию снова");
+        } else throw new NotValidDataException("Отправьте информацию снова");
+    }
+
+    @Override
+    public Dog setPetOwner(Dog dog, PetOwner petOwner) {
+        dog.setSheltered(true);
+        dog.setPetOwner(petOwner);
+        return dogsRepository.save(dog);
     }
 
     @Override

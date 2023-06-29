@@ -23,9 +23,6 @@ public class Dog extends Animal {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "about_dog")
-    private String aboutDog;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(referencedColumnName = "id")
     private PetOwner petOwner;
@@ -37,8 +34,8 @@ public class Dog extends Animal {
     @OneToMany(targetEntity = DogImage.class, mappedBy = "dog", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<DogImage> images;
 
-    public Dog(String nickname, boolean isChipped, LocalDateTime registeredAt, PetOwner petOwner) {
-        super(nickname, isChipped, registeredAt);
+    public Dog(String nickname, boolean isChipped, LocalDateTime registeredAt, PetOwner petOwner, String about) {
+        super(nickname, isChipped, registeredAt, about);
         this.petOwner = petOwner;
     }
 }

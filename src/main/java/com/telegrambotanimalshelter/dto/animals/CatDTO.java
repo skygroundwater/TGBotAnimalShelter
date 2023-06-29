@@ -11,5 +11,5 @@ public class CatDTO {
 
     private String nickName;
     private LocalDateTime registeredAt;
-    private String aboutCat;
+    private String about;
 }

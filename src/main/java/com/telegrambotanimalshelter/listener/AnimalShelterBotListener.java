@@ -41,7 +41,7 @@ public class AnimalShelterBotListener<A extends Animal, R extends Report, I exte
 
     private final ReportRequestBlock<A, R, I> reportRequestBlock;
 
-    private final ChoosePetForPotentialOwnerBlock<A, R > choosePetForPotentialOwnerBlock;
+    private final ChoosePetForPotentialOwnerBlock<A, R> choosePetForOwnerBlock;
 
     @Autowired
     public AnimalShelterBotListener(TelegramBot telegramBot,
@@ -51,7 +51,7 @@ public class AnimalShelterBotListener<A extends Animal, R extends Report, I exte
                                     MessageSender<A> sender,
                                     ReportRequestBlock<A, R, I> reportRequestBlock,
                                     ContactRequestBlock<A, R> contactBlock,
-                                    Logger logger, ChoosePetForPotentialOwnerBlock<A, R> choosePetForPotentialOwnerBlock) {
+                                    Logger logger, ChoosePetForPotentialOwnerBlock<A, R> choosePetForOwnerBlock) {
         this.telegramBot = telegramBot;
         this.chat = chat;
         this.volunteerBlock = volunteerBlock;
@@ -60,7 +60,7 @@ public class AnimalShelterBotListener<A extends Animal, R extends Report, I exte
         this.contactBlock = contactBlock;
         this.logger = logger;
         this.reportRequestBlock = reportRequestBlock;
-        this.choosePetForPotentialOwnerBlock = choosePetForPotentialOwnerBlock;
+        this.choosePetForOwnerBlock = choosePetForOwnerBlock;
     }
 
     @PostConstruct
@@ -120,7 +120,7 @@ public class AnimalShelterBotListener<A extends Animal, R extends Report, I exte
                             Далее проверяем, если это волонтёр, то сначала на то,
                             находится ли он в статусе проверяющего отчеты
                              */
-                            if(volunteerBlock.checkOfficeStatusForVolunteer(chatId)){
+                            if (volunteerBlock.checkOfficeStatusForVolunteer(chatId)) {
                                 volunteerBlock.reportCheckingByVolunteerBlock(chatId, message);
                             }
                             /*
@@ -137,6 +137,9 @@ public class AnimalShelterBotListener<A extends Animal, R extends Report, I exte
                                 chat.continueChat(null, chatId, text);
                             }
 
+                            if (choosePetForOwnerBlock.checkNotShelteredAnimals()) {
+                                checker.inputNameFromUser(chatId, text);
+                            }
                         }
                     });
         } catch (Exception e) {
