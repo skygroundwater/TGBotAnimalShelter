@@ -50,12 +50,12 @@ public class ReportNotificationTimer<A extends Animal> {
         for (PetOwner petOwner : cacheKeeper.getPetOwnersById().values()) {
             if (petOwner.isHasPets()) {
                 Long petOwnerId = petOwner.getId();
-                for (Dog dog : cacheKeeper.getDogs().get(petOwnerId)) {
+                for (Dog dog : cacheKeeper.getDogsByPetOwnerId().get(petOwnerId)) {
                     if (!dog.isReported()) {
                         stringBuilder.append(dog.getNickName()).append(" ");
                     }
                 }
-                for (Cat cat : cacheKeeper.getCats().get(petOwnerId)) {
+                for (Cat cat : cacheKeeper.getCatsByPetOwnerId().get(petOwnerId)) {
                     if (!cat.isReported()) {
                         stringBuilder.append(cat.getNickName()).append(" ");
                     }
