@@ -106,6 +106,7 @@ public class CallbackChecker<A extends Animal, R extends Report, I extends AppIm
             choosePetMenu(dogShelter);
         }
         if ("_animal_info".equals(data)) choosePetForPotentialOwnerBlock.getAnimalInfo(animal, chatId);
+        if ("_animal_photo".equals(data)) choosePetForPotentialOwnerBlock.getPetPhotoFromShelter(animal, chatId);
         if ("_animal_approve".equals(data)) choosePetForPotentialOwnerBlock.getPetFromShelter(animal, chatId);
 
         if ("volunteer".equals(data)) {

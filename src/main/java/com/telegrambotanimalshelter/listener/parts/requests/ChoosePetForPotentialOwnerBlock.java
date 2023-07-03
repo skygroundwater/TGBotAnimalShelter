@@ -1,6 +1,7 @@
 package com.telegrambotanimalshelter.listener.parts.requests;
 
 import com.pengrad.telegrambot.request.SendMessage;
+import com.pengrad.telegrambot.request.SendPhoto;
 import com.telegrambotanimalshelter.exceptions.NotFoundInDataBaseException;
 import com.telegrambotanimalshelter.listener.parts.keeper.CacheKeeper;
 import com.telegrambotanimalshelter.models.PetOwner;
@@ -11,6 +12,7 @@ import com.telegrambotanimalshelter.models.reports.Report;
 import com.telegrambotanimalshelter.repositories.animals.CatsRepository;
 import com.telegrambotanimalshelter.repositories.animals.DogsRepository;
 import com.telegrambotanimalshelter.services.petownerservice.PetOwnersService;
+import com.telegrambotanimalshelter.services.petphotoservice.PetPhotoService;
 import com.telegrambotanimalshelter.services.petservice.CatsServiceImpl;
 import com.telegrambotanimalshelter.services.petservice.DogsServiceImpl;
 import com.telegrambotanimalshelter.utils.MessageSender;
@@ -34,9 +36,11 @@ public class ChoosePetForPotentialOwnerBlock<A extends Animal, R extends Report>
 
     private final CacheKeeper<A, R> cacheKeeper;
 
+    private final PetPhotoService petPhotoService;
+
     public ChoosePetForPotentialOwnerBlock(MessageSender<A> sender,
                                            CatsServiceImpl catsService, DogsServiceImpl dogsService, CatsRepository catsRepository,
-                                           DogsRepository dogsRepository, PetOwnersService petOwnersService, CacheKeeper<A, R> cacheKeeper) {
+                                           DogsRepository dogsRepository, PetOwnersService petOwnersService, CacheKeeper<A, R> cacheKeeper, PetPhotoService petPhotoService) {
         this.sender = sender;
         this.catsService = catsService;
         this.dogsService = dogsService;
@@ -44,6 +48,7 @@ public class ChoosePetForPotentialOwnerBlock<A extends Animal, R extends Report>
         this.dogsRepository = dogsRepository;
         this.petOwnersService = petOwnersService;
         this.cacheKeeper = cacheKeeper;
+        this.petPhotoService = petPhotoService;
     }
 
     private List<Cat> getAllNotShelteredCats() {
@@ -127,6 +132,12 @@ public class ChoosePetForPotentialOwnerBlock<A extends Animal, R extends Report>
             sendMessage = new SendMessage(chatId, "Повторите запрос или свяжитесь с волонтером");
         }
         sender.sendResponse(sendMessage);
+    }
+
+    public void getPetPhotoFromShelter(Animal animal, Long chatId) {
+        petPhotoService.getPetPhoto(animal.getNickName());
+        SendPhoto sendPhoto = new SendPhoto(chatId, petPhotoService.getPetPhoto(animal.getNickName()));
+        sender.sendResponse(sendPhoto);
     }
 
     public void getPetFromShelter(Animal animal, Long chatId) {

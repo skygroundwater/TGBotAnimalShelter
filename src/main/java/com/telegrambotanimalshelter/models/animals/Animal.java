@@ -32,10 +32,15 @@ public abstract class Animal {
     @Column(name = "about")
     private String about;
 
-    public Animal(String nickname, boolean sheltered, LocalDateTime registeredAt, String about) {
+//    @Lob
+    @Column (name = "photo")
+    private byte[] photo;
+
+    public Animal(String nickname, boolean sheltered, LocalDateTime registeredAt, String about, byte[] photo) {
         this.nickName = nickname;
         this.sheltered = sheltered;
         this.registeredAt = registeredAt;
         this.about = about;
+        this.photo = photo;
     }
 }

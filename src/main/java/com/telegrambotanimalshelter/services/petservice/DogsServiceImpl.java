@@ -59,6 +59,24 @@ public class DogsServiceImpl implements PetService<Dog> {
     }
 
     @Override
+    public Dog findPetByName(String name) {
+        return dogsRepository.findDogsByNickName(name);
+    }
+
+    @Override
+    public void setPhoto(String name, byte[] photo) {
+        Dog dogsByNickName = dogsRepository.findDogsByNickName(name);
+        dogsByNickName.setPhoto(photo);
+        dogsRepository.save(dogsByNickName);
+    }
+
+    @Override
+    public byte[] getPhoto(String name) {
+        Dog dogsByNickName = dogsRepository.findDogsByNickName(name);
+        return dogsByNickName.getPhoto();
+    }
+
+    @Override
     public List<Dog> findPetsByPetOwner(PetOwner petOwner) {
         return dogsRepository.findDogsByPetOwner(petOwner);
     }

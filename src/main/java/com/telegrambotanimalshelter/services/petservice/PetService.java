@@ -19,6 +19,12 @@ public interface PetService<T extends Animal> {
 
     T setPetOwner(T pet, PetOwner petOwner);
 
+    void setPhoto(String name, byte[] photo);
+
+    byte[] getPhoto(String name);
+
+    T findPetByName(String name);
+
     List<T> findPetsByPetOwner(PetOwner petOwner);
 
     List<T> getAllPets();

@@ -113,7 +113,7 @@ public class AnimalShelterBotListener<A extends Animal, R extends Report, I exte
                             /*
                             Далее проверяем на статус записи отчета о питомце
                              */
-                            if (reportRequestBlock.checkReportRequestStatus(chatId)) {
+                            if (reportRequestBlock.checkReportRequestStatus(chatId)) { //todo NPE
                                 reportRequestBlock.reportFromPetOwnerBlock(chatId, message);
                             }
                             /*
