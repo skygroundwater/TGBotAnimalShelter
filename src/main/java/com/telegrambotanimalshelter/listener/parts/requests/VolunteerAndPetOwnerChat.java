@@ -44,7 +44,7 @@ public class VolunteerAndPetOwnerChat<A extends Animal, R extends Report> {
      * @return true или false
      */
     public boolean checkPetOwnerChatStatus(Long petOwnerId) {
-        PetOwner petOwner = cacheKeeper.getPetOwners().get(petOwnerId);
+        PetOwner petOwner = cacheKeeper.getPetOwnersById().get(petOwnerId);
         if (petOwner != null) {
             return petOwner.isVolunteerChat();
         } else return false;
@@ -82,7 +82,7 @@ public class VolunteerAndPetOwnerChat<A extends Animal, R extends Report> {
 
             //назначем поля усыновителю в базе данных и одновременно возвращаем его из метода
             PetOwner petOwner = petOwnersService.setPetOwnerToVolunteerChat(chatId, volunteer, true);
-            cacheKeeper.getPetOwners().put(petOwner.getId(), petOwner);
+            cacheKeeper.getPetOwnersById().put(petOwner.getId(), petOwner);
 
             //также назначаем поля волонтеру
             volunteer.setPetOwner(petOwner);
@@ -114,7 +114,7 @@ public class VolunteerAndPetOwnerChat<A extends Animal, R extends Report> {
             if (volunteerId == null) {
 
                 //находим усыновителя в базе
-                PetOwner petOwner = cacheKeeper.getPetOwners().get(petOwnerId);
+                PetOwner petOwner = cacheKeeper.getPetOwnersById().get(petOwnerId);
 
                 //через усыновителя находим волонтера и применяем метод из сервиса
                 Volunteer volunteer = cacheKeeper.getVolunteers()
@@ -125,7 +125,7 @@ public class VolunteerAndPetOwnerChat<A extends Animal, R extends Report> {
                 petOwner.setVolunteer(null);
 
                 //кладём усыновителя обратно в базу
-                cacheKeeper.getPetOwners().put(petOwner.getId(), petOwnersService.putPetOwner(petOwner));
+                cacheKeeper.getPetOwnersById().put(petOwner.getId(), petOwnersService.putPetOwner(petOwner));
                 sender.sendMessage(petOwner.getId(), "Вы закончили чат");
                 sender.sendMessage(volunteer.getId(), "Вы закончили чат");
 
@@ -138,7 +138,7 @@ public class VolunteerAndPetOwnerChat<A extends Animal, R extends Report> {
                 Volunteer volunteer = cacheKeeper.getVolunteers().get(volunteerId);
 
                 //через волонтера находим усыновителя в базе и применяем метод из сервиса
-                PetOwner petOwner = cacheKeeper.getPetOwners()
+                PetOwner petOwner = cacheKeeper.getPetOwnersById()
                         .put(volunteer.getPetOwner().getId(), petOwnersService.setPetOwnerToVolunteerChat(
                                 volunteer.getPetOwner().getId(), null, false));
 
@@ -191,7 +191,7 @@ public class VolunteerAndPetOwnerChat<A extends Animal, R extends Report> {
      * @hidden все данные о волонтере берутся из кеша
      */
     private void sendToVolunteer(Long petOwnerId, String msg) {
-        Volunteer volunteer = cacheKeeper.getPetOwners().get(petOwnerId).getVolunteer();
+        Volunteer volunteer = cacheKeeper.getPetOwnersById().get(petOwnerId).getVolunteer();
         if (volunteer != null) {
             sender.sendMessage(volunteer.getId(), msg);
         }

@@ -1,6 +1,5 @@
 package com.telegrambotanimalshelter.timer;
 
-import com.pengrad.telegrambot.TelegramBot;
 import com.telegrambotanimalshelter.listener.parts.keeper.CacheKeeper;
 import com.telegrambotanimalshelter.models.PetOwner;
 import com.telegrambotanimalshelter.models.animals.Animal;
@@ -16,14 +15,11 @@ import com.telegrambotanimalshelter.utils.MessageSender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.scheduling.annotation.Schedules;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 @Component
 public class ReportNotificationTimer<A extends Animal> {
@@ -51,7 +47,7 @@ public class ReportNotificationTimer<A extends Animal> {
     public void notificationToSendReport() {
         StringBuilder stringBuilder = new StringBuilder();
 
-        for (PetOwner petOwner : cacheKeeper.getPetOwners().values()) {
+        for (PetOwner petOwner : cacheKeeper.getPetOwnersById().values()) {
             if (petOwner.isHasPets()) {
                 Long petOwnerId = petOwner.getId();
                 for (Dog dog : cacheKeeper.getDogs().get(petOwnerId)) {
