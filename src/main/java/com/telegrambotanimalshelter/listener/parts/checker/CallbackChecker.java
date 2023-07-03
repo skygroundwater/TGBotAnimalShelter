@@ -53,9 +53,9 @@ public class CallbackChecker<A extends Animal, R extends Report, I extends AppIm
 
     private final MessageSender<A> sender;
 
-    private final VolunteerBlock volunteerBlock;
+    private final VolunteerBlock<A, R, I> volunteerBlock;
 
-    private final ChoosePetForPotentialOwnerBlock choosePetForPotentialOwnerBlock;
+    private final ChoosePetForPotentialOwnerBlock<A, R> choosePetForPotentialOwnerBlock;
 
     public CallbackChecker(ContactRequestBlock<A, R> contactBlock,
                            ReportRequestBlock<A, R, I> reportRequestBlock,
@@ -65,8 +65,8 @@ public class CallbackChecker<A extends Animal, R extends Report, I extends AppIm
                            MessageSender<A> sender,
                            @Qualifier("dogShelter") Shelter dogShelter,
                            @Qualifier("catShelter") Shelter catShelter,
-                           VolunteerBlock volunteerBlock,
-                           ChoosePetForPotentialOwnerBlock choosePetForPotentialOwnerBlock) {
+                           VolunteerBlock<A, R, I> volunteerBlock,
+                           ChoosePetForPotentialOwnerBlock<A, R> choosePetForPotentialOwnerBlock) {
         this.contactBlock = contactBlock;
         this.reportRequestBlock = reportRequestBlock;
         this.chat = chat;
