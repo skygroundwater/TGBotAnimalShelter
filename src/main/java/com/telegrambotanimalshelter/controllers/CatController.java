@@ -42,15 +42,12 @@ public class CatController {
         return ResponseEntity.ok(catsService.findPet(id));
     }
 
-    @DeleteMapping
-    public ResponseEntity<HttpStatus> deleteCat(@RequestBody CatDTO catDTO) {
-        return ResponseEntity.ok(catsService.deletePet(convertToCat(catDTO, modelMapper)));
-    }
 
     @PutMapping("/put")
     public ResponseEntity<Cat> putCat(@RequestBody CatDTO catDTO) {
         return ResponseEntity.ok(catsService.putPet(convertToCat(catDTO, modelMapper)));
     }
+
 
     @PutMapping(name = "/photo/{name}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Cat> uploadPetPhoto(@RequestParam String name,

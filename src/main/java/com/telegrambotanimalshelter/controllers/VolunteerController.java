@@ -1,6 +1,5 @@
-package com.telegrambotanimalshelter.listener.controllers;
+package com.telegrambotanimalshelter.controllers;
 
-import com.telegrambotanimalshelter.models.PetOwner;
 import com.telegrambotanimalshelter.models.Volunteer;
 import com.telegrambotanimalshelter.services.volunteerservice.VolunteerService;
 import io.swagger.v3.oas.annotations.Operation;
