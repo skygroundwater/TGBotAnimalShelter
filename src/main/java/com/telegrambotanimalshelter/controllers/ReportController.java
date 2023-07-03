@@ -1,7 +1,6 @@
-package com.telegrambotanimalshelter.listener.controllers;
+package com.telegrambotanimalshelter.controllers;
 
 import com.telegrambotanimalshelter.exceptions.NotValidDataException;
-import com.telegrambotanimalshelter.models.Volunteer;
 import com.telegrambotanimalshelter.models.animals.Animal;
 import com.telegrambotanimalshelter.models.animals.Cat;
 import com.telegrambotanimalshelter.models.animals.Dog;
