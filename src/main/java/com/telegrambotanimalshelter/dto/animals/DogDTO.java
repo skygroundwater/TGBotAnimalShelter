@@ -10,6 +10,6 @@ import java.time.LocalDateTime;
 public class DogDTO {
 
     private String nickName;
-    private boolean isChipped;
     private LocalDateTime registeredAt;
+    private String about;
 }
