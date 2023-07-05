@@ -122,9 +122,32 @@ public class CatController {
     }
 
 
+    @Operation(
+            summary = "Добавление фото кошки",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Фото кошки"),
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Фото добавлено",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    array = @ArraySchema(schema = @Schema(implementation = Cat.class))
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Фото не удалось добавить",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    array = @ArraySchema(schema = @Schema(implementation = Cat.class))
+                            )
+                    )
+            },
+            tags = "Кошки"
+    )
     @PutMapping(name = "/photo/{name}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Cat> uploadPetPhoto(@RequestParam String name,
-                                              @RequestParam MultipartFile file) {
+    public ResponseEntity<Cat> uploadPetPhoto(@Parameter(description = "Имя кошки") @RequestParam String name,
+                                              @Parameter(description = "Фото") @RequestParam MultipartFile file) {
 
         String originalFilename = file.getOriginalFilename();
 
