@@ -2,6 +2,7 @@ package com.telegrambotanimalshelter.controllers;
 
 import com.telegrambotanimalshelter.dto.animals.DogDTO;
 import com.telegrambotanimalshelter.exceptions.FileProcessingException;
+import com.telegrambotanimalshelter.models.animals.Cat;
 import com.telegrambotanimalshelter.models.animals.Dog;
 import com.telegrambotanimalshelter.services.petphotoservice.PetPhotoService;
 import com.telegrambotanimalshelter.services.petservice.PetService;
@@ -124,9 +125,32 @@ public class DogController {
         return ResponseEntity.ok(dogsService.putPet(convertToDog(dogDTO, modelMapper)));
     }
 
+    @Operation(
+            summary = "Добавление фото собаки",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Фото собаки"),
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Фото добавлено",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    array = @ArraySchema(schema = @Schema(implementation = Cat.class))
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Фото не удалось добавить",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    array = @ArraySchema(schema = @Schema(implementation = Cat.class))
+                            )
+                    )
+            },
+            tags = "Собаки"
+    )
     @PutMapping(name = "/photo/{name}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Dog> uploadPetPhoto(@RequestParam String name,
-                                              @RequestParam MultipartFile file) {
+    public ResponseEntity<Dog> uploadPetPhoto(@Parameter(description = "Имя собаки") @RequestParam String name,
+                                              @Parameter(description = "Фото") @RequestParam MultipartFile file) {
 
         String originalFilename = file.getOriginalFilename();
 
