@@ -18,7 +18,9 @@ import com.telegrambotanimalshelter.services.petservice.DogsServiceImpl;
 import com.telegrambotanimalshelter.utils.MessageSender;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
 import java.util.List;
+import java.util.Objects;
 
 @Component
 public class ChoosePetForPotentialOwnerBlock<A extends Animal, R extends Report> {
@@ -126,7 +128,7 @@ public class ChoosePetForPotentialOwnerBlock<A extends Animal, R extends Report>
         SendMessage sendMessage;
         if (animal != null) {
             String about = animal.getAbout();
-            sendMessage = new SendMessage(chatId, about);
+            sendMessage = new SendMessage(chatId, Objects.requireNonNullElse(about, "Информация отсутствует"));
 
         } else {
             sendMessage = new SendMessage(chatId, "Повторите запрос или свяжитесь с волонтером");
@@ -135,9 +137,14 @@ public class ChoosePetForPotentialOwnerBlock<A extends Animal, R extends Report>
     }
 
     public void getPetPhotoFromShelter(Animal animal, Long chatId) {
-        petPhotoService.getPetPhoto(animal.getNickName());
-        SendPhoto sendPhoto = new SendPhoto(chatId, petPhotoService.getPetPhoto(animal.getNickName()));
-        sender.sendResponse(sendPhoto);
+        File petPhoto = petPhotoService.getPetPhoto(animal, animal.getNickName());
+        if (petPhoto != null) {
+            SendPhoto sendPhoto = new SendPhoto(chatId, petPhoto);
+            sender.sendResponse(sendPhoto);
+        } else {
+            SendMessage sendMessage = new SendMessage(chatId, "Фото отсутствует");
+            sender.sendResponse(sendMessage);
+        }
     }
 
     public void getPetFromShelter(Animal animal, Long chatId) {
