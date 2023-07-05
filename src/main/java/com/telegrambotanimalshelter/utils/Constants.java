@@ -1,12 +1,24 @@
 package com.telegrambotanimalshelter.utils;
 
+import com.telegrambotanimalshelter.listener.AnimalShelterBotListener;
+import com.telegrambotanimalshelter.listener.parts.BecomingPetOwnerPart;
+import com.telegrambotanimalshelter.listener.parts.IntroductionPart;
 import com.telegrambotanimalshelter.models.reports.Report;
 
+/**
+ * Список констант для вывода сопровождающих информационных сообщений при взаимодействии пользователя с кнопками
+ * @see AnimalShelterBotListener
+ * @see IntroductionPart
+ * @see BecomingPetOwnerPart
+ */
 public class Constants<R extends Report> {
 
     public static String dogShelterName = "Halfway home";
 
     public static String catShelterName = "Ковчег";
+
+    public static String START_MESSAGE = "Здравствуйте! Вас приветствует сеть приютов для животных города Астаны. \n" +
+            "На данном этапе вы будете взаимодействовать с нашим ботом. Выберите к какому приюту вы бы хотели обратиться";
 
 
     public static String DOG_SHELTER_DESCRIPTION = """

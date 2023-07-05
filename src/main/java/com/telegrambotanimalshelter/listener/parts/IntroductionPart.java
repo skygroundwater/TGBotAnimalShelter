@@ -1,8 +1,11 @@
 package com.telegrambotanimalshelter.listener.parts;
 
+import com.pengrad.telegrambot.model.CallbackQuery;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.request.SendMessage;
+import com.telegrambotanimalshelter.listener.AnimalShelterBotListener;
+import com.telegrambotanimalshelter.listener.parts.checker.CallbackChecker;
 import com.telegrambotanimalshelter.models.Shelter;
 import com.telegrambotanimalshelter.models.animals.Animal;
 import com.telegrambotanimalshelter.utils.MessageSender;
@@ -26,22 +29,52 @@ public class IntroductionPart {
         this.sender = sender;
     }
 
+    /** Выводит сообщение, и предлагает ряд кнопок с информацией по выбранному приюту. <br> <br>
+     * <i> список выводимых кнопок в этом методе --> {@link IntroductionPart#introductionPartMarkup(Shelter)} </i>
+     * @param chatId
+     * @param shelter
+     * @see CallbackChecker#callBackQueryConstantCheck(CallbackQuery, Shelter)
+     */
     public void welcome(Long chatId, Shelter shelter) {
         sender.sendResponse(introductionPartMessage(chatId, "Здравствуйте!", introductionPartMarkup(shelter)));
     }
 
+    /** При нажатии пользователя на кнопку <b> "О приюте" </b> ({@link IntroductionPart#introductionPartMarkup(Shelter)}) вызывается данный метод.
+     * @param id
+     * @param shelter
+     * @return Выводит информацию и список тех же кнопок
+     * @see CallbackChecker#callBackQueryConstantCheck(CallbackQuery, Shelter)
+     */
     public void shelterInfo(Long id, Shelter shelter) {
         sender.sendResponse(introductionPartMessage(id, shelter.getDescription(), introductionPartMarkup(shelter)));
     }
 
+    /** При нажатии пользователя на кнопку <b> "Адрес, время работы" </b> ({@link IntroductionPart#introductionPartMarkup(Shelter)}) вызывается данный метод.
+     * @param id
+     * @param shelter
+     * @return Выводит информацию и список тех же кнопок
+     * @see CallbackChecker#callBackQueryConstantCheck(CallbackQuery, Shelter)
+     */
     public void shelterWorkingHours(Long id, Shelter shelter) {
         sender.sendResponse(introductionPartMessage(id, shelter.getWorkingHours(), introductionPartMarkup(shelter)));
     }
 
+    /** При нажатии пользователя на кнопку <b> "Пропуск в приют" </b> ({@link IntroductionPart#introductionPartMarkup(Shelter)}) вызывается данный метод.
+     * @param id
+     * @param shelter
+     * @return Выводит информацию и список тех же кнопок
+     * @see CallbackChecker#callBackQueryConstantCheck(CallbackQuery, Shelter)
+     */
     public void shelterPass(Long id, Shelter shelter) {
         sender.sendResponse(introductionPartMessage(id, shelter.getSecurityContacts(), introductionPartMarkup(shelter)));
     }
 
+    /** При нажатии пользователя на кнопку <b> "Техника безопасности" </b> ({@link IntroductionPart#introductionPartMarkup(Shelter)}) вызывается данный метод.
+     * @param id
+     * @param shelter
+     * @return Выводит информацию и список тех же кнопок
+     * @see CallbackChecker#callBackQueryConstantCheck(CallbackQuery, Shelter)
+     */
     public void shelterSafety(Long id, Shelter shelter) {
         sender.sendResponse(introductionPartMessage(id, shelter.getSafetyPrecautions(), introductionPartMarkup(shelter)));
     }
@@ -50,6 +83,13 @@ public class IntroductionPart {
         return new SendMessage(id, message).replyMarkup(inlineKeyboardMarkup);
     }
 
+    /**
+     * Кнопки, выводимые для взаимодействия с пользователем, из метода {@link IntroductionPart#welcome(Long, Shelter)}
+     * @param shelter
+     * @see MessageSender
+     * @see BecomingPetOwnerPart
+     * @see CallbackChecker#callBackQueryConstantCheck(CallbackQuery, Shelter)
+     */
     private InlineKeyboardMarkup introductionPartMarkup(Shelter shelter) {
         String shelterName = shelter.getName();
         return new InlineKeyboardMarkup(

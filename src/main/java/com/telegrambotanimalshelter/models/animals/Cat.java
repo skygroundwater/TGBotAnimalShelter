@@ -4,17 +4,16 @@ import com.telegrambotanimalshelter.models.PetOwner;
 import com.telegrambotanimalshelter.models.images.CatImage;
 import com.telegrambotanimalshelter.models.reports.CatReport;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(schema = "animals", name = "cats")
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 public class Cat extends Animal {
@@ -37,5 +36,18 @@ public class Cat extends Animal {
     public Cat(String nickname, boolean isChipped, LocalDateTime registeredAt, PetOwner petOwner, String about, byte[] photo) {
         super(nickname, isChipped, registeredAt, about, photo);
         this.petOwner = petOwner;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Cat cat)) return false;
+        return id.equals(cat.id) && petOwner.equals(cat.petOwner) && reports.equals(cat.reports) && images.equals(cat.images);
+    }
+
+    @Override
+    public int hashCode() {
+//        return Objects.hash(id, petOwner, reports, images);
+        return Objects.hash(id, reports, images);
     }
 }
