@@ -17,6 +17,9 @@ public class Constants<R extends Report> {
 
     public static String catShelterName = "Ковчег";
 
+    public static String START_MESSAGE = "Здравствуйте! Вас приветствует сеть приютов для животных города Астаны. \n" +
+            "На данном этапе вы будете взаимодействовать с нашим ботом. Выберите к какому приюту вы бы хотели обратиться";
+
 
     public static String DOG_SHELTER_DESCRIPTION = """
             Приют работает с 2019 года. В приоритете — спасение сбитых машинами и больных животных.\s

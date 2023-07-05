@@ -66,13 +66,13 @@ public class ContactRequestBlock<A extends Animal, R extends Report> {
      * уже животных из приюта или нет.
      * @see PetOwnersService#savePotentialPetOwner(Update)
      */
-    public void savePotentialPetOwner(Update update) {
+    public PetOwner savePotentialPetOwner(Update update) {
         if (checkUserForVolunteerStatus(update)) {
-            petOwnersService.savePotentialPetOwner(update);
-        }
+            return petOwnersService.savePotentialPetOwner(update);
+        }else return null;
     }
 
-    private boolean checkUserForVolunteerStatus(Update update) {
+    public boolean checkUserForVolunteerStatus(Update update) {
         return cacheKeeper.getVolunteers().get(update.message().from().id()) == null;
     }
 

@@ -16,6 +16,8 @@ import com.telegrambotanimalshelter.timer.ReportNotificationTimer;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
+import static com.telegrambotanimalshelter.utils.Constants.START_MESSAGE;
+
 @Component
 public class MessageSender<A extends Animal> {
 
@@ -33,17 +35,16 @@ public class MessageSender<A extends Animal> {
      * Принимает <b><u>chatId</b></u> пользователя и выводит приветственное сообщение при отправке пользователем команды <b><u>/start</b></u>. <br> <br>
      * Также бот выводит кнопки выбора одного из приютов: для кошек ({@link ShelterType#CATS_SHELTER}) или собак ({@link ShelterType#DOGS_SHELTER}) <br> <br>
      * <i> следующий этап взаимодействия с ботом --> {@link CallbackChecker#shelterMenu(Long, Shelter)}  </i>
+     *
      * @param chatId not null.
      */
-    public void sendStartMessage(Long chatId) {
-        SendMessage sendMessage = new SendMessage(chatId,
-                "Здравствуйте! Вас приветствует сеть приютов для животных города Астаны. \n" +
-                        "На данном этапе вы будете взаимодействовать с нашим ботом. Выберите к какому приюту вы бы хотели обратиться");
+    public SendResponse sendStartMessage(Long chatId) {
+        SendMessage sendMessage = new SendMessage(chatId, START_MESSAGE);
         sendMessage.replyMarkup(new InlineKeyboardMarkup(
                 new InlineKeyboardButton("Приют для собак ").callbackData("dog_shelter"),
                 new InlineKeyboardButton("Приют для кошек ").callbackData("cat_shelter"))
                 .addRow(new InlineKeyboardButton("Вы волонтёр").callbackData("i_am_volunteer")));
-        sendResponse(sendMessage);
+        return sendResponse(sendMessage);
     }
 
     public void sendMessage(Long chatId, String message) {
@@ -70,19 +71,22 @@ public class MessageSender<A extends Animal> {
     /**
      * Отправка сформированного ответа пользователю. <br>
      * Если формирование ответа прошло не успешно, бросается ошибка {@link Logger#error(String)}
+     *
      * @param sendMessage
      */
-    public void sendResponse(SendMessage sendMessage) {
+    public SendResponse sendResponse(SendMessage sendMessage) {
         sendMessage.parseMode(ParseMode.Markdown);
         SendResponse sendResponse = telegramBot.execute(sendMessage);
         if (!sendResponse.isOk()) {
             logger.error("Error during sending message: {}", sendResponse.message());
         }
+        return sendResponse;
     }
 
     /**
      * При срабатывании таймера ({@link ReportNotificationTimer#notificationToSendReport()} / {@link ReportNotificationTimer#checkLastReportFromPet(Long, Animal)})
      * бот отправляет пользователю сообщения о том, что ему необходимо отправить отчет по питомцу
+     *
      * @param chatId
      * @param petNames
      * @see CallbackChecker#callbackQueryCheck(CallbackQuery)
@@ -94,10 +98,10 @@ public class MessageSender<A extends Animal> {
         SendMessage sendMessage = new SendMessage(chatId, text);
         sendMessage.parseMode(ParseMode.Markdown);
 
-            sendMessage.replyMarkup(new InlineKeyboardMarkup(
-                    new InlineKeyboardButton("Отправить отчет")
-                            .callbackData("_report")
-            ));
+        sendMessage.replyMarkup(new InlineKeyboardMarkup(
+                new InlineKeyboardButton("Отправить отчет")
+                        .callbackData("_report")
+        ));
         sendResponse(sendMessage);
     }
 }

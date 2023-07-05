@@ -1,0 +1,11 @@
+{
+  "message" : {
+    "chat" : {
+      "id" : 1048847441,
+      "username" : "skywater",
+      "first_name" : "Олег",
+      "last_name" : null
+    },
+    "text": "%text%"
+  }
+}

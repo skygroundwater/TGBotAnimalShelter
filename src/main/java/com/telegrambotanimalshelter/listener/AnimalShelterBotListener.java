@@ -5,7 +5,6 @@ import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
 import com.telegrambotanimalshelter.listener.parts.checker.CallbackChecker;
-import com.telegrambotanimalshelter.listener.parts.requests.ChoosePetForPotentialOwnerBlock;
 import com.telegrambotanimalshelter.listener.parts.requests.ContactRequestBlock;
 import com.telegrambotanimalshelter.listener.parts.requests.ReportRequestBlock;
 import com.telegrambotanimalshelter.listener.parts.requests.VolunteerAndPetOwnerChat;
@@ -41,8 +40,6 @@ public class AnimalShelterBotListener<A extends Animal, R extends Report, I exte
 
     private final ReportRequestBlock<A, R, I> reportRequestBlock;
 
-    private final ChoosePetForPotentialOwnerBlock<A, R> choosePetForOwnerBlock;
-
     @Autowired
     public AnimalShelterBotListener(TelegramBot telegramBot,
                                     VolunteerAndPetOwnerChat<A, R> chat,
@@ -51,7 +48,7 @@ public class AnimalShelterBotListener<A extends Animal, R extends Report, I exte
                                     MessageSender<A> sender,
                                     ReportRequestBlock<A, R, I> reportRequestBlock,
                                     ContactRequestBlock<A, R> contactBlock,
-                                    Logger logger, ChoosePetForPotentialOwnerBlock<A, R> choosePetForOwnerBlock) {
+                                    Logger logger) {
         this.telegramBot = telegramBot;
         this.chat = chat;
         this.volunteerBlock = volunteerBlock;
@@ -60,7 +57,6 @@ public class AnimalShelterBotListener<A extends Animal, R extends Report, I exte
         this.contactBlock = contactBlock;
         this.logger = logger;
         this.reportRequestBlock = reportRequestBlock;
-        this.choosePetForOwnerBlock = choosePetForOwnerBlock;
     }
 
     @PostConstruct
@@ -79,7 +75,6 @@ public class AnimalShelterBotListener<A extends Animal, R extends Report, I exte
                            Производится проверка на наличие скрытых данных в обновлении от кнопок
                          */
                         if (update.callbackQuery() != null) {
-
                             /*
                           Если есть, то, используя отдельную сущность CallBackChecker осуществляем проверку этих данных
                              */
@@ -94,7 +89,7 @@ public class AnimalShelterBotListener<A extends Animal, R extends Report, I exte
                             /*
                             Сначала проверяем текст сообщения на команды
                              */
-                            if ("/start".equals(message.text())) {
+                            if ("/start".equals(text)) {
                                 contactBlock.savePotentialPetOwner(update);
                                 sender.sendStartMessage(chatId);
                             }
@@ -113,14 +108,14 @@ public class AnimalShelterBotListener<A extends Animal, R extends Report, I exte
                             /*
                             Далее проверяем на статус записи отчета о питомце
                              */
-                            if (reportRequestBlock.checkReportRequestStatus(chatId)) { //todo NPE
+                            if (reportRequestBlock.checkReportRequestStatus(chatId)) {
                                 reportRequestBlock.reportFromPetOwnerBlock(chatId, message);
                             }
                             /*
                             Далее проверяем, если это волонтёр, то сначала на то,
                             находится ли он в статусе проверяющего отчеты
                              */
-                            if (volunteerBlock.checkOfficeStatusForVolunteer(chatId)) {
+                            if(volunteerBlock.checkOfficeStatusForVolunteer(chatId)){
                                 volunteerBlock.reportCheckingByVolunteerBlock(chatId, message);
                             }
                             /*
@@ -135,10 +130,6 @@ public class AnimalShelterBotListener<A extends Animal, R extends Report, I exte
                              */
                             if (chat.checkVolunteer(chatId)) {
                                 chat.continueChat(null, chatId, text);
-                            }
-
-                            if (choosePetForOwnerBlock.checkNotShelteredAnimals()) {
-                                checker.inputNameFromUser(chatId, text);
                             }
                         }
                     });
