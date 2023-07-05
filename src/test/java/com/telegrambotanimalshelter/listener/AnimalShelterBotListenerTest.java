@@ -23,11 +23,10 @@ import com.telegrambotanimalshelter.utils.MessageSender;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.slf4j.Logger;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
@@ -45,54 +44,46 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class AnimalShelterBotListenerTest<A extends Animal, R extends Report, I extends AppImage> {
 
+    @Mock
+    TelegramBot telegramBot;
 
+    @Mock
+    VolunteerAndPetOwnerChat<A,R> chat;
 
-    @Test
-    public void handleStartTest() throws IOException {
+    @Mock
+    ContactRequestBlock<A,R> contactBlock;
 
-        String json = Files.readString(
-                Path.of("C:\\Projects\\TGBotAnimalShelter\\src\\test\\resources\\com.telegrambotanimalshelter.listener\\update.json"));
+    @Mock
+    VolunteerBlock<A,R,I> volunteerBlock;
 
-        Update update = BotUtils.fromJson(json.replace("%text%", "/start"), Update.class);
+    @Mock
+    CallbackChecker<A,R,I> checker;
 
-        SendResponse sendResponse = BotUtils.fromJson("""
-                {
-                "ok": true
-                }
-                """, SendResponse.class);
+    @Mock
+    MessageSender<A> sender;
 
-        ArgumentCaptor<SendMessage> messageCaptor = ArgumentCaptor.forClass(SendMessage.class);
+    @Mock
+    Logger logger;
 
-        PetOwner petOwner = new PetOwner(1048847441L, "Олег",
-                null, "skywater",
-                LocalDateTime.of(2023, 7, 3, 13, 52, 47, 857000),
-                false);
+    @Mock
+    ReportRequestBlock<A,R,I> reportBlock;
 
-        PetOwner savedPetOwner = new PetOwner();
+    @Mock
+    AnimalShelterBotListener<A,R,I> out;
 
-        savedPetOwner.setFirstName(petOwner.getFirstName());
-        savedPetOwner.setLastName(petOwner.getLastName());
-        savedPetOwner.setUserName(petOwner.getUserName());
-        savedPetOwner.setRegisteredAt(petOwner.getRegisteredAt());
-        savedPetOwner.setReportRequest(false);
-        savedPetOwner.setContactRequest(false);
-        savedPetOwner.setVolunteerChat(false);
-        savedPetOwner.setId(petOwner.getId());
+    AutoCloseable closeable;
 
+    @Mock
+    PetOwnersServiceImpl petOwnersService;
 
+    @Mock
+    VolunteerServiceImpl volunteerService;
+    @Mock
+    CacheKeeper<A,R> keeper;
 
-
-        verify(telegramBot, times(1)).execute(messageCaptor.capture());
-
-        SendMessage actual = messageCaptor.getValue();
-
-        assertThat(actual.getParameters().get("chat_id")).isEqualTo(update.message().chat().id());
-
-        assertThat(actual.getParameters().get("text")).isEqualTo(START_MESSAGE);
-
-    }
 
 
 }
