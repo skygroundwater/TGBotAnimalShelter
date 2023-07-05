@@ -21,21 +21,21 @@ public class ExceptionApiHandler {
     }
 
     @ExceptionHandler(NotValidDataException.class)
-    public ResponseEntity<String> BadRequestException(NotValidDataException e) {
+    public ResponseEntity<String> notValidDataException(NotValidDataException e) {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(e.getMessage());
     }
 
     @ExceptionHandler(NotFoundInDataBaseException.class)
-    public ResponseEntity<String> modelNotFoundException(NotFoundInDataBaseException e) {
+    public ResponseEntity<String> notFoundInDataBaseException(NotFoundInDataBaseException e) {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .body(e.getMessage());
     }
 
     @ExceptionHandler(EmptyDTOException.class)
-    public ResponseEntity<String> modelNotFoundException(EmptyDTOException e) {
+    public ResponseEntity<String> emptyDTOException(EmptyDTOException e) {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(e.getMessage());
