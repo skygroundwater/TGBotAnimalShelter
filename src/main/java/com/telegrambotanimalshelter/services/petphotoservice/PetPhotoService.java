@@ -1,6 +1,8 @@
 package com.telegrambotanimalshelter.services.petphotoservice;
 
 import com.telegrambotanimalshelter.exceptions.FileProcessingException;
+import com.telegrambotanimalshelter.models.animals.Animal;
+import com.telegrambotanimalshelter.models.animals.Cat;
 import com.telegrambotanimalshelter.services.petservice.CatsServiceImpl;
 import com.telegrambotanimalshelter.services.petservice.DogsServiceImpl;
 import jakarta.annotation.PostConstruct;
@@ -65,15 +67,23 @@ public class PetPhotoService {
         }
     }
 
-    public File getPetPhoto(String name) {
-        byte[] photo = catsService.getPhoto(name);
+    public File getPetPhoto(Animal animal, String name) {
+        byte[] photo;
+        if (animal instanceof Cat) {
+            photo = catsService.getPhoto(name);
+        } else {
+            photo = dogsService.getPhoto(name);
+        }
         File dataFile = new File(dataTempFilePath + "/" + name + "_photo");
 
-        try (FileOutputStream fos = new FileOutputStream(dataFile)) {
-            fos.write(photo);
-        } catch (IOException e) {
-            throw new FileProcessingException("Ошибка загрузки файла");
-        }
-        return dataFile;
+        if (photo != null) {
+            try (FileOutputStream fos = new FileOutputStream(dataFile)) {
+                fos.write(photo);
+            } catch (IOException e) {
+                throw new FileProcessingException("Ошибка загрузки файла");
+            }
+            return dataFile;
+        } else
+            return null;
     }
 }
