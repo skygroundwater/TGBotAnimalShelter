@@ -49,13 +49,13 @@ public class PetOwnersServiceImpl implements PetOwnersService {
     }
 
     @Override
-    public void savePotentialPetOwner(Update update) {
+    public PetOwner savePotentialPetOwner(Update update) {
         Message message = update.message();
         Chat chat = message.chat();
         try {
-            findPetOwner(chat.id());
+            return findPetOwner(chat.id());
         } catch (NotFoundInDataBaseException e) {
-            postPetOwner(new PetOwner(chat.id(), chat.firstName(), chat.lastName(),
+            return postPetOwner(new PetOwner(chat.id(), chat.firstName(), chat.lastName(),
                     chat.username(), LocalDateTime.now(), false));
         }
     }

@@ -16,7 +16,7 @@ public interface PetOwnersService {
 
     PetOwner putPetOwner(PetOwner petOwner);
 
-    void savePotentialPetOwner(Update update);
+    PetOwner savePotentialPetOwner(Update update);
 
     PetOwner setPetOwnerReportRequest(Long id, boolean trueOrFalse);
 

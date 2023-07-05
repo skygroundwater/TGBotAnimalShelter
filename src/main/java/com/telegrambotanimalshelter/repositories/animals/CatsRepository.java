@@ -11,5 +11,7 @@ import java.util.List;
 public interface CatsRepository extends JpaRepository<Cat, Long> {
 
     List<Cat> findCatsByPetOwner(PetOwner petOwner);
+    List<Cat> findCatsBySheltered(boolean isSheltered);
+    Cat findCatsByNickName(String name);
 
 }

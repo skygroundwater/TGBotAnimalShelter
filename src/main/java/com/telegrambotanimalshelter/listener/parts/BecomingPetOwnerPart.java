@@ -164,6 +164,8 @@ public class BecomingPetOwnerPart {
                             .callbackData("_volunteer"))
                     .addRow(new InlineKeyboardButton("Запишем ваши контактные данные")
                             .callbackData("_contacts"))
+                    .addRow(new InlineKeyboardButton("Взять собаку из приюта")
+                            .callbackData("_get_dog"))
                     .addRow(new InlineKeyboardButton("Назад к выбору приюта")
                             .callbackData("back"));
         } else if (shelter.getShelterType().equals(ShelterType.CATS_SHELTER)) {
@@ -186,6 +188,8 @@ public class BecomingPetOwnerPart {
                             .callbackData("volunteer"))
                     .addRow(new InlineKeyboardButton("Запишем ваши контактные данные")
                             .callbackData("_contacts"))
+                    .addRow(new InlineKeyboardButton("Взять кошку из приюта")
+                            .callbackData("_get_cat"))
                     .addRow(new InlineKeyboardButton("Назад к выбору приюта")
                             .callbackData("back"));
         }

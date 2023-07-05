@@ -9,12 +9,15 @@ import com.telegrambotanimalshelter.enums.ShelterType;
 import com.telegrambotanimalshelter.listener.AnimalShelterBotListener;
 import com.telegrambotanimalshelter.listener.parts.BecomingPetOwnerPart;
 import com.telegrambotanimalshelter.listener.parts.IntroductionPart;
+import com.telegrambotanimalshelter.listener.parts.requests.ChoosePetForPotentialOwnerBlock;
 import com.telegrambotanimalshelter.listener.parts.requests.ContactRequestBlock;
 import com.telegrambotanimalshelter.listener.parts.requests.ReportRequestBlock;
 import com.telegrambotanimalshelter.listener.parts.requests.VolunteerAndPetOwnerChat;
 import com.telegrambotanimalshelter.listener.parts.volunteerblock.VolunteerBlock;
 import com.telegrambotanimalshelter.models.Shelter;
 import com.telegrambotanimalshelter.models.animals.Animal;
+import com.telegrambotanimalshelter.models.animals.Cat;
+import com.telegrambotanimalshelter.models.animals.Dog;
 import com.telegrambotanimalshelter.models.images.AppImage;
 import com.telegrambotanimalshelter.models.reports.Report;
 import com.telegrambotanimalshelter.utils.MessageSender;
@@ -34,6 +37,8 @@ import static com.telegrambotanimalshelter.utils.Constants.dogShelterName;
 @Component
 public class CallbackChecker<A extends Animal, R extends Report, I extends AppImage> {
 
+    private int choosePetMenu = 0;
+    private Animal animal;
     private final ContactRequestBlock<A, R> contactBlock;
 
     private final ReportRequestBlock<A, R, I> reportRequestBlock;
@@ -52,6 +57,8 @@ public class CallbackChecker<A extends Animal, R extends Report, I extends AppIm
 
     private final VolunteerBlock<A, R, I> volunteerBlock;
 
+    private final ChoosePetForPotentialOwnerBlock<A, R> choosePetForPotentialOwnerBlock;
+
     public CallbackChecker(ContactRequestBlock<A, R> contactBlock,
                            ReportRequestBlock<A, R, I> reportRequestBlock,
                            VolunteerAndPetOwnerChat<A, R> chat,
@@ -60,7 +67,8 @@ public class CallbackChecker<A extends Animal, R extends Report, I extends AppIm
                            MessageSender<A> sender,
                            @Qualifier("dogShelter") Shelter dogShelter,
                            @Qualifier("catShelter") Shelter catShelter,
-                           VolunteerBlock<A, R, I> volunteerBlock) {
+                           VolunteerBlock<A, R, I> volunteerBlock,
+                           ChoosePetForPotentialOwnerBlock<A, R> choosePetForPotentialOwnerBlock) {
         this.contactBlock = contactBlock;
         this.reportRequestBlock = reportRequestBlock;
         this.chat = chat;
@@ -70,6 +78,7 @@ public class CallbackChecker<A extends Animal, R extends Report, I extends AppIm
         this.catShelter = catShelter;
         this.sender = sender;
         this.volunteerBlock = volunteerBlock;
+        this.choosePetForPotentialOwnerBlock = choosePetForPotentialOwnerBlock;
     }
 
     /** Если пользователь юзает одну из предложенных ботом кнопку, метод принимает параметр <b>callbackQuery</b> ({@link Update#callbackQuery()})
@@ -81,14 +90,34 @@ public class CallbackChecker<A extends Animal, R extends Report, I extends AppIm
      * @see MessageSender
      */
     public void callbackQueryCheck(CallbackQuery callbackQuery) {
+
         String data = callbackQuery.data();
         Long chatId = callbackQuery.from().id();
+
         if ("cat_shelter".equals(data)) shelterMenu(chatId, catShelter);
         if ("dog_shelter".equals(data)) shelterMenu(chatId, dogShelter);
-        if ("back".equals(data)) sender.sendStartMessage(chatId);
+
+        if ("back".equals(data)) {
+            choosePetMenu = 0;
+            sender.sendStartMessage(chatId);
+        }
+
         if ("_contacts".equals(data)) contactBlock.sendMessageToTakeName(chatId);
         if ("_report".equals(data)) reportRequestBlock.startReportFromPetOwner(chatId);
         if ("i_am_volunteer".equals(data)) volunteerBlock.startWorkWithVolunteer(chatId);
+
+        if ("_get_cat".equals(data)) {
+            choosePetForPotentialOwnerBlock.sendNotShelteredAnimals(data, chatId);
+            choosePetMenu(catShelter);
+        }
+        if ("_get_dog".equals(data)) {
+            choosePetForPotentialOwnerBlock.sendNotShelteredAnimals(data, chatId);
+            choosePetMenu(dogShelter);
+        }
+        if ("_animal_info".equals(data)) choosePetForPotentialOwnerBlock.getAnimalInfo(animal, chatId);
+        if ("_animal_photo".equals(data)) choosePetForPotentialOwnerBlock.getPetPhotoFromShelter(animal, chatId);
+        if ("_animal_approve".equals(data)) choosePetForPotentialOwnerBlock.getPetFromShelter(animal, chatId);
+
         if ("volunteer".equals(data)) {
             chat.startChat(chatId, "Здравствуйте. С вами хочет поговорить усыновитель. " + callbackQuery.from().firstName());
         }
@@ -164,4 +193,49 @@ public class CallbackChecker<A extends Animal, R extends Report, I extends AppIm
                 .addRow(new InlineKeyboardButton("Прислать отчет о питомце").callbackData("_report"))
                 .addRow(new InlineKeyboardButton("Обратиться к волонтеру").callbackData("volunteer"));
     }
+
+    private void choosePetMenu(Shelter shelter) {
+        if (shelter.getShelterType().equals(ShelterType.DOGS_SHELTER)) {
+            choosePetMenu = 1;
+        } else if (shelter.getShelterType().equals(ShelterType.CATS_SHELTER)) {
+            choosePetMenu = 2;
+        }
+    }
+
+    private InlineKeyboardMarkup getAnimalInfoMarkup() {
+        return new InlineKeyboardMarkup(
+                new InlineKeyboardButton("Посмотреть информацию о будущем питомце")
+                        .callbackData("_animal_info"))
+                .addRow(new InlineKeyboardButton("Посмотреть фото будущего питомца").callbackData("_animal_photo"))
+                .addRow(new InlineKeyboardButton("Приютить животное").callbackData("_animal_approve"))
+                .addRow(new InlineKeyboardButton("Назад к выбору приюта").callbackData("back"));
+    }
+
+    public void inputNameFromUser(Long chatId, String text) {
+        SendMessage sendMessage;
+
+        switch (choosePetMenu) {
+            case (1) -> {
+                Dog dog = choosePetForPotentialOwnerBlock.getDogByNameFromUserRequest(text, chatId); //todo запрос по имени
+                animal = dog;
+                sendMessage = new SendMessage(chatId, dog.getNickName());
+                sendMessage.replyMarkup(getAnimalInfoMarkup());
+                sender.sendResponse(sendMessage);
+            }
+
+            case (2) -> {
+                Cat cat = choosePetForPotentialOwnerBlock.getCatByNameFromUserRequest(text, chatId); //todo запрос по имени
+                animal = cat;
+                sendMessage = new SendMessage(chatId, cat.getNickName());
+                sendMessage.replyMarkup(getAnimalInfoMarkup());
+                sender.sendResponse(sendMessage);
+            }
+            default -> {
+                choosePetMenu = 0;
+                animal = null;
+            }
+        }
+    }
+
+
 }

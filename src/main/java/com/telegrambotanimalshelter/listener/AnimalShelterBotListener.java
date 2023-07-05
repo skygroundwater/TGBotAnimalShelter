@@ -75,7 +75,6 @@ public class AnimalShelterBotListener<A extends Animal, R extends Report, I exte
                            Производится проверка на наличие скрытых данных в обновлении от кнопок
                          */
                         if (update.callbackQuery() != null) {
-
                             /*
                           Если есть, то, используя отдельную сущность CallBackChecker осуществляем проверку этих данных
                              */
@@ -90,7 +89,7 @@ public class AnimalShelterBotListener<A extends Animal, R extends Report, I exte
                             /*
                             Сначала проверяем текст сообщения на команды
                              */
-                            if ("/start".equals(message.text())) {
+                            if ("/start".equals(text)) {
                                 contactBlock.savePotentialPetOwner(update);
                                 sender.sendStartMessage(chatId);
                             }
@@ -132,7 +131,6 @@ public class AnimalShelterBotListener<A extends Animal, R extends Report, I exte
                             if (chat.checkVolunteer(chatId)) {
                                 chat.continueChat(null, chatId, text);
                             }
-
                         }
                     });
         } catch (Exception e) {
