@@ -81,6 +81,9 @@ public class PetOwner {
         this.registeredAt = registeredAt;
         this.userName = userName;
         this.hasPets = hasPets;
+        this.contactRequest = false;
+        this.reportRequest = false;
+        this.volunteerChat = false;
     }
 
     @Override
