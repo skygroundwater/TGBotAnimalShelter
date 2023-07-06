@@ -4,6 +4,7 @@ import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.request.ReplyKeyboardMarkup;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.request.SendPhoto;
+import com.telegrambotanimalshelter.listener.parts.keeper.Cache;
 import com.telegrambotanimalshelter.listener.parts.keeper.CacheKeeper;
 import com.telegrambotanimalshelter.listener.parts.requests.VolunteerAndPetOwnerChat;
 import com.telegrambotanimalshelter.models.Volunteer;
@@ -42,6 +43,9 @@ public class VolunteerBlock<A extends Animal, R extends Report, I extends AppIma
         this.cachedCheckingReports = new HashMap<>();
     }
 
+    private Cache<A, R> cache(){
+        return cacheKeeper.getCache();
+    }
 
     public void reportCheckingByVolunteerBlock(Long chatId, Message message) {
         String text = message.text();
@@ -58,10 +62,10 @@ public class VolunteerBlock<A extends Animal, R extends Report, I extends AppIma
 
     public void startWorkWithVolunteer(Long chatId) {
         if (checkVolunteer(chatId)) {
-            Volunteer volunteer = cacheKeeper.getVolunteers().get(chatId);
+            Volunteer volunteer = cache().getVolunteers().get(chatId);
             if (volunteer != null) {
                 volunteer.setInOffice(true);
-                cacheKeeper.getVolunteers().put(chatId, volunteer);
+                cache().getVolunteers().put(chatId, volunteer);
                 sender.sendResponse(new SendMessage(chatId,
                         "Здравствуйте, " + volunteer.getFirstName() + ". Спасибо, что помогаете нам, мы очень это ценим")
                         .replyMarkup(volunteerKeyboardInOffice()));
@@ -70,7 +74,7 @@ public class VolunteerBlock<A extends Animal, R extends Report, I extends AppIma
     }
 
     public boolean checkOfficeStatusForVolunteer(Long chatId) {
-        Volunteer volunteer = cacheKeeper.getVolunteers().get(chatId);
+        Volunteer volunteer = cache().getVolunteers().get(chatId);
         if (volunteer != null) {
             return volunteer.isInOffice();
         } else return false;
@@ -117,7 +121,7 @@ public class VolunteerBlock<A extends Animal, R extends Report, I extends AppIma
     }
 
     private boolean checkVolunteer(Long chatId) {
-        Volunteer volunteer = cacheKeeper.getVolunteers().get(chatId);
+        Volunteer volunteer = cache().getVolunteers().get(chatId);
         if (volunteer != null) {
             if (volunteer.isFree()) {
                 return true;
@@ -128,15 +132,15 @@ public class VolunteerBlock<A extends Animal, R extends Report, I extends AppIma
     }
 
     private void checkNoneCheckedReportsFromCacheKeeper(Long chatId) {
-        List<R> reports = cacheKeeper.getCashedReports()
+        List<R> reports = cache().getCashedReports()
                 .stream().filter(r -> !r.isCheckedByVolunteer()).toList();
         if (reports.isEmpty()) {
             sender.sendResponse(new SendMessage(chatId,
                     "На данный момент отчетов усыновители не предоставляли")
                     .replyMarkup(volunteerKeyboardInOffice()));
-            Volunteer volunteer = cacheKeeper.getVolunteers().get(chatId);
+            Volunteer volunteer = cache().getVolunteers().get(chatId);
             volunteer.setCheckingReports(false);
-            cacheKeeper.getVolunteers().put(chatId, volunteer);
+            cache().getVolunteers().put(chatId, volunteer);
         } else {
             for (R report : reports) {
                 if (!report.isCheckedByVolunteer()) {
@@ -156,7 +160,7 @@ public class VolunteerBlock<A extends Animal, R extends Report, I extends AppIma
     private void sendReportPhoto(Long chatId, R report) {
         SendPhoto sendPhoto;
         if (report instanceof CatReport catReport) {
-            Optional<CatImage> catImage = cacheKeeper.getCatImages()
+            Optional<CatImage> catImage = cache().getCatImages()
                     .stream()
                     .filter(image -> image.getCopiedReportId()
                             .equals(catReport.getId()))
@@ -166,7 +170,7 @@ public class VolunteerBlock<A extends Animal, R extends Report, I extends AppIma
                 sender.sendResponse(sendPhoto);
             }
         } else if (report instanceof DogReport dogReport) {
-            Optional<DogImage> dogImage = cacheKeeper.getDogImages().stream()
+            Optional<DogImage> dogImage = cache().getDogImages().stream()
                     .filter(image -> image.getCopiedReportId()
                             .equals(dogReport.getId())).findFirst();
             if (dogImage.isPresent()) {

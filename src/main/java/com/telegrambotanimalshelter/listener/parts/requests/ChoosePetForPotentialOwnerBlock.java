@@ -74,7 +74,6 @@ public class ChoosePetForPotentialOwnerBlock<A extends Animal, R extends Report>
                 }
                 builder.append("Информацию о каком животном вы бы хотели посмотреть?\n");
             }
-
         } else {
             List<Dog> allNotShelteredDogs = getAllNotShelteredDogs();
             if (allNotShelteredDogs.size() == 0) {
