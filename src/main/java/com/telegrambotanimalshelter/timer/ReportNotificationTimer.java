@@ -1,5 +1,6 @@
 package com.telegrambotanimalshelter.timer;
 
+import com.telegrambotanimalshelter.listener.parts.keeper.Cache;
 import com.telegrambotanimalshelter.listener.parts.keeper.CacheKeeper;
 import com.telegrambotanimalshelter.models.PetOwner;
 import com.telegrambotanimalshelter.models.animals.Animal;
@@ -43,19 +44,23 @@ public class ReportNotificationTimer<A extends Animal> {
         this.cacheKeeper = cacheKeeper;
     }
 
+    private Cache<A, ? extends Report> cache(){
+        return cacheKeeper.getCache();
+    }
+
     @Scheduled(cron = "0 0 8 * * *")
     public void notificationToSendReport() {
         StringBuilder stringBuilder = new StringBuilder();
 
-        for (PetOwner petOwner : cacheKeeper.getPetOwnersById().values()) {
+        for (PetOwner petOwner : cache().getPetOwnersById().values()) {
             if (petOwner.isHasPets()) {
                 Long petOwnerId = petOwner.getId();
-                for (Dog dog : cacheKeeper.getDogsByPetOwnerId().get(petOwnerId)) {
+                for (Dog dog : cache().getDogsByPetOwnerId().get(petOwnerId)) {
                     if (!dog.isReported()) {
                         stringBuilder.append(dog.getNickName()).append(" ");
                     }
                 }
-                for (Cat cat : cacheKeeper.getCatsByPetOwnerId().get(petOwnerId)) {
+                for (Cat cat : cache().getCatsByPetOwnerId().get(petOwnerId)) {
                     if (!cat.isReported()) {
                         stringBuilder.append(cat.getNickName()).append(" ");
                     }

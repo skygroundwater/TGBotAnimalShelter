@@ -1,5 +1,6 @@
 package com.telegrambotanimalshelter.listener.keeper;
 
+import com.telegrambotanimalshelter.listener.parts.keeper.Cache;
 import com.telegrambotanimalshelter.listener.parts.keeper.CacheKeeper;
 import com.telegrambotanimalshelter.models.PetOwner;
 import com.telegrambotanimalshelter.models.Volunteer;
@@ -45,19 +46,10 @@ public class CacheKeeperTest<A extends Animal, R extends Report> {
     private ReportService<DogReport, Dog, DogImage> dogReportService;
     @Mock
     private FileService<? extends AppImage> fileService;
+    @Mock
+    private Cache<A, R> cache;
     @InjectMocks
     private CacheKeeper<A, R> keeper;
-    private Map<Long, PetOwner> petOwnersById = new HashMap<>();
-    private Map<Long, Volunteer> volunteers = new HashMap<>();
-    private Map<Long, List<Cat>> catsByPetOwnerId = new HashMap<>();
-    private Map<Long, List<Dog>> dogsByPetOwnerId = new HashMap<>();
-    private Map<Long, List<CatReport>> catReportsByCatId = new HashMap<>();
-    private Map<Long, List<DogReport>> dogReportsByDogId = new HashMap<>();
-    private List<R> cashedReports = new ArrayList<>();
-    private Map<Long, R> actualReportByPetOwnerId = new HashMap<>();
-    private Map<Long, A> actualPetsInReportProcess = new HashMap<>();
-    private List<CatImage> catImages = new ArrayList<>();
-    private List<DogImage> dogImages = new ArrayList<>();
 
 
 }

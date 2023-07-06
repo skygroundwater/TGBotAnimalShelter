@@ -4,6 +4,7 @@ import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.request.KeyboardButton;
 import com.pengrad.telegrambot.model.request.ReplyKeyboardMarkup;
 import com.pengrad.telegrambot.request.SendMessage;
+import com.telegrambotanimalshelter.listener.parts.keeper.Cache;
 import com.telegrambotanimalshelter.listener.parts.keeper.CacheKeeper;
 import com.telegrambotanimalshelter.models.PetOwner;
 import com.telegrambotanimalshelter.models.animals.Animal;
@@ -64,6 +65,10 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
         this.fileService = fileService;
         this.cacheKeeper = cacheKeeper;
         this.cashedNoneReportedPetNames = new HashMap<>();
+    }
+
+    private Cache<A, R> cache(){
+        return cacheKeeper.getCache();
     }
 
     /**
@@ -175,9 +180,9 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
      * в кеш и в базу данных.
      */
     public void startReportFromPetOwner(Long chatId) {
-        PetOwner petOwner = cacheKeeper.getPetOwnersById().get(chatId);
+        PetOwner petOwner = cache().getPetOwnersById().get(chatId);
         if (petOwner != null && petOwner.isHasPets()) {
-            cacheKeeper.getPetOwnersById().put(chatId,
+            cache().getPetOwnersById().put(chatId,
                     petOwnersService.setPetOwnerReportRequest(chatId, true));
             chooseAnyPetMessages(chatId);
         } else sender.sendMessage(chatId, "У вас нет животных");
@@ -228,7 +233,7 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
             /*
             берем активную сущность отчета пользователя из кеша
              */
-            R report = cacheKeeper.getActualReportByPetOwnerId().get(chatId);
+            R report = cache().getActualReportByPetOwnerId().get(chatId);
             /*
             осуществляем проверку сущности отчета на соответствие
             отчета для кота или же для собаки.
@@ -261,7 +266,7 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
      * @return true или false
      */
     public boolean checkReportRequestStatus(Long chatId) {
-        PetOwner petOwner = cacheKeeper.getPetOwnersById().get(chatId);
+        PetOwner petOwner = cache().getPetOwnersById().get(chatId);
         if (petOwner != null) {
             return petOwner.isReportRequest();
         } else return false;
@@ -276,7 +281,7 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
      */
     private void forcedStopReport(Long chatId) {
         sender.sendMessage(chatId, "Вы прервали отправку отчета. Пожалуйста, не забудьте отправить его позже.");
-        R report = cacheKeeper.getActualReportByPetOwnerId().remove(chatId);
+        R report = cache().getActualReportByPetOwnerId().remove(chatId);
         if (report instanceof CatReport catReport) {
             catReportService.deleteReport(catReport);
         } else if (report instanceof DogReport dogReport) {
@@ -286,7 +291,7 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
     }
 
     private void breakReport(Long chatId) {
-        cacheKeeper.getPetOwnersById().put(chatId,
+        cache().getPetOwnersById().put(chatId,
                 petOwnersService.setPetOwnerReportRequest(chatId, false));
     }
 
@@ -302,7 +307,7 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
      */
     private void stopReport(Long chatId, String behavioralChanges) {
         //получаем отчет из кеша и заполняем в нем переменную behavioralChanges
-        R report = cacheKeeper.getActualReportByPetOwnerId().get(chatId);
+        R report = cache().getActualReportByPetOwnerId().get(chatId);
         report.setBehavioralChanges(behavioralChanges);
         /*
         производим проверку соответствия отчета к определенному классу
@@ -311,7 +316,7 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
         if (report instanceof CatReport catReport) {
             CatImage catImage = (catReport.getImages().get(0));
             catReport.setCopiedPetOwnerId(chatId);
-            Cat cat = (Cat) cacheKeeper.getActualPetsInReportProcess().remove(chatId);
+            Cat cat = (Cat) cache().getActualPetsInReportProcess().remove(chatId);
             cat.setReported(true);
             cacheKeeper.getCatService().putPet(cat);
             catReport.setCopiedAnimalId(cat.getId());
@@ -323,7 +328,7 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
         } else if (report instanceof DogReport dogReport) {
             DogImage dogImage = (dogReport.getImages().get(0));
             dogReport.setCopiedPetOwnerId(chatId);
-            Dog dog = (Dog) cacheKeeper.getActualPetsInReportProcess().remove(chatId);
+            Dog dog = (Dog) cache().getActualPetsInReportProcess().remove(chatId);
             dog.setReported(true);
             cacheKeeper.getDogService().putPet(dog);
             dogReport.setCopiedAnimalId(dog.getId());
@@ -375,7 +380,7 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
     private void sendMessageToTakeCommonStatus(Long chatId, String diet) {
         sender.sendMessage(chatId, "Мы уже близки к завершению. Поделитесь общим состоянием животного.\n" +
                 " Как его самочувствие и процесс привыкания к новому месту? Префикс *Состояние: *");
-        cacheKeeper.getActualReportByPetOwnerId().get(chatId).setDiet(diet);
+        cacheKeeper.getCache().getActualReportByPetOwnerId().get(chatId).setDiet(diet);
     }
 
     /**
@@ -394,7 +399,7 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
                 Как идет процесс восчпитания? Может быть, животное стало проявлять
                  новые черты в своем поведении? Префикс *Изменения: *
                 """);
-        cacheKeeper.getActualReportByPetOwnerId().get(chatId).setCommonDescriptionOfStatus(commonStatus);
+        cacheKeeper.getCache().getActualReportByPetOwnerId().get(chatId).setCommonDescriptionOfStatus(commonStatus);
     }
 
     /**

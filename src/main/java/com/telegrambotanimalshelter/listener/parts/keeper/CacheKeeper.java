@@ -43,27 +43,7 @@ public class CacheKeeper<A extends Animal, R extends Report> {
 
     private final FileService<? extends AppImage> fileService;
 
-    private Map<Long, PetOwner> petOwnersById;
-
-    private Map<Long, Volunteer> volunteers;
-
-    private Map<Long, List<Cat>> catsByPetOwnerId;
-
-    private Map<Long, List<Dog>> dogsByPetOwnerId;
-
-    private Map<Long, List<CatReport>> catReportsByCatId;
-
-    private Map<Long, List<DogReport>> dogReportsByDogId;
-
-    private List<R> cashedReports;
-
-    private Map<Long, R> actualReportByPetOwnerId;
-
-    private Map<Long, A> actualPetsInReportProcess;
-
-    private List<CatImage> catImages;
-
-    private List<DogImage> dogImages;
+    private final Cache<A, R> cache;
 
     public CacheKeeper(PetOwnersService petOwnersService,
                        VolunteerService volunteerService,
@@ -71,7 +51,7 @@ public class CacheKeeper<A extends Animal, R extends Report> {
                        PetService<Dog> dogService,
                        @Qualifier("dogReportServiceImpl") ReportService<DogReport, Dog, DogImage> dogReportService,
                        @Qualifier("catReportServiceImpl") ReportService<CatReport, Cat, CatImage> catReportService,
-                       FileService<? extends AppImage> fileService) {
+                       FileService<? extends AppImage> fileService, Cache<A, R> cache) {
         this.petOwnersService = petOwnersService;
         this.volunteerService = volunteerService;
         this.catService = catService;
@@ -79,59 +59,50 @@ public class CacheKeeper<A extends Animal, R extends Report> {
         this.catReportService = catReportService;
         this.dogReportService = dogReportService;
         this.fileService = fileService;
+        this.cache = cache;
     }
 
     @PostConstruct
     public void init() {
-        this.volunteers = new HashMap<>();
-        this.petOwnersById = new HashMap<>();
-        this.catsByPetOwnerId = new HashMap<>();
-        this.dogsByPetOwnerId = new HashMap<>();
-        this.catReportsByCatId = new HashMap<>();
-        this.dogReportsByDogId = new HashMap<>();
-        this.actualReportByPetOwnerId = new HashMap<>();
-        this.actualPetsInReportProcess = new HashMap<>();
-        this.cashedReports = new ArrayList<>();
-        this.catImages = new ArrayList<>();
-        this.dogImages = new ArrayList<>();
         fill();
     }
 
-    public void fill() {
+    private void fill() {
         for (PetOwner petOwner : petOwnersService.getAllPetOwners()) {
-            petOwnersById.put(petOwner.getId(), petOwner);
-            catsByPetOwnerId.put(petOwner.getId(), catService.findPetsByPetOwner(petOwner));
-            dogsByPetOwnerId.put(petOwner.getId(), dogService.findPetsByPetOwner(petOwner));
+            cache.getPetOwnersById().put(petOwner.getId(), petOwner);
+            cache.getCatsByPetOwnerId().put(petOwner.getId(), catService.findPetsByPetOwner(petOwner));
+            cache.getDogsByPetOwnerId().put(petOwner.getId(), dogService.findPetsByPetOwner(petOwner));
         }
         for (Volunteer volunteer : volunteerService.gatAllVolunteers()) {
-            volunteers.put(volunteer.getId(), volunteer);
+            cache.getVolunteers().put(volunteer.getId(), volunteer);
         }
         for (CatReport catReport : catReportService.getAllReports()) {
-            cashedReports.add((R) catReport);
+            cache.getCashedReports().add((R) catReport);
         }
         for (DogReport dogReport : dogReportService.getAllReports()) {
-            cashedReports.add((R) dogReport);
+            cache.getCashedReports().add((R) dogReport);
         }
-        dogImages.addAll(fileService.getAllDogImages());
-        catImages.addAll(fileService.gatAllCatImages());
+        cache.getDogImages().addAll(fileService.getAllDogImages());
+        cache.getCatImages().addAll(fileService.gatAllCatImages());
     }
 
     public List<Cat> getCatsByPetOwnerIdFromCache(Long petOwnerId) {
-        return catsByPetOwnerId.get(petOwnerId);
+        return cache.getCatsByPetOwnerId().get(petOwnerId);
     }
 
     public List<Dog> getDogByPetOwnerIdFromCache(Long petOwnerId) {
-        return dogsByPetOwnerId.get(petOwnerId);
+        return cache.getDogsByPetOwnerId().get(petOwnerId);
     }
 
     public void setAllAnimalsReportedToFalse() {
-        for (Map.Entry<Long, List<Cat>> entry : catsByPetOwnerId.entrySet()) {
+        for (Map.Entry<Long, List<Cat>> entry :
+                cache.getCatsByPetOwnerId().entrySet()) {
             for (Cat cat : entry.getValue()) {
                 cat.setReported(false);
                 catService.putPet(cat);
             }
         }
-        for (Map.Entry<Long, List<Dog>> entry : dogsByPetOwnerId.entrySet()) {
+        for (Map.Entry<Long, List<Dog>> entry : cache.getDogsByPetOwnerId().entrySet()) {
             for (Dog dog : entry.getValue()) {
                 dog.setReported(false);
                 dogService.putPet(dog);
@@ -140,40 +111,40 @@ public class CacheKeeper<A extends Animal, R extends Report> {
     }
 
     public Volunteer appointVolunteerToCheckReports(Long chatId) {
-        Volunteer volunteer = volunteers.get(chatId);
+        Volunteer volunteer = cache.getVolunteers().get(chatId);
         if (volunteer != null) {
             if (volunteer.isFree() && !volunteer.isCheckingReports() && volunteer.isInOffice()) {
                 volunteer.setCheckingReports(true);
                 volunteer.setFree(false);
-                return volunteers.put(chatId, volunteerService.putVolunteer(volunteer));
+                return cache.getVolunteers().put(chatId, volunteerService.putVolunteer(volunteer));
             }
             if (!volunteer.isFree() && volunteer.isInOffice() && !volunteer.isCheckingReports()) {
                 volunteer.setCheckingReports(true);
-                return volunteers.put(chatId, volunteerService.putVolunteer(volunteer));
+                return cache.getVolunteers().put(chatId, volunteerService.putVolunteer(volunteer));
             }
         }
         return null;
     }
 
     public void volunteerAcceptReport(Long volunteerId, R report) {
-        cashedReports.remove(report);
+        cache.getCashedReports().remove(report);
         report.setCheckedByVolunteer(true);
-        cashedReports.add(report);
+        cache.getCashedReports().add(report);
         if (report instanceof DogReport dogReport) {
             dogReportService.putReport(dogReport);
         } else if (report instanceof CatReport catReport) {
             catReportService.putReport(catReport);
         }
-        Volunteer volunteer = volunteers.get(volunteerId);
+        Volunteer volunteer = cache.getVolunteers().get(volunteerId);
         volunteer.setCheckingReports(false);
-        volunteers.put(volunteerId, volunteer);
+        cache.getVolunteers().put(volunteerId, volunteer);
     }
 
     public void volunteerRejectReport(Long volunteerId, R report) {
-        cashedReports.remove(report);
+        cache.getCashedReports().remove(report);
         if (report instanceof DogReport dogReport) {
             dogReportService.deleteReport(dogReport);
-            dogsByPetOwnerId.get(dogReport.getCopiedPetOwnerId())
+            cache.getDogsByPetOwnerId().get(dogReport.getCopiedPetOwnerId())
                     .stream()
                     .filter(d -> d.getId()
                             .equals(dogReport.getCopiedAnimalId()))
@@ -184,7 +155,7 @@ public class CacheKeeper<A extends Animal, R extends Report> {
                     });
         } else if (report instanceof CatReport catReport) {
             catReportService.deleteReport(catReport);
-            catsByPetOwnerId.get(catReport.getCopiedPetOwnerId())
+            cache.getCatsByPetOwnerId().get(catReport.getCopiedPetOwnerId())
                     .stream()
                     .filter(c -> c.getId()
                             .equals(catReport.getCopiedAnimalId()))
@@ -194,7 +165,7 @@ public class CacheKeeper<A extends Animal, R extends Report> {
                         catService.putPet(cat);
                     });
         }
-        volunteers.entrySet().stream().peek(entry -> {
+        cache.getVolunteers().entrySet().stream().peek(entry -> {
             if (entry.getKey().equals(volunteerId)) {
                 entry.setValue(Stream.of(entry.getValue()).peek(vol ->
                         vol.setCheckingReports(false)).findFirst().get());
@@ -203,7 +174,7 @@ public class CacheKeeper<A extends Animal, R extends Report> {
     }
 
     public void volunteerWantsToGetOutFromOffice(Long chatId) {
-        volunteers.entrySet().stream().peek(entry -> {
+        cache.getVolunteers().entrySet().stream().peek(entry -> {
             if (entry.getKey().equals(chatId)) {
                 entry.setValue(Stream.of(entry.getValue()).peek(vol -> {
                     vol.setCheckingReports(false);
@@ -215,24 +186,25 @@ public class CacheKeeper<A extends Animal, R extends Report> {
     }
 
     public void createReportForAnimal(Long chatId, A animal) {
-        PetOwner petOwner = petOwnersById.get(chatId);
+        PetOwner petOwner = cache.getPetOwnersById().get(chatId);
         if (animal instanceof Cat) {
             CatReport catReport = CatReport.builder().cat((Cat) animal).petOwner(petOwner).images(new ArrayList<>()).build();
             catReport.setPetOwner(petOwner);
             CatReport catReportWithId = catReportService.putReport(catReport);
-            actualReportByPetOwnerId.put(chatId, (R) catReportWithId);
-            actualPetsInReportProcess.put(chatId, animal);
+            cache.getActualReportByPetOwnerId().put(chatId, (R) catReportWithId);
+            cache.getActualPetsInReportProcess().put(chatId, animal);
         } else if (animal instanceof Dog dog) {
             DogReport dogReport = DogReport.builder().dog(dog).petOwner(petOwner).images(new ArrayList<>()).build();
             dogReport.setPetOwner(petOwner);
             DogReport dogReportWithId = dogReportService.putReport(dogReport);
-            actualReportByPetOwnerId.put(chatId, (R) dogReportWithId);
-            actualPetsInReportProcess.put(chatId, animal);
+            cache.getActualReportByPetOwnerId().put(chatId, (R) dogReportWithId);
+            cache.getActualPetsInReportProcess().put(chatId, animal);
         }
     }
 
     public Volunteer findFreeVolunteer() {
-        for (Map.Entry<Long, Volunteer> entry : volunteers.entrySet()) {
+        for (Map.Entry<Long, Volunteer> entry :
+                cache.getVolunteers().entrySet()) {
             if (entry.getValue().isFree()) return entry.getValue();
         }
         throw new NotFoundInDataBaseException("Волонтеры заняты. Придется подождать. Обратитесь позже");
