@@ -5,8 +5,10 @@ import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.request.SendMessage;
+import com.pengrad.telegrambot.response.SendResponse;
 import com.telegrambotanimalshelter.enums.ShelterType;
-import com.telegrambotanimalshelter.listener.AnimalShelterBotListener;
+import com.telegrambotanimalshelter.exceptions.CallBackQueryNotRecognizedException;
+import com.telegrambotanimalshelter.exceptions.NotReturnedResponseException;
 import com.telegrambotanimalshelter.listener.parts.BecomingPetOwnerPart;
 import com.telegrambotanimalshelter.listener.parts.IntroductionPart;
 import com.telegrambotanimalshelter.listener.parts.requests.ChoosePetForPotentialOwnerBlock;
@@ -94,8 +96,8 @@ public class CallbackChecker<A extends Animal, R extends Report, I extends AppIm
         String data = callbackQuery.data();
         Long chatId = callbackQuery.from().id();
 
-        if ("cat_shelter".equals(data)) shelterMenu(chatId, catShelter);
-        if ("dog_shelter".equals(data)) shelterMenu(chatId, dogShelter);
+        if ("cat_shelter".equals(data)) this.shelterMenu(chatId, catShelter);
+        if ("dog_shelter".equals(data)) this.shelterMenu(chatId, dogShelter);
 
         if ("back".equals(data)) {
             choosePetMenu = 0;
@@ -140,23 +142,24 @@ public class CallbackChecker<A extends Animal, R extends Report, I extends AppIm
      * @see IntroductionPart
      * @see MessageSender
      */
-    public void callBackQueryConstantCheck(CallbackQuery callbackQuery, Shelter shelter) {
+    public SendResponse callBackQueryConstantCheck(CallbackQuery callbackQuery, Shelter shelter) {
         String shelterName = shelter.getName();
         String data = callbackQuery.data();
         Long id = callbackQuery.from().id();
-        if ((shelterName + "_shelter_info").equals(data)) introductionPart.welcome(id, shelter);
-        if ((shelterName + "_info").equals(data)) introductionPart.shelterInfo(id, shelter);
-        if ((shelterName + "_hours").equals(data)) introductionPart.shelterWorkingHours(id, shelter);
-        if ((shelterName + "_pass").equals(data)) introductionPart.shelterPass(id, shelter);
-        if ((shelterName + "_safety").equals(data)) introductionPart.shelterSafety(id, shelter);
-        if ((shelterName + "_shelter_consultation").equals(data)) becomingPart.welcome(id, shelter);
-        if ((shelterName + "_acquaintance").equals(data)) becomingPart.acquaintanceWithPet(id, shelter);
-        if ((shelterName + "_documents").equals(data)) becomingPart.documentsForPetOwner(id, shelter);
-        if ((shelterName + "_transportation").equals(data)) becomingPart.transportation(id, shelter);
-        if ((shelterName + "_little").equals(data)) becomingPart.homeForLittlePet(id, shelter);
-        if ((shelterName + "_adult").equals(data)) becomingPart.homeForAdultPet(id, shelter);
-        if ((shelterName + "_restricted").equals(data)) becomingPart.homeForRestrictedPet(id, shelter);
-        if ((shelterName + "_reasons_for_refusal").equals(data)) becomingPart.reasonsForRefusal(id, shelter);
+        if ((shelterName + "_shelter_info").equals(data)) return introductionPart.welcome(id, shelter);
+        if ((shelterName + "_info").equals(data)) return introductionPart.shelterInfo(id, shelter);
+        if ((shelterName + "_hours").equals(data)) return introductionPart.shelterWorkingHours(id, shelter);
+        if ((shelterName + "_pass").equals(data)) return introductionPart.shelterPass(id, shelter);
+        if ((shelterName + "_safety").equals(data)) return introductionPart.shelterSafety(id, shelter);
+        if ((shelterName + "_shelter_consultation").equals(data)) return becomingPart.welcome(id, shelter);
+        if ((shelterName + "_acquaintance").equals(data)) return becomingPart.acquaintanceWithPet(id, shelter);
+        if ((shelterName + "_documents").equals(data)) return becomingPart.documentsForPetOwner(id, shelter);
+        if ((shelterName + "_transportation").equals(data)) return becomingPart.transportation(id, shelter);
+        if ((shelterName + "_little").equals(data)) return becomingPart.homeForLittlePet(id, shelter);
+        if ((shelterName + "_adult").equals(data)) return becomingPart.homeForAdultPet(id, shelter);
+        if ((shelterName + "_restricted").equals(data)) return becomingPart.homeForRestrictedPet(id, shelter);
+        if ((shelterName + "_reasons_for_refusal").equals(data)) return becomingPart.reasonsForRefusal(id, shelter);
+        else throw new CallBackQueryNotRecognizedException();
     }
 
     /** После приветственного сообщения из {@link MessageSender#sendStartMessage(Long)} и выбора одной из предложенных кнопок
@@ -165,17 +168,23 @@ public class CallbackChecker<A extends Animal, R extends Report, I extends AppIm
      * @param chatId
      * @param shelter
      */
-    private void shelterMenu(Long chatId, Shelter shelter) {
+    public SendResponse shelterMenu(Long chatId, Shelter shelter) {
         SendMessage sendMessage = null;
         String shelterName = shelter.getName();
-        if (shelter.getShelterType().equals(ShelterType.DOGS_SHELTER)) {
-            sendMessage = new SendMessage(chatId, "Это приют для собак " + shelterName);
-            sendMessage.replyMarkup(shelterMenuMarkup(shelter));
-        } else if (shelter.getShelterType().equals(ShelterType.CATS_SHELTER)) {
-            sendMessage = new SendMessage(chatId, "Это приют для кошек " + shelterName);
-            sendMessage.replyMarkup(shelterMenuMarkup(shelter));
+        ShelterType shelterType = shelter.getShelterType();
+        if(shelterType != null) {
+            if (shelter.getShelterType().equals(ShelterType.DOGS_SHELTER)) {
+                sendMessage = new SendMessage(chatId, "Это приют для собак " + shelterName);
+                sendMessage.replyMarkup(shelterMenuMarkup(shelter));
+            } else if (shelter.getShelterType().equals(ShelterType.CATS_SHELTER)) {
+                sendMessage = new SendMessage(chatId, "Это приют для кошек " + shelterName);
+                sendMessage.replyMarkup(shelterMenuMarkup(shelter));
+            }
+            if (sendMessage != null) {
+                return sender.sendResponse(sendMessage);
+            }
         }
-        if (sendMessage != null) sender.sendResponse(sendMessage);
+        throw new NotReturnedResponseException();
     }
 
     /**
@@ -185,7 +194,7 @@ public class CallbackChecker<A extends Animal, R extends Report, I extends AppIm
      * @see IntroductionPart
      * @see BecomingPetOwnerPart
      */
-    private InlineKeyboardMarkup shelterMenuMarkup(Shelter shelter) {
+    public InlineKeyboardMarkup shelterMenuMarkup(Shelter shelter) {
         String shelterName = shelter.getName();
         return new InlineKeyboardMarkup(
                 new InlineKeyboardButton("Узнать информацию о приюте").callbackData(shelterName + "_shelter_info"))
