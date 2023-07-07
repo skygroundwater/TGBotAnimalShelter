@@ -33,8 +33,8 @@ public class Cat extends Animal {
     @OneToMany(targetEntity = CatImage.class, mappedBy = "cat", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<CatImage> images;
 
-    public Cat(String nickname, boolean isChipped, LocalDateTime registeredAt, PetOwner petOwner, String about, byte[] photo) {
-        super(nickname, isChipped, registeredAt, about, photo);
+    public Cat(String nickname, boolean sheltered, LocalDateTime registeredAt, PetOwner petOwner, String about, byte[] photo) {
+        super(nickname, sheltered, registeredAt, about, photo);
         this.petOwner = petOwner;
     }
 
