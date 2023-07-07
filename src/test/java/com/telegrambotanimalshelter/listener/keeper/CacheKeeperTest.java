@@ -97,6 +97,9 @@ public class CacheKeeperTest<A extends Animal, R extends Report> {
 
         when(cache.getPetOwnersById())
                 .thenReturn(petOwners);
+
+        when(cache.getCashedReports())
+                .thenReturn((List<R>) reports);
     }
 
     @Test
@@ -189,6 +192,8 @@ public class CacheKeeperTest<A extends Animal, R extends Report> {
         Volunteer testingVolunteer = out.volunteerAcceptReport(volunteer1.getId(), (R) dogReport);
         //then
         assertEquals(testingVolunteer, comparingVolunteer);
+        assertFalse(comparingVolunteer.isCheckingReports());
+        assertEquals(comparingVolunteer.getFirstName(), testingVolunteer.getFirstName());
     }
 
     @Test
@@ -217,8 +222,6 @@ public class CacheKeeperTest<A extends Animal, R extends Report> {
 
     @Test
     public void createReportFromPetOwner_ReturnsPetOwnerWhoCreatedReport(){
-        //given
-        PetOwner petOwner = petOwner1;
         //when
         PetOwner testingPetOwner = out.createReportForAnimal(petOwner1.getId(), (A) dog1);
         //then

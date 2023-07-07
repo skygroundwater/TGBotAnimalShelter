@@ -8,12 +8,10 @@ import com.telegrambotanimalshelter.models.images.CatImage;
 import com.telegrambotanimalshelter.models.images.DogImage;
 import com.telegrambotanimalshelter.models.reports.CatReport;
 import com.telegrambotanimalshelter.models.reports.DogReport;
+import com.telegrambotanimalshelter.models.reports.Report;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ConstantsForTesting {
 
@@ -57,6 +55,9 @@ public class ConstantsForTesting {
             new ArrayList<>();
 
     public static final List<DogReport> dogReports =
+            new ArrayList<>();
+
+    public static final List<Report> reports =
             new ArrayList<>();
 
     public static final List<CatImage> catImages =
@@ -113,6 +114,8 @@ public class ConstantsForTesting {
         dogReport.setDate(LocalDateTime.now().toLocalDate());
         dogReport.setImages(dogImages);
         dogReport.setCopiedPetOwnerId(petOwner1.getId());
+        reports.addAll(catReports);
+        reports.addAll(dogReports);
     }
 
 }
