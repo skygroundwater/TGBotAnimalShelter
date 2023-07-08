@@ -19,6 +19,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Map;
 
 import static com.telegrambotanimalshelter.utils.ConstantsForTesting.*;
@@ -48,7 +50,7 @@ class VolunteerAndPetOwnerChatTest<A extends Animal, R extends Report> {
     Cache<A, R> cache;
 
     @BeforeEach
-    void setUp(){
+    void setUp() {
         cache = new Cache<>();
         when(keeper.getCache()).thenReturn(cache);
     }
@@ -67,7 +69,7 @@ class VolunteerAndPetOwnerChatTest<A extends Animal, R extends Report> {
     }
 
     @Test
-    void checkPetOwnerChatStatus_ReturnsFalse(){
+    void checkPetOwnerChatStatus_ReturnsFalse() {
         cache.setPetOwnersById(petOwners);
         boolean petOwnerIsChattingOrNot =
                 out.checkPetOwnerChatStatus(petOwner1.getId());
@@ -75,7 +77,7 @@ class VolunteerAndPetOwnerChatTest<A extends Animal, R extends Report> {
     }
 
     @Test
-    void checkPetOwnerChatStatus_ReturnsFalseBecausePetOwnerIsNull(){
+    void checkPetOwnerChatStatus_ReturnsFalseBecausePetOwnerIsNull() {
         Map<Long, PetOwner> petOwnersForTesting = petOwners;
         petOwnersForTesting.put(chatId, null);
         cache.setPetOwnersById(petOwnersForTesting);
@@ -86,7 +88,7 @@ class VolunteerAndPetOwnerChatTest<A extends Animal, R extends Report> {
     }
 
     @Test
-    public void checkVolunteer_ReturnsTrueIfVolunteerIsNotInOfficeIsNotCheckingReportsAndNotFree(){
+    public void checkVolunteer_ReturnsTrueIfVolunteerIsNotInOfficeIsNotCheckingReportsAndNotFree() {
         Map<Long, Volunteer> volunteersForTesting = volunteers;
         Volunteer volunteerForTesting = volunteer1;
         volunteerForTesting.setInOffice(false);
@@ -100,7 +102,7 @@ class VolunteerAndPetOwnerChatTest<A extends Animal, R extends Report> {
     }
 
     @Test
-    public void checkVolunteer_ReturnsFalseIfVolunteerIsInOfficeOrIsCheckingReportsAndNotFree(){
+    public void checkVolunteer_ReturnsFalseIfVolunteerIsInOfficeOrIsCheckingReportsAndNotFree() {
         Map<Long, Volunteer> volunteersForTesting = volunteers;
         Volunteer volunteerForTesting = volunteer1;
         volunteerForTesting.setInOffice(true);
@@ -114,7 +116,7 @@ class VolunteerAndPetOwnerChatTest<A extends Animal, R extends Report> {
     }
 
     @Test
-    public void checkVolunteer_ReturnsFalseBecauseVolunteerIsNull(){
+    public void checkVolunteer_ReturnsFalseBecauseVolunteerIsNull() {
         Map<Long, Volunteer> volunteersForTesting = volunteers;
         volunteersForTesting.put(chatId, null);
         cache.setVolunteers(volunteersForTesting);
@@ -125,7 +127,7 @@ class VolunteerAndPetOwnerChatTest<A extends Animal, R extends Report> {
 
 
     @Test
-    public void startChat_ReturnsInfoByStringThatChatIsStarted(){
+    public void startChat_ReturnsInfoByStringThatChatIsStarted() {
         Volunteer volunteerForTesting = volunteer1;
         PetOwner petOwnerForTesting = petOwner1;
         petOwnerForTesting.setVolunteerChat(true);
@@ -171,7 +173,7 @@ class VolunteerAndPetOwnerChatTest<A extends Animal, R extends Report> {
     }
 
     @Test
-    public void stopChat_ReturnsFalseWhenCommandUnverifiable(){
+    public void stopChat_ReturnsFalseWhenCommandUnverifiable() {
         boolean chatIsNotStopped =
                 out.stopChat(petOwner1.getId(),
                         null,
@@ -179,7 +181,8 @@ class VolunteerAndPetOwnerChatTest<A extends Animal, R extends Report> {
         assertFalse(chatIsNotStopped);
     }
 
-    private void initialize(){
+    @Test
+    public void stopChat_ReturnsTrueWhenPetOwnerOrVolunteerWantToBreakAChat() {
         Map<Long, Volunteer> volunteersForTesting =
                 volunteers;
         Map<Long, PetOwner> petOwnersForTesting =
@@ -196,11 +199,6 @@ class VolunteerAndPetOwnerChatTest<A extends Animal, R extends Report> {
         cache.setPetOwnersById(petOwnersForTesting);
         when(volunteerService.setFree(volunteer1.getId(), true))
                 .thenReturn(volunteer1);
-    }
-
-    @Test
-    public void stopChat_ReturnsTrueWhenPetOwnerOrVolunteerWantToBreakAChat(){
-        initialize();
         boolean chatIsStoppedByVolunteer =
                 out.stopChat(null,
                         volunteer1.getId(),
@@ -213,9 +211,50 @@ class VolunteerAndPetOwnerChatTest<A extends Animal, R extends Report> {
         assertTrue(chatIsStoppedByVolunteer);
     }
 
-    /*@Test
-    public void continueChat_ReturnsTrueWhenCommandUnverifiable(){
-        initialize();
+    @Test
+    public void continueChat_ReturnsTrueWhenCommandUnverifiable() {
+        PetOwner petOwner1 = new PetOwner(
+                2L, "Карапет",
+                "Карапетов", "karapet",
+                LocalDateTime.now(), false
+        );
+        PetOwner petOwner2 = new PetOwner(
+                1L, "Пузанок",
+                "Пузанов", "puzanok",
+                LocalDateTime.now(), false
+        );
+        Map<Long, PetOwner> petOwners =
+                new HashMap<>(Map.of(
+                        petOwner1.getId(), petOwner1,
+                        petOwner2.getId(), petOwner2));
+        Volunteer volunteer1 =
+                new Volunteer(
+                        1L, "@afrodita",
+                        "Афродита", "Боговиева",
+                        "afrodita", true,
+                        false, false, null);
+        Volunteer volunteer2 =
+                new Volunteer(
+                        2L, "@sohoncev",
+                        "Владимир", "Сохонцев",
+                        "sohonets", true,
+                        false, false, null);
+        Map<Long, Volunteer> volunteers =
+                new HashMap<>(Map.of(
+                        volunteer1.getId(), volunteer1,
+                        volunteer2.getId(), volunteer2));
+        volunteers.forEach((key, value) -> {
+            value.setFree(false);
+            value.setPetOwner(petOwners.get(key));
+        });
+        petOwners.forEach((key, value) -> {
+            value.setVolunteerChat(true);
+            value.setVolunteer(volunteers.get(key));
+        });
+        cache.setVolunteers(volunteers);
+        cache.setPetOwnersById(petOwners);
+        when(volunteerService.setFree(volunteer1.getId(), true))
+                .thenReturn(volunteer1);
         boolean petOwnerContinuedChat =
                 out.continueChat(petOwner2.getId(), null, "Сообщение волонтёру");
         boolean volunteerContinuedChat =
@@ -225,11 +264,52 @@ class VolunteerAndPetOwnerChatTest<A extends Animal, R extends Report> {
     }
 
     @Test
-    public void continueChat_ReturnsFalseWhenCommandIsCorrect(){
-        initialize();
+    public void continueChat_ReturnsFalseWhenCommandIsCorrect() {
+        PetOwner petOwner1 = new PetOwner(
+                2L, "Карапет",
+                "Карапетов", "karapet",
+                LocalDateTime.now(), false
+        );
+        PetOwner petOwner2 = new PetOwner(
+                1L, "Пузанок",
+                "Пузанов", "puzanok",
+                LocalDateTime.now(), false
+        );
+        Map<Long, PetOwner> petOwners =
+                new HashMap<>(Map.of(
+                        petOwner1.getId(), petOwner1,
+                        petOwner2.getId(), petOwner2));
+        Volunteer volunteer1 =
+                new Volunteer(
+                        1L, "@afrodita",
+                        "Афродита", "Боговиева",
+                        "afrodita", true,
+                        false, false, null);
+        Volunteer volunteer2 =
+                new Volunteer(
+                        2L, "@sohoncev",
+                        "Владимир", "Сохонцев",
+                        "sohonets", true,
+                        false, false, null);
+        Map<Long, Volunteer> volunteers =
+                new HashMap<>(Map.of(
+                        volunteer1.getId(), volunteer1,
+                        volunteer2.getId(), volunteer2));
+        volunteers.forEach((key, value) -> {
+            value.setFree(false);
+            value.setPetOwner(petOwners.get(key));
+        });
+        petOwners.forEach((key, value) -> {
+            value.setVolunteerChat(true);
+            value.setVolunteer(volunteers.get(key));
+        });
+        cache.setVolunteers(volunteers);
+        cache.setPetOwnersById(petOwners);
+        when(volunteerService.setFree(volunteer1.getId(), true))
+                .thenReturn(volunteer1);
         boolean volunteerContinuedChat =
                 out.continueChat(null, volunteer2.getId(), "Прекратить чат");
         assertFalse(volunteerContinuedChat);
-    }*/
+    }
 
 }

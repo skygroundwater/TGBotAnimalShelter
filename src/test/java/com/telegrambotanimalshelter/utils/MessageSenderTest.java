@@ -46,8 +46,7 @@ public class MessageSenderTest<A extends Animal> {
     public MessageSenderTest() throws IOException, URISyntaxException {
     }
 
-    final String json = Files.readString(Path.of(
-            "src/test/resources/com/telegrambotanimalshelter/listener/parts/update.json"));
+    final String json = Files.readString(Path.of(MessageSenderTest.class.getResource("update.json").toURI()));
 
 
     @Test
