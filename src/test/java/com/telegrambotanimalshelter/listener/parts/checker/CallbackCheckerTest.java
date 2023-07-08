@@ -8,10 +8,7 @@ import com.telegrambotanimalshelter.enums.ShelterType;
 import com.telegrambotanimalshelter.exceptions.NotReturnedResponseException;
 import com.telegrambotanimalshelter.listener.parts.BecomingPetOwnerPart;
 import com.telegrambotanimalshelter.listener.parts.IntroductionPart;
-import com.telegrambotanimalshelter.listener.parts.requests.ChoosePetForPotentialOwnerBlock;
-import com.telegrambotanimalshelter.listener.parts.requests.ContactRequestBlock;
-import com.telegrambotanimalshelter.listener.parts.requests.ReportRequestBlock;
-import com.telegrambotanimalshelter.listener.parts.requests.VolunteerAndPetOwnerChat;
+import com.telegrambotanimalshelter.listener.parts.requests.*;
 import com.telegrambotanimalshelter.listener.parts.volunteerblock.VolunteerBlock;
 import com.telegrambotanimalshelter.models.Shelter;
 import com.telegrambotanimalshelter.models.animals.Animal;
@@ -33,6 +30,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -121,10 +119,9 @@ class CallbackCheckerTest<A extends Animal, R extends Report, I extends AppImage
                     "_little", "_adult", "_restricted",
                     "_reasons_for_refusal"));
 
-    final String json = Files.readString(Path.of(
-            "/Users/olegmetelev/IdeaProjects/TGBotAnimalShelter/src/test/resources/com.telegrambotanimalshelter.listener/callbackquery.json"));
+    final String json = Files.readString(Path.of(CallbackCheckerTest.class.getResource("callbackquery.json").toURI()));
 
-    CallbackCheckerTest() throws IOException {
+    CallbackCheckerTest() throws IOException, URISyntaxException {
     }
 
     @BeforeEach

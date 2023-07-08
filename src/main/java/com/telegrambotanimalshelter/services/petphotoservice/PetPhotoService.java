@@ -46,16 +46,6 @@ public class PetPhotoService {
         return new File(dataTempFilePath + "/" + dataFileName);
     }
 
-    public void cleanDataFile(String dataFileName) {
-        try {
-            Path path = Path.of(dataTempFilePath, dataFileName);
-            Files.deleteIfExists(path);
-            Files.createFile(path);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     public void createNewFileIfNotExist(String dataFileName) {
         try {
             Path path = Path.of(dataTempFilePath, dataFileName);
