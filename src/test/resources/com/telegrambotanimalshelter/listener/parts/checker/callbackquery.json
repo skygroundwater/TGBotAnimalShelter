@@ -1,6 +1,7 @@
 {
   "from": {
-    "id" : 123
+    "id" : 123,
+    "first_name" : "Афродита"
   },
   "data" : "%data%"
 }

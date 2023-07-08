@@ -60,17 +60,32 @@ public class VolunteerBlock<A extends Animal, R extends Report, I extends AppIma
         }
     }
 
-    public void startWorkWithVolunteer(Long chatId) {
+    private boolean checkVolunteer(Long chatId) {
+        Volunteer volunteer = cache().getVolunteers().get(chatId);
+        if (volunteer != null) {
+            if (volunteer.isFree()) {
+                return true;
+            }
+            return volunteer.isInOffice();
+        }
+        return false;
+    }
+
+    public Volunteer startWorkWithVolunteer(Long chatId) {
+        Volunteer volunteer = cache().getVolunteers().get(chatId);
         if (checkVolunteer(chatId)) {
-            Volunteer volunteer = cache().getVolunteers().get(chatId);
             if (volunteer != null) {
                 volunteer.setInOffice(true);
                 cache().getVolunteers().put(chatId, volunteer);
                 sender.sendResponse(new SendMessage(chatId,
                         "Здравствуйте, " + volunteer.getFirstName() + ". Спасибо, что помогаете нам, мы очень это ценим")
                         .replyMarkup(volunteerKeyboardInOffice()));
+                return volunteer;
             }
-        } else sender.sendMessage(chatId, "Нет вы не волонтёр");
+        } else {
+            sender.sendMessage(chatId, "Нет вы не волонтёр");
+        }
+        return volunteer;
     }
 
     public boolean checkOfficeStatusForVolunteer(Long chatId) {
@@ -118,17 +133,6 @@ public class VolunteerBlock<A extends Animal, R extends Report, I extends AppIma
         if (volunteer != null) {
             checkNoneCheckedReportsFromCacheKeeper(chatId);
         }
-    }
-
-    private boolean checkVolunteer(Long chatId) {
-        Volunteer volunteer = cache().getVolunteers().get(chatId);
-        if (volunteer != null) {
-            if (volunteer.isFree()) {
-                return true;
-            }
-            return volunteer.isInOffice();
-        }
-        return false;
     }
 
     private void checkNoneCheckedReportsFromCacheKeeper(Long chatId) {

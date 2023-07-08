@@ -37,7 +37,7 @@ public class VolunteerAndPetOwnerChat<A extends Animal, R extends Report> {
         this.cacheKeeper = cacheKeeper;
     }
 
-    private Cache<A, R> cache(){
+    private Cache<A, R> cache() {
         return cacheKeeper.getCache();
     }
 
@@ -67,7 +67,7 @@ public class VolunteerAndPetOwnerChat<A extends Animal, R extends Report> {
         Volunteer volunteer = cache().getVolunteers().get(volunteerId);
         if (volunteer != null) {
             if (!volunteer.isInOffice() && !volunteer.isCheckingReports() && !volunteer.isFree()) {
-                return !volunteer.isFree();
+                return true;
             } else return false;
         } else return false;
     }
@@ -79,30 +79,29 @@ public class VolunteerAndPetOwnerChat<A extends Animal, R extends Report> {
      * @param chatId личный id пользователя
      * @param msg    текстовое сообщение от пользователя
      */
-    public void startChat(Long chatId, String msg) {
+    public String startChat(Long chatId, String msg) {
 
         //вызов метода может происходить только со стороны усыновителя
         //поэтому находим сначала любого свободного волонтера
         try {
             Volunteer volunteer = cacheKeeper.findFreeVolunteer();
-
             //назначем поля усыновителю в базе данных и одновременно возвращаем его из метода
             PetOwner petOwner = petOwnersService.setPetOwnerToVolunteerChat(chatId, volunteer, true);
             cache().getPetOwnersById().put(petOwner.getId(), petOwner);
-
             //также назначаем поля волонтеру
             volunteer.setPetOwner(petOwner);
             volunteer.setFree(false);
-
             //и схораняем его в базу данных
             cache().getVolunteers().put(volunteer.getId(), volunteerService.putVolunteer(volunteer));
-
             //отправляем сообщения волонтеру и усыновителю,
             // что они находятся в чате друг с другом
+            String info = "С вами будет общаться волонтёр " + volunteer.getFirstName();
             sender.sendChatMessage(volunteer.getId(), msg);
-            sender.sendChatMessage(petOwner.getId(), "С вами будет общаться волонтёр " + volunteer.getFirstName());
+            sender.sendChatMessage(petOwner.getId(), info);
+            return info;
         } catch (NotFoundInDataBaseException e) {
             sender.sendMessage(chatId, e.getMessage());
+            return e.getMessage();
         }
     }
 
@@ -118,43 +117,36 @@ public class VolunteerAndPetOwnerChat<A extends Animal, R extends Report> {
     public boolean stopChat(Long petOwnerId, Long volunteerId, String msg) {
         if ("Прекратить чат".equals(msg)) {
             if (volunteerId == null) {
-
                 //находим усыновителя в базе
                 PetOwner petOwner = cache().getPetOwnersById().get(petOwnerId);
-
                 //через усыновителя находим волонтера и применяем метод из сервиса
                 Volunteer volunteer = cache().getVolunteers()
-                        .put(petOwner.getVolunteer().getId(), volunteerService.setFree(petOwner.getVolunteer().getId(), true));
-
+                        .put(petOwner.getVolunteer().getId(),
+                                volunteerService.setFree(
+                                        petOwner.getVolunteer().getId(), true));
                 //назначаем усыновителю новые значения полей
                 petOwner.setVolunteerChat(false);
                 petOwner.setVolunteer(null);
-
                 //кладём усыновителя обратно в базу
-                cache().getPetOwnersById().put(petOwner.getId(), petOwnersService.putPetOwner(petOwner));
+                cache().getPetOwnersById().put(petOwner.getId(),
+                        petOwnersService.putPetOwner(petOwner));
                 sender.sendMessage(petOwner.getId(), "Вы закончили чат");
                 sender.sendMessage(volunteer.getId(), "Вы закончили чат");
-
                 sender.sendStartMessage(petOwner.getId());
                 return true;
             }
             if (petOwnerId == null) {
-
                 //находим волонтера в базе
                 Volunteer volunteer = cache().getVolunteers().get(volunteerId);
-
                 //через волонтера находим усыновителя в базе и применяем метод из сервиса
                 PetOwner petOwner = cache().getPetOwnersById()
                         .put(volunteer.getPetOwner().getId(), petOwnersService.setPetOwnerToVolunteerChat(
                                 volunteer.getPetOwner().getId(), null, false));
-
                 //назначаем волонтеру новые значения полей
                 volunteer.setPetOwner(null);
                 volunteer.setFree(true);
-
                 //кладём волонтера обратно в базу
-                cacheKeeper.getCache().getVolunteers().put(volunteer.getId(), volunteerService.putVolunteer(volunteer));
-
+                cache().getVolunteers().put(volunteer.getId(), volunteerService.putVolunteer(volunteer));
                 sender.sendMessage(volunteer.getId(), "Вы закончили чат");
                 sender.sendMessage(petOwner.getId(), "Вы закончили чат");
                 sender.sendStartMessage(petOwner.getId());
@@ -172,21 +164,21 @@ public class VolunteerAndPetOwnerChat<A extends Animal, R extends Report> {
      * @param volunteerId личный id волонтёра
      * @param msg         текстовое сообщение
      */
-    public void continueChat(Long petOwnerId, Long volunteerId, String msg) {
-
+    public boolean continueChat(Long petOwnerId, Long volunteerId, String msg) {
         //этот метод осуществляет одновременно и проверку и, в случае успешной проверки, завершает чат
         if (!stopChat(petOwnerId, volunteerId, msg)) {
-
             //в случае, если сообщение отправляет усыновитель
             if (petOwnerId != null && volunteerId == null) {
                 sendToVolunteer(petOwnerId, msg);
+                return true;
             }
-
             //в случае, если сообщение отправил волонтёр
             if (volunteerId != null && petOwnerId == null) {
                 sendToPetOwner(volunteerId, msg);
+                return true;
             }
         }
+        return false;
     }
 
     /**

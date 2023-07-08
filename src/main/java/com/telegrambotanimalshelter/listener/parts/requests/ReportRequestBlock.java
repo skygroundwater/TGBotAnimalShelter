@@ -67,7 +67,7 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
         this.cashedNoneReportedPetNames = new HashMap<>();
     }
 
-    private Cache<A, R> cache(){
+    private Cache<A, R> cache() {
         return cacheKeeper.getCache();
     }
 
@@ -179,13 +179,14 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
      * присваивается значение true и отправляется
      * в кеш и в базу данных.
      */
-    public void startReportFromPetOwner(Long chatId) {
+    public PetOwner startReportFromPetOwner(Long chatId) {
         PetOwner petOwner = cache().getPetOwnersById().get(chatId);
         if (petOwner != null && petOwner.isHasPets()) {
-            cache().getPetOwnersById().put(chatId,
+            petOwner = cache().getPetOwnersById().put(chatId,
                     petOwnersService.setPetOwnerReportRequest(chatId, true));
             chooseAnyPetMessages(chatId);
         } else sender.sendMessage(chatId, "У вас нет животных");
+        return petOwner;
     }
 
     /**

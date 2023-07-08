@@ -59,4 +59,9 @@ public class Cache<A extends Animal, R extends Report> {
         this.catImages = new ArrayList<>();
         this.dogImages = new ArrayList<>();
     }
+
+    public void clear(){
+        volunteers.clear();
+        petOwnersById.clear();
+    }
 }

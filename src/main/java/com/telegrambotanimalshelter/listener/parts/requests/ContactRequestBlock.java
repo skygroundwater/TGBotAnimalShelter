@@ -108,9 +108,9 @@ public class ContactRequestBlock<A extends Animal, R extends Report> {
      * пользователя на то, является ли он на данный момент
      * в блоке записи контактов.
      */
-    public void sendMessageToTakeName(Long chatId) {
-        cache().getPetOwnersById().put(chatId, petOwnersService.setPetOwnerContactRequest(chatId, true));
+    public PetOwner sendMessageToTakeName(Long chatId) {
         sender.sendMessage(chatId, "Введите ваше имя после префикса *Имя: * \uD83E\uDEAA Не забудьте пробел после двоеточия.");
+        return cache().getPetOwnersById().put(chatId, petOwnersService.setPetOwnerContactRequest(chatId, true));
     }
 
     /**
