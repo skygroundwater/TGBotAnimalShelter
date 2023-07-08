@@ -3,11 +3,12 @@ package com.telegrambotanimalshelter.utils;
 import com.pengrad.telegrambot.BotUtils;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Update;
-import com.pengrad.telegrambot.model.request.*;
-import com.pengrad.telegrambot.request.SendChatAction;
+import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
+import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.SendResponse;
 import com.telegrambotanimalshelter.models.animals.Animal;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,10 +43,14 @@ public class MessageSenderTest<A extends Animal> {
     @InjectMocks
     private MessageSender<A> sender;
 
+    public MessageSenderTest() throws IOException, URISyntaxException {
+    }
+
+    final String json = Files.readString(Path.of(MessageSenderTest.class.getResource("update.json").toURI()));
+
+
     @Test
-    public void shouldSendStartMessage() throws IOException, URISyntaxException {
-        String json = Files.readString(Path.of(
-                "/Users/olegmetelev/IdeaProjects/TGBotAnimalShelter/src/test/resources/com.telegrambotanimalshelter.listener/update.json"));
+    public void shouldSendStartMessage() {
 
         Update update = BotUtils.fromJson(json.replace(
                 "%text%", "/start"), Update.class);
@@ -68,9 +73,7 @@ public class MessageSenderTest<A extends Animal> {
     }
 
     @Test
-    public void shouldSendMessage() throws IOException {
-        String json = Files.readString(Path.of(
-                "/Users/olegmetelev/IdeaProjects/TGBotAnimalShelter/src/test/resources/com.telegrambotanimalshelter.listener/update.json"));
+    public void shouldSendMessage() {
         Update update = BotUtils.fromJson(json.replace(
                 "%text%", "/start"), Update.class);
         when(telegramBot.execute(any())).thenReturn(BotUtils.fromJson(
@@ -91,9 +94,7 @@ public class MessageSenderTest<A extends Animal> {
     }
 
     @Test
-    public void shouldSendMessageForChat() throws IOException {
-        String json = Files.readString(Path.of(
-                "/Users/olegmetelev/IdeaProjects/TGBotAnimalShelter/src/test/resources/com.telegrambotanimalshelter.listener/update.json"));
+    public void shouldSendMessageForChat() {
         Update update = BotUtils.fromJson(json.replace(
                 "%text%", "/start"), Update.class);
         when(telegramBot.execute(any())).thenReturn(BotUtils.fromJson(
@@ -115,10 +116,9 @@ public class MessageSenderTest<A extends Animal> {
         Assertions.assertEquals(actual.getParameters().get("text"), messageText);
     }
 
+    @SneakyThrows
     @Test
-    public void shouldReturnSendResponse() throws IOException {
-        String json = Files.readString(Path.of(
-                "/Users/olegmetelev/IdeaProjects/TGBotAnimalShelter/src/test/resources/com.telegrambotanimalshelter.listener/update.json"));
+    public void shouldReturnSendResponse() {
         Update update = BotUtils.fromJson(json.replace(
                 "%text%", "/start"), Update.class);
         when(telegramBot.execute(any())).thenReturn(BotUtils.fromJson(

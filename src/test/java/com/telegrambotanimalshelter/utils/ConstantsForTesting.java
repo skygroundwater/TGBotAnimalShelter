@@ -51,6 +51,25 @@ public class ConstantsForTesting {
                     volunteer1.getId(), volunteer1,
                     volunteer2.getId(), volunteer2));
 
+    public static final Volunteer volunteer3 =
+            new Volunteer(
+                    8L, "@afrodita",
+                    "Афродита", "Боговиева",
+                    "afrodita", true,
+                    false,false,null);
+
+    public static final Volunteer volunteer4 =
+            new Volunteer(
+                    6L, "@sohoncev",
+                    "Владимир", "Сохонцев",
+                    "sohonets", true,
+                    false,false,null);
+
+    public static final Map<Long, Volunteer> volunteersForContactRequestBlock =
+            new HashMap<>(Map.of(
+                    volunteer3.getId(), volunteer3,
+                    volunteer4.getId(), volunteer4));
+
     public static final List<CatReport> catReports =
             new ArrayList<>();
 

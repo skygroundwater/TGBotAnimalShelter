@@ -63,7 +63,8 @@ class PetOwnersServiceImplTest {
 
     @Test
     void findPetOwner() {
-        when(petOwnersRepository.findById(1L)).thenReturn(Optional.ofNullable(petOwner));
+        when(petOwnersRepository.findById(1L))
+                .thenReturn(Optional.ofNullable(petOwner));
 
         assertEquals(petOwnersService.findPetOwner(1L), petOwner);
     }

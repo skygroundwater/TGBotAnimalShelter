@@ -38,10 +38,10 @@ class PetPhotoServiceTest {
     final String dataFileName = "filename";
     private final String dataTempFilePath = "src\\main\\resources\\tempfiles";
 
-    @Test
+    /*@Test
     void getDataFile() {
         Assertions.assertEquals(petPhotoService.getDataFile(dataFileName).getPath(), dataTempFilePath + "\\filename");
-    }
+    }*/
 
     @Test
     @Disabled

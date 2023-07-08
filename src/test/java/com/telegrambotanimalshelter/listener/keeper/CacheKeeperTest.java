@@ -222,6 +222,23 @@ public class CacheKeeperTest<A extends Animal, R extends Report> {
 
     @Test
     public void createReportFromPetOwner_ReturnsPetOwnerWhoCreatedReport(){
+        PetOwner petOwner1 = new PetOwner(
+                2L, "Карапет",
+                "Карапетов", "karapet",
+                LocalDateTime.now(),false
+        );
+
+        PetOwner petOwner2 = new PetOwner(
+                1L, "Пузанок",
+                "Пузанов", "puzanok",
+                LocalDateTime.now(), false
+        );
+
+        Map<Long, PetOwner> petOwners =
+                new HashMap<>(Map.of(
+                        petOwner1.getId(), petOwner1,
+                        petOwner2.getId(), petOwner2));
+        when(cache.getPetOwnersById()).thenReturn(petOwners);
         //when
         PetOwner testingPetOwner = out.createReportForAnimal(petOwner1.getId(), (A) dog1);
         //then

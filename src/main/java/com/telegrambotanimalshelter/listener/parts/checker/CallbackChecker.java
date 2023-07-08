@@ -16,6 +16,7 @@ import com.telegrambotanimalshelter.listener.parts.requests.ContactRequestBlock;
 import com.telegrambotanimalshelter.listener.parts.requests.ReportRequestBlock;
 import com.telegrambotanimalshelter.listener.parts.requests.VolunteerAndPetOwnerChat;
 import com.telegrambotanimalshelter.listener.parts.volunteerblock.VolunteerBlock;
+import com.telegrambotanimalshelter.models.PetOwner;
 import com.telegrambotanimalshelter.models.Shelter;
 import com.telegrambotanimalshelter.models.animals.Animal;
 import com.telegrambotanimalshelter.models.animals.Cat;
@@ -25,6 +26,8 @@ import com.telegrambotanimalshelter.models.reports.Report;
 import com.telegrambotanimalshelter.utils.MessageSender;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+
+import java.util.Optional;
 
 import static com.telegrambotanimalshelter.utils.Constants.catShelterName;
 import static com.telegrambotanimalshelter.utils.Constants.dogShelterName;
@@ -91,7 +94,7 @@ public class CallbackChecker<A extends Animal, R extends Report, I extends AppIm
      * @see IntroductionPart
      * @see MessageSender
      */
-    public void callbackQueryCheck(CallbackQuery callbackQuery) {
+    public Optional<Object> callbackQueryCheck(CallbackQuery callbackQuery) {
 
         String data = callbackQuery.data();
         Long chatId = callbackQuery.from().id();
@@ -104,9 +107,9 @@ public class CallbackChecker<A extends Animal, R extends Report, I extends AppIm
             sender.sendStartMessage(chatId);
         }
 
-        if ("_contacts".equals(data)) contactBlock.sendMessageToTakeName(chatId);
-        if ("_report".equals(data)) reportRequestBlock.startReportFromPetOwner(chatId);
-        if ("i_am_volunteer".equals(data)) volunteerBlock.startWorkWithVolunteer(chatId);
+        if ("_contacts".equals(data)) return Optional.ofNullable(contactBlock.sendMessageToTakeName(chatId));
+        if ("_report".equals(data)) return Optional.ofNullable(reportRequestBlock.startReportFromPetOwner(chatId));
+        if ("i_am_volunteer".equals(data)) return Optional.ofNullable(volunteerBlock.startWorkWithVolunteer(chatId));
 
         if ("_get_cat".equals(data)) {
             choosePetForPotentialOwnerBlock.sendNotShelteredAnimals(data, chatId);
@@ -121,17 +124,17 @@ public class CallbackChecker<A extends Animal, R extends Report, I extends AppIm
         if ("_animal_approve".equals(data)) choosePetForPotentialOwnerBlock.getPetFromShelter(animal, chatId);
 
         if ("volunteer".equals(data)) {
-            chat.startChat(chatId, "Здравствуйте. С вами хочет поговорить усыновитель. " + callbackQuery.from().firstName());
+            return Optional.ofNullable(chat.startChat(chatId, "Здравствуйте. С вами хочет поговорить усыновитель. " + callbackQuery.from().firstName()));
         }
         if ((dogShelterName + "_first_meeting").equals(data)) {
-            becomingPart.firstMeetingWithDog(callbackQuery.from().id(), dogShelter);
+            return Optional.ofNullable(becomingPart.firstMeetingWithDog(callbackQuery.from().id(), dogShelter));
         }
-        String preFix = data.split("_")[0];
-        if (preFix.equals(dogShelterName)) {
+        if (data.contains(dogShelterName)) {
             callBackQueryConstantCheck(callbackQuery, dogShelter);
-        } else if (preFix.equals(catShelterName)) {
+        } else if (data.contains(catShelterName)) {
             callBackQueryConstantCheck(callbackQuery, catShelter);
         }
+        return Optional.empty();
     }
 
     /** Если пользователь юзает одну из предложенных ботом кнопку, метод принимает параметр <b>callbackQuery</b> ({@link Update#callbackQuery()})
