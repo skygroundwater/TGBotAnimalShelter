@@ -163,7 +163,23 @@ class ContactRequestBlockTest<A extends Animal, R extends Report> {
 
     @Test
     void checkContactRequestStatus_ReturnsFalseIfPetOwnerIsNotInContactRequestBlock() {
+        PetOwner petOwner1 = new PetOwner(
+                2L, "Карапет",
+                "Карапетов", "karapet",
+                LocalDateTime.now(), false
+        );
+        PetOwner petOwner2 = new PetOwner(
+                1L, "Пузанок",
+                "Пузанов", "puzanok",
+                LocalDateTime.now(), false
+        );
+        Map<Long, PetOwner> petOwners =
+                new HashMap<>(Map.of(
+                        petOwner1.getId(), petOwner1,
+                        petOwner2.getId(), petOwner2));
+        cache = new Cache<>();
         cache.setPetOwnersById(petOwners);
+        when(keeper.getCache()).thenReturn(cache);
         boolean falseIfPetOwnerIsNotInContactRequestBlock =
                 out.checkContactRequestStatus(petOwner1.getId());
         assertFalse(falseIfPetOwnerIsNotInContactRequestBlock);
@@ -183,7 +199,7 @@ class ContactRequestBlockTest<A extends Animal, R extends Report> {
         PetOwner petOwner1 = new PetOwner(
                 2L, "Карапет",
                 "Карапетов", "karapet",
-                LocalDateTime.now(),false
+                LocalDateTime.now(), false
         );
         PetOwner petOwner2 = new PetOwner(
                 1L, "Пузанок",
@@ -203,18 +219,27 @@ class ContactRequestBlockTest<A extends Animal, R extends Report> {
 
     @Test
     void sendMessageToTakeName_ReturnsPetOwnerWhoGotInContactRequestBlock() {
-        PetOwner petOwner = petOwner2;
-        petOwner.setContactRequest(true);
-        cache.setPetOwnersById(petOwners);
+        Map<Long, PetOwner> petOwnersForTesting = new HashMap<>();
+        PetOwner petOwner1 = new PetOwner(
+                2L, "Карапет",
+                "Карапетов", "karapet",
+                LocalDateTime.now(), false
+        );
+        PetOwner petOwner2 = new PetOwner(
+                1L, "Пузанок",
+                "Пузанов", "puzanok",
+                LocalDateTime.now(), false
+        );
+        petOwnersForTesting.put(petOwner1.getId(), petOwner1);
+        petOwnersForTesting.put(petOwner2.getId(), petOwner2);
+        petOwner1.setContactRequest(true);
+        cache.setPetOwnersById(petOwnersForTesting);
         when(petOwnersService.setPetOwnerContactRequest(petOwner2.getId(), true))
-                .thenReturn(petOwner);
+                .thenReturn(petOwner1);
         PetOwner petOwnerForTesting =
-                out.sendMessageToTakeName(petOwner2.getId());
-        assertEquals(petOwnerForTesting, petOwner);
+                out.sendMessageToTakeName(petOwner1.getId());
+        assertEquals(petOwnerForTesting, petOwner1);
     }
-
-
-
 
 
 }
