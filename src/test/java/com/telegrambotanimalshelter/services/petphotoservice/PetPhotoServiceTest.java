@@ -36,12 +36,14 @@ class PetPhotoServiceTest {
     DogsServiceImpl dogsService;
 
     final String dataFileName = "filename";
-    private final String dataTempFilePath = "src\\main\\resources\\tempfiles";
+    final String separator = File.separator;
+    private final String dataTempFilePath = "src" + separator + "main" + separator + "resources" + separator + "tempfiles";
 
-    /*@Test
+    @Test
     void getDataFile() {
-        Assertions.assertEquals(petPhotoService.getDataFile(dataFileName).getPath(), dataTempFilePath + "\\filename");
-    }*/
+        Assertions.assertEquals(petPhotoService.getDataFile(dataFileName).getPath(),
+                dataTempFilePath + separator + "filename");
+    }
 
     @Test
     @Disabled
