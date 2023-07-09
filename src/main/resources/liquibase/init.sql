@@ -211,7 +211,6 @@ alter table images.dog_images
 
 --changeset oleg:2
 
-alter table animals.cats add reported      boolean;
 alter table animals.cats add about varchar(1000);
 alter table animals.cats add photo bytea;
 alter table animals.cats add sheltered boolean;
@@ -219,7 +218,6 @@ alter table animals.cats add sheltered boolean;
 alter table animals.cats
     owner to postgres;
 
-alter table animals.dogs add reported      boolean;
 alter table animals.dogs add about varchar(1000);
 alter table animals.dogs add photo bytea;
 alter table animals.dogs add sheltered boolean;
