@@ -1,4 +1,4 @@
-package com.telegrambotanimalshelter.listener.keeper;
+package com.telegrambotanimalshelter.listener.parts.keeper;
 
 import com.telegrambotanimalshelter.exceptions.NotFoundInDataBaseException;
 import com.telegrambotanimalshelter.listener.parts.keeper.Cache;
@@ -247,6 +247,27 @@ public class CacheKeeperTest<A extends Animal, R extends Report> {
 
     @Test
     public void findFreeVolunteer_ReturnsVolunteerWhoIsFree(){
+        //given
+        Volunteer volunteer1 =
+                new Volunteer(
+                        1L, "@afrodita",
+                        "Афродита", "Боговиева",
+                        "afrodita", true,
+                        false,false,null);
+
+        Volunteer volunteer2 =
+                new Volunteer(
+                        2L, "@sohoncev",
+                        "Владимир", "Сохонцев",
+                        "sohonets", true,
+                        false,false,null);
+
+        Map<Long, Volunteer> volunteers =
+                new HashMap<>(Map.of(
+                        volunteer1.getId(), volunteer1,
+                        volunteer2.getId(), volunteer2));
+        when(this.cache.getVolunteers())
+                .thenReturn(volunteers);
         //when
         Volunteer volunteer = out.findFreeVolunteer();
         //then
