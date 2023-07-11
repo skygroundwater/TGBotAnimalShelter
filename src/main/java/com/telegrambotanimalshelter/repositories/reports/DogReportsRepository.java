@@ -11,12 +11,10 @@ import java.util.List;
 @Repository
 public interface DogReportsRepository extends JpaRepository<DogReport, Long> {
 
-    List<DogReport> findDogReportsByPetOwner(PetOwner petOwner);
-
     List<DogReport> findDogReportsByDog(Dog dog);
 
     void deleteDogReportsByDog(Dog dog);
 
-
+    DogReport deleteDogReportById(Long id);
 
 }

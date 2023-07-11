@@ -123,6 +123,12 @@ public class AnimalShelterBotListener<A extends Animal, R extends Report, I exte
                                 volunteerBlock.reportCheckingByVolunteerBlock(chatId, message);
                             }
                             /*
+                            Далее проверяем не выбирает ли пользователь животное в данный момент
+                             */
+                            if (choosePetForOwnerBlock.checkIfPetOwnerChoosingPet(chatId)) {
+                                choosePetForOwnerBlock.choosingPetForPetOwnerBlock(chatId, message);
+                            }
+                            /*
                             Далее проверяем на статус того, является ли пользователь
                             на данный момент в чате с волонтёром
                              */
@@ -134,10 +140,6 @@ public class AnimalShelterBotListener<A extends Animal, R extends Report, I exte
                              */
                             if (chat.checkVolunteer(chatId)) {
                                 chat.continueChat(null, chatId, text);
-                            }
-
-                            if (choosePetForOwnerBlock.checkNotShelteredAnimals()) {
-                                checker.inputNameFromUser(chatId, text);
                             }
                         }
                     });

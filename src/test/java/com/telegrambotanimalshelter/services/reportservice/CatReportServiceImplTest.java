@@ -63,6 +63,6 @@ class CatReportServiceImplTest {
 
     @Test
     void deleteReport() {
-        assertEquals(catReportService.deleteReport(catReport), HttpStatus.OK);
+        assertEquals(catReportService.deleteReportById(catReport.getId()), HttpStatus.OK);
     }
 }

@@ -18,6 +18,10 @@ public interface PetOwnersService {
 
     PetOwner savePotentialPetOwner(Update update);
 
+    PetOwner setChoosingPets(Long id, boolean trueOrFalse);
+
+    PetOwner setLookingAboutPet(Long id, boolean trueOrFalse);
+
     PetOwner setPetOwnerReportRequest(Long id, boolean trueOrFalse);
 
     boolean checkReportRequestStatus(Long id);

@@ -41,12 +41,13 @@ public class Cat extends Animal {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Cat cat)) return false;
-        return id.equals(cat.id) && petOwner.equals(cat.petOwner) && reports.equals(cat.reports) && images.equals(cat.images);
+        if (o == null || getClass() != o.getClass()) return false;
+        Cat cat = (Cat) o;
+        return Objects.equals(id, cat.id) && Objects.equals(petOwner, cat.petOwner) && Objects.equals(reports, cat.reports) && Objects.equals(images, cat.images);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, petOwner, reports, images);
+        return Objects.hash(id, reports, images);
     }
 }

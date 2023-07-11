@@ -61,6 +61,20 @@ public class PetOwnersServiceImpl implements PetOwnersService {
     }
 
     @Override
+    public PetOwner setChoosingPets(Long id, boolean trueOrFalse){
+        PetOwner petOwner = findPetOwner(id);
+        petOwner.setChoosingPet(trueOrFalse);
+        return putPetOwner(petOwner);
+    }
+
+    @Override
+    public PetOwner setLookingAboutPet(Long id, boolean trueOrFalse){
+        PetOwner petOwner = findPetOwner(id);
+        petOwner.setLookingAboutPet(true);
+        return petOwner;
+    }
+
+    @Override
     public PetOwner setPetOwnerReportRequest(Long id, boolean trueOrFalse) {
         PetOwner petOwner = findPetOwner(id);
         petOwner.setReportRequest(trueOrFalse);

@@ -37,9 +37,15 @@ public class Cache<A extends Animal, R extends Report> {
 
     private List<R> cashedReports;
 
+    private List<CatReport> cachedCatReports;
+
+    private List<DogReport> cachedDogReports;
+
     private Map<Long, R> actualReportByPetOwnerId;
 
     private Map<Long, A> actualPetsInReportProcess;
+
+    private List<A> cachedAnimals;
 
     private List<CatImage> catImages;
 
@@ -58,10 +64,6 @@ public class Cache<A extends Animal, R extends Report> {
         this.cashedReports = new ArrayList<>();
         this.catImages = new ArrayList<>();
         this.dogImages = new ArrayList<>();
-    }
-
-    public void clear(){
-        volunteers.clear();
-        petOwnersById.clear();
+        this.cachedAnimals = new ArrayList<>();
     }
 }

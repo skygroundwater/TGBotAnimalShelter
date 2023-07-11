@@ -3,7 +3,6 @@ package com.telegrambotanimalshelter.services.reportservice;
 import com.telegrambotanimalshelter.models.animals.Cat;
 import com.telegrambotanimalshelter.models.images.CatImage;
 import com.telegrambotanimalshelter.models.reports.CatReport;
-import com.telegrambotanimalshelter.repositories.images.CatImagesRepository;
 import com.telegrambotanimalshelter.repositories.reports.CatReportsRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -16,13 +15,8 @@ public class CatReportServiceImpl implements ReportService<CatReport, Cat, CatIm
 
     private final CatReportsRepository reportsRepository;
 
-
-    private final CatImagesRepository catImagesRepository;
-
-    public CatReportServiceImpl(CatReportsRepository reportsRepository,
-                                CatImagesRepository catImagesRepository) {
+    public CatReportServiceImpl(CatReportsRepository reportsRepository) {
         this.reportsRepository = reportsRepository;
-        this.catImagesRepository = catImagesRepository;
     }
 
     @Override
@@ -59,8 +53,8 @@ public class CatReportServiceImpl implements ReportService<CatReport, Cat, CatIm
     }
 
     @Override
-    public HttpStatus deleteReport(CatReport report) {
-        reportsRepository.delete(report);
-        return HttpStatus.OK;
+    public String deleteReportById(Long reportId) {
+        reportsRepository.deleteById(reportId);
+        return "Отчет удалён";
     }
 }

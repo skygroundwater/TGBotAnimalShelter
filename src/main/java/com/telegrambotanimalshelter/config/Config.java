@@ -28,9 +28,12 @@ public class Config {
     @Value("${bot.owner}")
     Long ownerId;
 
+    @Value("${bot.token}")
+    String botToken;
+
     @Bean
-    public TelegramBot telegramBot(@Value("${bot.token}") String token) {
-        return new TelegramBot(token);
+    public TelegramBot telegramBot() {
+        return new TelegramBot(botToken);
     }
 
     @Bean

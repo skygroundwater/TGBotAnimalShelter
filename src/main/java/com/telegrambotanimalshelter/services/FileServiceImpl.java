@@ -68,16 +68,6 @@ public class FileServiceImpl<I extends AppImage> implements FileService<I> {
     }
 
     @Override
-    public DogImage saveDogImage(DogImage dogImage) {
-        return dogImagesRepository.save(dogImage);
-    }
-
-    @Override
-    public CatImage saveCatImage(CatImage catImage) {
-        return catImagesRepository.save(catImage);
-    }
-
-    @Override
     public List<DogImage> getAllDogImages() {
         return dogImagesRepository.findAll();
     }
@@ -95,14 +85,11 @@ public class FileServiceImpl<I extends AppImage> implements FileService<I> {
     }
 
     private byte[] downloadFile(String filePath) {
-        System.out.println(filePath);
         String fullUri = this.filePath.replace("{bot.token}", this.botToken)
                 .replace("{filePath}", filePath);
-        System.out.println(fullUri);
         URL urlObj;
         try {
             urlObj = new URL(fullUri);
-            System.out.println(urlObj);
         } catch (MalformedURLException e) {
             throw new UploadFileException(e.getMessage());
         }

@@ -26,11 +26,11 @@ public class Dog extends Animal {
     @JoinColumn(referencedColumnName = "id")
     private PetOwner petOwner;
 
-    @OneToMany(mappedBy = "dog", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "dog", fetch = FetchType.EAGER)
     @ToString.Exclude
     private List<DogReport> reports;
 
-    @OneToMany(targetEntity = DogImage.class, mappedBy = "dog", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(targetEntity = DogImage.class, mappedBy = "dog", fetch = FetchType.EAGER)
     private List<DogImage> images;
 
     public Dog(String nickname, boolean sheltered, LocalDateTime registeredAt, PetOwner petOwner, String about, byte[] photo) {
@@ -47,6 +47,6 @@ public class Dog extends Animal {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, petOwner, reports, images);
+        return Objects.hash(id, reports, images);
     }
 }

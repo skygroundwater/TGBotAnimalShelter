@@ -61,11 +61,12 @@ public class MessageSender<A extends Animal> {
         sendResponse(sendMessage);
     }
 
-    public void sendResponse(SendPhoto sendPhoto) {
+    public SendResponse sendResponse(SendPhoto sendPhoto) {
         SendResponse sendResponse = telegramBot.execute(sendPhoto);
         if (!sendResponse.isOk()) {
             logger.error("Error during sending message: {}", sendResponse.message());
         }
+        return sendResponse;
     }
 
     /**

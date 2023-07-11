@@ -51,7 +51,6 @@ public class ReportNotificationTimer<A extends Animal> {
     @Scheduled(cron = "0 0 8 * * *")
     public void notificationToSendReport() {
         StringBuilder stringBuilder = new StringBuilder();
-
         for (PetOwner petOwner : cache().getPetOwnersById().values()) {
             if (petOwner.isHasPets()) {
                 Long petOwnerId = petOwner.getId();
