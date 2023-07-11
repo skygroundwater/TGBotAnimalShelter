@@ -44,6 +44,4 @@ public class Volunteer {
     @JoinColumn(name = "petowner_id", referencedColumnName = "id")
     private PetOwner petOwner;
 
-
-
 }

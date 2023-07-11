@@ -32,13 +32,11 @@ public class PetPhotoService {
     private void init() {
         Path path = Path.of(dataTempFilePath);
         try {
-
             if (Files.notExists(path)) {
                 Files.createDirectory(path);
             }
-
         } catch (IOException e) {
-            throw new FileProcessingException("Проблема с чтением из файла");
+            System.out.println("Проблема с чтением файла");
         }
     }
 

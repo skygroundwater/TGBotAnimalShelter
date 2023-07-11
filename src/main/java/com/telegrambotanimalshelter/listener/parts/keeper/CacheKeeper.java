@@ -64,10 +64,21 @@ public class CacheKeeper<A extends Animal, R extends Report> {
 
     @PostConstruct
     private void init() {
+        fillAnimalsCache();
         fillVolunteersCache();
         fillPetOwnersCache();
         fillReportsCache();
         fillImagesCache();
+    }
+
+    public String fillAnimalsCache(){
+        catService.getAllPets().forEach(
+                cat -> cache.getCachedAnimals().add((A) cat)
+        );
+        dogService.getAllPets().forEach(
+                dog -> cache.getCachedAnimals().add((A) dog)
+        );
+        return "Кеш заполнен животными";
     }
 
     public String fillImagesCache() {
@@ -162,7 +173,6 @@ public class CacheKeeper<A extends Animal, R extends Report> {
     public Volunteer volunteerRejectReport(Long volunteerId, R report) {
         cache.getCashedReports().remove(report);
         if (report instanceof DogReport dogReport) {
-            dogReportService.deleteReport(dogReport);
             cache.getDogsByPetOwnerId().get(dogReport.getCopiedPetOwnerId())
                     .stream()
                     .filter(d -> d.getId()
@@ -172,8 +182,8 @@ public class CacheKeeper<A extends Animal, R extends Report> {
                         dog.setReported(false);
                         dogService.putPet(dog);
                     });
+            dogReportService.deleteReportById(dogReport.getId());
         } else if (report instanceof CatReport catReport) {
-            catReportService.deleteReport(catReport);
             cache.getCatsByPetOwnerId().get(catReport.getCopiedPetOwnerId())
                     .stream()
                     .filter(c -> c.getId()
@@ -183,6 +193,7 @@ public class CacheKeeper<A extends Animal, R extends Report> {
                         cat.setReported(false);
                         catService.putPet(cat);
                     });
+            catReportService.deleteReportById(catReport.getId());
         }
         cache.getVolunteers().entrySet().stream().peek(entry -> {
             if (entry.getKey().equals(volunteerId)) {
@@ -194,22 +205,20 @@ public class CacheKeeper<A extends Animal, R extends Report> {
     }
 
     public Volunteer volunteerWantsToGetOutFromOffice(Long chatId) {
-        cache.getVolunteers().entrySet().stream().peek(entry -> {
-            if (entry.getKey().equals(chatId)) {
-                entry.setValue(Stream.of(entry.getValue()).peek(vol -> {
-                    vol.setCheckingReports(false);
-                    vol.setInOffice(false);
-                    vol.setFree(true);
-                }).findFirst().get());
-            }
-        });
-        return cache.getVolunteers().get(chatId);
+        Volunteer volunteer = cache.getVolunteers().get(chatId);
+        volunteer.setCheckingReports(false);
+        volunteer.setInOffice(false);
+        volunteer.setFree(true);
+        cache.getVolunteers().put(volunteer.getId(), volunteer);
+        volunteerService.putVolunteer(volunteer);
+        return volunteer;
     }
 
     public PetOwner createReportForAnimal(Long chatId, A animal) {
         PetOwner petOwner = cache.getPetOwnersById().get(chatId);
-        if (animal instanceof Cat) {
-            CatReport catReport = CatReport.builder().cat((Cat) animal).petOwner(petOwner).images(new ArrayList<>()).build();
+        if (animal instanceof Cat cat) {
+            CatReport catReport = CatReport.builder().cat(cat)
+                    .petOwner(petOwner).images(new ArrayList<>()).build();
             catReport.setPetOwner(petOwner);
             CatReport catReportWithId = catReportService.putReport(catReport);
             cache.getActualReportByPetOwnerId().put(chatId, (R) catReportWithId);

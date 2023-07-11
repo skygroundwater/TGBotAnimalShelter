@@ -100,21 +100,23 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
                 String text = message.text();
                 String preFix = text.split(" ")[0];
                 String info = text.substring(preFix.length());
-                switch (preFix) {
-                    case "Диета:" -> {
-                        sendMessageToTakeCommonStatus(chatId, info);
+                if (!text.equals("Прервать отчет")) {
+                    switch (preFix) {
+                        case "Диета:" -> {
+                            sendMessageToTakeCommonStatus(chatId, info);
+                        }
+                        case "Состояние:" -> {
+                            sendMessageToTakeChanges(chatId, info);
+                        }
+                        case "Изменения:" -> {
+                            stopReport(chatId, info);
+                        }
+                        case "/break" -> {
+                            forcedStopReport(chatId);
+                        }
+                        default -> sendWarningLetter(chatId);
                     }
-                    case "Состояние:" -> {
-                        sendMessageToTakeChanges(chatId, info);
-                    }
-                    case "Изменения:" -> {
-                        stopReport(chatId, info);
-                    }
-                    case "/break" -> {
-                        forcedStopReport(chatId);
-                    }
-                    default -> sendWarningLetter(chatId);
-                }
+                } else forcedStopReport(chatId);
             }
     }
 
@@ -284,9 +286,9 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
         sender.sendMessage(chatId, "Вы прервали отправку отчета. Пожалуйста, не забудьте отправить его позже.");
         R report = cache().getActualReportByPetOwnerId().remove(chatId);
         if (report instanceof CatReport catReport) {
-            catReportService.deleteReport(catReport);
+            catReportService.deleteReportById(catReport.getId());
         } else if (report instanceof DogReport dogReport) {
-            dogReportService.deleteReport(dogReport);
+            dogReportService.deleteReportById(dogReport.getId());
         }
         breakReport(chatId);
     }
@@ -325,7 +327,8 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
             catImage.setCatReport(catReport);
             catImage.setCopiedReportId(catReport.getId());
             catReportService.putReport(catReport);
-            fileService.saveCatImage(catImage);
+            cache().getCashedReports().add((R) catReport);
+            cache().getCatImages().add(catImage);
         } else if (report instanceof DogReport dogReport) {
             DogImage dogImage = (dogReport.getImages().get(0));
             dogReport.setCopiedPetOwnerId(chatId);
@@ -337,7 +340,8 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
             dogImage.setDogReport(dogReport);
             dogImage.setCopiedReportId(dogReport.getId());
             dogReportService.putReport(dogReport);
-            fileService.saveDogImage(dogImage);
+            cache().getCashedReports().add((R) dogReport);
+            cache().getDogImages().add(dogImage);
         }
         //отправляем ответ и обновляем данные о пользователе в кеше и в базе данных
         sender.sendMessage(chatId, "Спасибо Вам за ваш отчет. Если будет что-то не так - волонтёр отпишетися вам. Желаем удачи.");

@@ -6,7 +6,6 @@ import com.telegrambotanimalshelter.models.reports.CatReport;
 import com.telegrambotanimalshelter.models.reports.DogReport;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.Hibernate;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -49,6 +48,12 @@ public class PetOwner {
     @Column(name = "report_request_chat")
     private boolean reportRequest;
 
+    @Column(name="choosing_pet")
+    private boolean choosingPet;
+
+    @Column(name = "looking_about_pet")
+    private boolean lookingAboutPet;
+
     @Column(name = "volunteer_chat")
     private boolean volunteerChat;
 
@@ -56,19 +61,19 @@ public class PetOwner {
     @JoinColumn(name = "volunteer_id", referencedColumnName = "id")
     private Volunteer volunteer;
 
-    @OneToMany(mappedBy = "petOwner", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "petOwner", fetch = FetchType.LAZY)
     @ToString.Exclude
     private List<CatReport> catReports;
 
-    @OneToMany(mappedBy = "petOwner", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "petOwner", fetch = FetchType.LAZY)
     @ToString.Exclude
     private List<DogReport> dogReports;
 
-    @OneToMany(mappedBy = "petOwner", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "petOwner")
     @ToString.Exclude
     private List<Cat> cats;
 
-    @OneToMany(mappedBy = "petOwner", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "petOwner")
     @ToString.Exclude
     private List<Dog> dogs;
 
@@ -89,13 +94,13 @@ public class PetOwner {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        if (o == null || getClass() != o.getClass()) return false;
         PetOwner petOwner = (PetOwner) o;
-        return getId() != null && Objects.equals(getId(), petOwner.getId());
+        return hasPets == petOwner.hasPets && contactRequest == petOwner.contactRequest && reportRequest == petOwner.reportRequest && volunteerChat == petOwner.volunteerChat && Objects.equals(id, petOwner.id) && Objects.equals(firstName, petOwner.firstName) && Objects.equals(lastName, petOwner.lastName) && Objects.equals(userName, petOwner.userName) && Objects.equals(registeredAt, petOwner.registeredAt) && Objects.equals(phoneNumber, petOwner.phoneNumber);
     }
 
     @Override
     public int hashCode() {
-        return getClass().hashCode();
+        return Objects.hash(id, firstName, lastName, userName, registeredAt, phoneNumber, hasPets, contactRequest, reportRequest, volunteerChat, volunteer);
     }
 }

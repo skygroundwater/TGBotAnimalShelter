@@ -5,6 +5,7 @@ import com.pengrad.telegrambot.model.Update;
 import com.telegrambotanimalshelter.listener.parts.keeper.Cache;
 import com.telegrambotanimalshelter.listener.parts.keeper.CacheKeeper;
 import com.telegrambotanimalshelter.models.PetOwner;
+import com.telegrambotanimalshelter.models.Volunteer;
 import com.telegrambotanimalshelter.models.animals.Animal;
 import com.telegrambotanimalshelter.models.reports.Report;
 import com.telegrambotanimalshelter.services.petownerservice.PetOwnersService;
@@ -83,14 +84,7 @@ public class ContactRequestBlock<A extends Animal, R extends Report> {
      * @see PetOwnersService#savePotentialPetOwner(Update)
      */
     public PetOwner savePotentialPetOwner(Update update) {
-        if (checkUserForVolunteerStatus(update)) {
             return petOwnersService.savePotentialPetOwner(update);
-        }else return null;
-    }
-
-    public boolean checkUserForVolunteerStatus(Update update) {
-        return cache().getVolunteers()
-                .get(update.message().chat().id()) == null;
     }
 
     /**
@@ -168,6 +162,12 @@ public class ContactRequestBlock<A extends Animal, R extends Report> {
         petOwner.setPhoneNumber(phoneNumber);
         petOwner.setContactRequest(false);
         cache().getPetOwnersById().put(petOwner.getId(), petOwner);
+        if(cache().getVolunteers().containsKey(chatId)){
+            Volunteer volunteer = cache().getVolunteers().get(chatId);
+            volunteer.setFirstName(petOwner.getFirstName());
+            volunteer.setLastName(petOwner.getLastName());
+            cacheKeeper.getVolunteerService().putVolunteer(volunteer);
+        }
         petOwnersService.putPetOwner(petOwner);
         sender.sendMessage(chatId, "Ваши контакты успешно записаны. Можете продолжить работу с нашим ботом.");
         sender.sendStartMessage(chatId);

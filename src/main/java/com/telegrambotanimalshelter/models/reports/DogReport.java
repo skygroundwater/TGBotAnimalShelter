@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(schema = "reports", name = "dog_reports")
@@ -33,9 +34,20 @@ public class DogReport extends Report {
     @ToString.Exclude
     private Dog dog;
 
-    @OneToMany(mappedBy = "dogReport", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "dogReport")
     @ToString.Exclude
     private List<DogImage> images;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DogReport dogReport = (DogReport) o;
+        return Objects.equals(id, dogReport.id);
+    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }

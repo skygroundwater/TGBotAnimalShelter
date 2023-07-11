@@ -3,7 +3,6 @@ package com.telegrambotanimalshelter.services.reportservice;
 import com.telegrambotanimalshelter.models.animals.Dog;
 import com.telegrambotanimalshelter.models.images.DogImage;
 import com.telegrambotanimalshelter.models.reports.DogReport;
-import com.telegrambotanimalshelter.repositories.images.DogImagesRepository;
 import com.telegrambotanimalshelter.repositories.reports.DogReportsRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -16,16 +15,12 @@ public class DogReportServiceImpl implements ReportService<DogReport, Dog, DogIm
 
     private final DogReportsRepository reportsRepository;
 
-    private final DogImagesRepository dogImagesRepository;
-
-    public DogReportServiceImpl(DogReportsRepository reportsRepository, DogImagesRepository dogImagesRepository) {
+    public DogReportServiceImpl(DogReportsRepository reportsRepository) {
         this.reportsRepository = reportsRepository;
-        this.dogImagesRepository = dogImagesRepository;
     }
 
     @Override
     public DogReport postReport(DogReport dogReport, MultipartFile... multipartFiles) {
-
         reportsRepository.save(dogReport);
         return reportsRepository.save(dogReport);
     }
@@ -53,8 +48,8 @@ public class DogReportServiceImpl implements ReportService<DogReport, Dog, DogIm
     }
 
     @Override
-    public HttpStatus deleteReport(DogReport report) {
-        reportsRepository.delete(report);
-        return HttpStatus.OK;
+    public String deleteReportById(Long reportId) {
+        reportsRepository.deleteById(reportId);
+        return "Отчет удалён";
     }
 }

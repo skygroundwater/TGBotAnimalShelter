@@ -76,7 +76,9 @@ public class VolunteerBlock<A extends Animal, R extends Report, I extends AppIma
         if (checkVolunteer(chatId)) {
             if (volunteer != null) {
                 volunteer.setInOffice(true);
+                volunteer.setFree(false);
                 cache().getVolunteers().put(chatId, volunteer);
+                cacheKeeper.getVolunteerService().putVolunteer(volunteer);
                 sender.sendResponse(new SendMessage(chatId,
                         "Здравствуйте, " + volunteer.getFirstName() + ". Спасибо, что помогаете нам, мы очень это ценим")
                         .replyMarkup(volunteerKeyboardInOffice()));
@@ -99,6 +101,7 @@ public class VolunteerBlock<A extends Animal, R extends Report, I extends AppIma
         R report = cachedCheckingReports.get(chatId);
         report.setCheckedByVolunteer(true);
         cacheKeeper.volunteerAcceptReport(chatId, report);
+        cachedCheckingReports.remove(chatId);
         sender.sendResponse(new SendMessage(chatId, "Вы приняли отчёт. Продолжим или хотите прервать процесс?")
                 .replyMarkup(volunteerKeyboardInOffice()));
     }
@@ -106,6 +109,7 @@ public class VolunteerBlock<A extends Animal, R extends Report, I extends AppIma
     private void rejectReport(Long chatId) {
         R report = cachedCheckingReports.get(chatId);
         cacheKeeper.volunteerRejectReport(chatId, report);
+        cachedCheckingReports.remove(chatId);
         sender.sendMessage(report.getCopiedPetOwnerId(), """
                 Дорогой усыновитель, мы заметили, что ты заполняешь отчет не так подробно,
                  как необходимо. Пожалуйста, подойди ответственнее к этому занятию.
@@ -118,12 +122,14 @@ public class VolunteerBlock<A extends Animal, R extends Report, I extends AppIma
 
     private void forcedStopCheckReport(Long chatId) {
         cacheKeeper.volunteerWantsToGetOutFromOffice(chatId);
+        cachedCheckingReports.remove(chatId);
         sender.sendMessage(chatId, "Вы вышли из кабинета волонтера");
         sender.sendStartMessage(chatId);
     }
 
     private void getOut(Long chatId) {
         cacheKeeper.volunteerWantsToGetOutFromOffice(chatId);
+        cachedCheckingReports.remove(chatId);
         sender.sendMessage(chatId, "Вы вышли из кабинета волонтера");
         sender.sendStartMessage(chatId);
     }
@@ -147,9 +153,11 @@ public class VolunteerBlock<A extends Animal, R extends Report, I extends AppIma
             cache().getVolunteers().put(chatId, volunteer);
         } else {
             for (R report : reports) {
-                if (!report.isCheckedByVolunteer()) {
-                    sendMessageWithUncheckedReportForVolunteer(chatId, report);
-                    return;
+                if (!report.getCopiedPetOwnerId().equals(chatId)) {
+                    if (!report.isCheckedByVolunteer()) {
+                        sendMessageWithUncheckedReportForVolunteer(chatId, report);
+                        return;
+                    }
                 }
             }
         }

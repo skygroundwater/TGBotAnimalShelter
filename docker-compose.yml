@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+  postgres:
+    image: "postgres:15"
+    container_name: 'tg_bot_animal_shelter_java_postgres'
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: animal_shelter
+      POSTGRES_HOST_AUTH_METHOD: trust
+
+  bot:
+    build: ./
+    container_name: 'tg_bot_animal_shelter_java_bot'
+    ports:
+      - 8080:8080

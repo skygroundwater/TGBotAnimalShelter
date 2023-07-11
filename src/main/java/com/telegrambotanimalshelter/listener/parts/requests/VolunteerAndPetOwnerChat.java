@@ -1,5 +1,6 @@
 package com.telegrambotanimalshelter.listener.parts.requests;
 
+import com.pengrad.telegrambot.model.Update;
 import com.telegrambotanimalshelter.exceptions.NotFoundInDataBaseException;
 import com.telegrambotanimalshelter.listener.parts.keeper.Cache;
 import com.telegrambotanimalshelter.listener.parts.keeper.CacheKeeper;
@@ -80,29 +81,39 @@ public class VolunteerAndPetOwnerChat<A extends Animal, R extends Report> {
      * @param msg    текстовое сообщение от пользователя
      */
     public String startChat(Long chatId, String msg) {
-
         //вызов метода может происходить только со стороны усыновителя
         //поэтому находим сначала любого свободного волонтера
-        try {
-            Volunteer volunteer = cacheKeeper.findFreeVolunteer();
-            //назначем поля усыновителю в базе данных и одновременно возвращаем его из метода
-            PetOwner petOwner = petOwnersService.setPetOwnerToVolunteerChat(chatId, volunteer, true);
-            cache().getPetOwnersById().put(petOwner.getId(), petOwner);
-            //также назначаем поля волонтеру
-            volunteer.setPetOwner(petOwner);
-            volunteer.setFree(false);
-            //и схораняем его в базу данных
-            cache().getVolunteers().put(volunteer.getId(), volunteerService.putVolunteer(volunteer));
-            //отправляем сообщения волонтеру и усыновителю,
-            // что они находятся в чате друг с другом
-            String info = "С вами будет общаться волонтёр " + volunteer.getFirstName();
-            sender.sendChatMessage(volunteer.getId(), msg);
-            sender.sendChatMessage(petOwner.getId(), info);
+        if (checkUserForVolunteerStatus(chatId)) {
+            try {
+                Volunteer volunteer = cacheKeeper.findFreeVolunteer();
+                //назначем поля усыновителю в базе данных и одновременно возвращаем его из метода
+                PetOwner petOwner = petOwnersService.setPetOwnerToVolunteerChat(chatId, volunteer, true);
+                cache().getPetOwnersById().put(petOwner.getId(), petOwner);
+                //также назначаем поля волонтеру
+                volunteer.setPetOwner(petOwner);
+                volunteer.setFree(false);
+                //и схораняем его в базу данных
+                cache().getVolunteers().put(volunteer.getId(), volunteerService.putVolunteer(volunteer));
+                //отправляем сообщения волонтеру и усыновителю,
+                // что они находятся в чате друг с другом
+                String info = "С вами будет общаться волонтёр " + volunteer.getFirstName();
+                sender.sendChatMessage(volunteer.getId(), msg);
+                sender.sendChatMessage(petOwner.getId(), info);
+                return info;
+            } catch (NotFoundInDataBaseException e) {
+                sender.sendMessage(chatId, e.getMessage());
+                return e.getMessage();
+            }
+        } else {
+            String info = "Вы сами являетесь волонтёром";
+            sender.sendMessage(chatId, info);
             return info;
-        } catch (NotFoundInDataBaseException e) {
-            sender.sendMessage(chatId, e.getMessage());
-            return e.getMessage();
         }
+    }
+
+    public boolean checkUserForVolunteerStatus(Long chatId) {
+        return cache().getVolunteers()
+                .get(chatId) == null;
     }
 
     /**
