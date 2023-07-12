@@ -160,6 +160,7 @@ public class VolunteerBlock<A extends Animal, R extends Report, I extends AppIma
                     }
                 }
             }
+            sender.sendMessage(chatId, "На данный момент отчетов усыновители не предоставляли");
         }
     }
 
