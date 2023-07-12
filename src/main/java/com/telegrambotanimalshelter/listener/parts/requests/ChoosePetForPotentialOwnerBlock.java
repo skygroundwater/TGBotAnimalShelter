@@ -78,13 +78,13 @@ public class ChoosePetForPotentialOwnerBlock<A extends Animal, R extends Report>
         cashedNoneShelteredAnimalsForChoosing.put(chatId, new ArrayList<>());
         switch (shelterType) {
             case DOGS_SHELTER -> cache().getCachedAnimals().stream().filter(
-                    animal -> animal instanceof Dog
+                    animal -> animal instanceof Dog && !animal.isSheltered()
             ).forEach(dog -> {
                 replyMarkup.addRow(dog.getNickName());
                 cashedNoneShelteredAnimalsForChoosing.get(chatId).add(dog);
             });
             case CATS_SHELTER -> cache().getCachedAnimals().stream().filter(
-                    animal -> animal instanceof Cat
+                    animal -> animal instanceof Cat && !animal.isSheltered()
             ).forEach(cat -> {
                 replyMarkup.addRow(cat.getNickName());
                 cashedNoneShelteredAnimalsForChoosing.get(chatId).add(cat);
@@ -96,7 +96,7 @@ public class ChoosePetForPotentialOwnerBlock<A extends Animal, R extends Report>
 
     private SendResponse petOwnerIsLookingInfoAboutPetBlock(Long chatId, Message message) {
         String text = message.text();
-        Animal animal = showingAnimalsByPetOwnerID.get(chatId);
+        A animal = showingAnimalsByPetOwnerID.get(chatId);
         switch (text) {
             case "Посмотреть информацию о будущем питомце":
                 return getAnimalInfo(animal, chatId);
@@ -214,8 +214,9 @@ public class ChoosePetForPotentialOwnerBlock<A extends Animal, R extends Report>
         }
     }
 
-    public SendResponse getPetFromShelter(Animal animal, Long chatId) {
+    public SendResponse getPetFromShelter(A animal, Long chatId) {
         PetOwner petOwner = cache().getPetOwnersById().get(chatId);
+        cashedNoneShelteredAnimalsForChoosing.remove(animal);
         if (animal instanceof Cat cat) {
             cat.setSheltered(true);
             petOwner.setHasPets(true);

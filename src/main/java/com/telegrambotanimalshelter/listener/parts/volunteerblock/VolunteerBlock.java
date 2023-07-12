@@ -43,7 +43,7 @@ public class VolunteerBlock<A extends Animal, R extends Report, I extends AppIma
         this.cachedCheckingReports = new HashMap<>();
     }
 
-    private Cache<A, R> cache(){
+    private Cache<A, R> cache() {
         return cacheKeeper.getCache();
     }
 
@@ -193,10 +193,30 @@ public class VolunteerBlock<A extends Animal, R extends Report, I extends AppIma
     }
 
     private void sendReportInfoByText(Long chatId, R report) {
-        String info = "*Диета питомца:* " + report.getDiet() + "\n\n" +
-                "*Состояние питомца:* " + report.getCommonDescriptionOfStatus() + "\n\n" +
-                "*Изменения: *" + report.getBehavioralChanges();
-        SendMessage sendMessage = new SendMessage(chatId, info);
+        StringBuilder stringBuilder = new StringBuilder();
+        if (report instanceof DogReport) {
+            stringBuilder
+                    .append("Отчет о собачке от ")
+                    .append(cache().getPetOwnersById()
+                            .get(report.getCopiedPetOwnerId())
+                            .getFirstName())
+                    .append("\n\n");
+        } else if (report instanceof CatReport) {
+            stringBuilder
+                    .append("Отчет о собачке от ")
+                    .append(cache().getPetOwnersById()
+                            .get(report.getCopiedPetOwnerId())
+                            .getFirstName())
+                    .append("\n\n");
+        }
+        stringBuilder.append("*Диета питомца:* ")
+                .append(report.getDiet())
+                .append("\n\n").append("*Состояние питомца:* ")
+                .append(report.getCommonDescriptionOfStatus())
+                .append("\n\n").append("*Изменения: *")
+                .append(report.getBehavioralChanges());
+        SendMessage sendMessage =
+                new SendMessage(chatId, stringBuilder.toString());
         sendMessage.replyMarkup(volunteerKeyboardWhileCheckingReport());
         sender.sendResponse(sendMessage);
     }

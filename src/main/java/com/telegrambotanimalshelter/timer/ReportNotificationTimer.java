@@ -48,18 +48,18 @@ public class ReportNotificationTimer<A extends Animal> {
         return cacheKeeper.getCache();
     }
 
-    @Scheduled(cron = "0 0 8 * * *")
+    @Scheduled(cron = "0 20 9 * * *")
     public void notificationToSendReport() {
         StringBuilder stringBuilder = new StringBuilder();
         for (PetOwner petOwner : cache().getPetOwnersById().values()) {
             if (petOwner.isHasPets()) {
                 Long petOwnerId = petOwner.getId();
-                for (Dog dog : cache().getDogsByPetOwnerId().get(petOwnerId)) {
+                for (Dog dog : cacheKeeper.getDogByPetOwnerIdFromCache(petOwnerId)) {
                     if (!dog.isReported()) {
                         stringBuilder.append(dog.getNickName()).append(" ");
                     }
                 }
-                for (Cat cat : cache().getCatsByPetOwnerId().get(petOwnerId)) {
+                for (Cat cat : cacheKeeper.getCatsByPetOwnerIdFromCache(petOwnerId)) {
                     if (!cat.isReported()) {
                         stringBuilder.append(cat.getNickName()).append(" ");
                     }
@@ -69,7 +69,7 @@ public class ReportNotificationTimer<A extends Animal> {
         }
     }
 
-    @Scheduled(cron = "0 50 7 * * *")
+    @Scheduled(cron = "0 50 8 * * *")
     public void resetReporting() {
         cacheKeeper.setAllAnimalsReportedToFalse();
     }

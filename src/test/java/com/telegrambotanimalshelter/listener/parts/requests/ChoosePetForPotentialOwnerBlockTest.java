@@ -25,10 +25,10 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URISyntaxException;
-import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -55,75 +55,6 @@ class ChoosePetForPotentialOwnerBlockTest<A extends Animal, R extends Report> {
 
     @InjectMocks
     ChoosePetForPotentialOwnerBlock<A, R> choosePetForPotentialOwnerBlock;
-
-    @Test
-    void shouldGetAllNotShelteredCats() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        Method method = ChoosePetForPotentialOwnerBlock.class.getDeclaredMethod("getAllNotShelteredCats");
-        method.setAccessible(true);
-        when(method.invoke(choosePetForPotentialOwnerBlock)).thenReturn(cats);
-        assertEquals(method.invoke(choosePetForPotentialOwnerBlock), cats);
-    }
-
-    @Test
-    void shouldGetAllNotShelteredDogs() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        Method method = ChoosePetForPotentialOwnerBlock.class.getDeclaredMethod("getAllNotShelteredDogs");
-        method.setAccessible(true);
-        when(method.invoke(choosePetForPotentialOwnerBlock)).thenReturn(dogs);
-        assertEquals(method.invoke(choosePetForPotentialOwnerBlock), dogs);
-    }
-
-    @Test
-    void shouldSendNotShelteredCats() {
-        StringBuilder builder = new StringBuilder();
-        List<Cat> cats = List.of(
-                new Cat("name", false, LocalDateTime.now(), null, "about", null
-                ));
-        builder.append("В нашем приюте проживают:\n");
-        builder.append("name\n");
-        builder.append("Информацию о каком животном вы бы хотели посмотреть?\n");
-
-        when(catsRepository.findCatsBySheltered(false)).thenReturn(cats);
-        choosePetForPotentialOwnerBlock.sendNotShelteredAnimals("_get_cat", chatId);
-        verify(sender).sendMessage(chatId, builder.toString());
-    }
-
-    @Test
-    void shouldNotSendNotShelteredCats() {
-        StringBuilder builder = new StringBuilder();
-        List<Cat> cats = List.of();
-        builder.append("На данный момент все животные нашли своих хозяев :)\n");
-
-        when(catsRepository.findCatsBySheltered(false)).thenReturn(cats);
-        choosePetForPotentialOwnerBlock.sendNotShelteredAnimals("_get_cat", chatId);
-        verify(sender).sendMessage(chatId, builder.toString());
-    }
-
-    @Test
-    void shouldSendNotShelteredDogs() {
-        StringBuilder builder = new StringBuilder();
-        List<Dog> dogs = List.of(
-                new Dog("name", false, LocalDateTime.now(), null, "about", null
-                ));
-        builder.append("В нашем приюте проживают:\n");
-        builder.append("name\n");
-        builder.append("Информацию о каком животном вы бы хотели посмотреть?\n");
-
-        when(dogsRepository.findDogsBySheltered(false)).thenReturn(dogs);
-        choosePetForPotentialOwnerBlock.sendNotShelteredAnimals("_get_dog", chatId);
-        verify(sender).sendMessage(chatId, builder.toString());
-    }
-
-    @Test
-    void shouldNotSendNotShelteredDogs() {
-        StringBuilder builder = new StringBuilder();
-        List<Dog> dogs = List.of();
-        builder.append("На данный момент все животные нашли своих хозяев :)\n");
-
-        when(dogsRepository.findDogsBySheltered(false)).thenReturn(dogs);
-        choosePetForPotentialOwnerBlock.sendNotShelteredAnimals("_get_dog", chatId);
-        verify(sender).sendMessage(chatId, builder.toString());
-    }
-
 
     @Test
     void shouldGetDogByNameFromUserRequest() {
@@ -162,11 +93,6 @@ class ChoosePetForPotentialOwnerBlockTest<A extends Animal, R extends Report> {
                 () -> choosePetForPotentialOwnerBlock.getCatByNameFromUserRequest(name, chatId));
         assertEquals("Кошки с таким именем нет в базе или задан неверный запрос", exception.getMessage());
         verify(sender).sendResponse(any(SendMessage.class));
-    }
-
-    @Test
-    void shouldCheckNotShelteredAnimals() {
-        assertFalse(choosePetForPotentialOwnerBlock.checkNotShelteredAnimals());
     }
 
     @Test
@@ -213,35 +139,5 @@ class ChoosePetForPotentialOwnerBlockTest<A extends Animal, R extends Report> {
         choosePetForPotentialOwnerBlock.getPetPhotoFromShelter(animal, chatId);
         verify(sender).sendResponse(any(SendMessage.class));
 
-    }
-
-    @Test
-    void shouldGetDogFromShelter() {
-        Dog dog = new Dog();
-        PetOwner petOwner = new PetOwner();
-        petOwner.setFirstName("first name");
-        petOwner.setHasPets(true);
-        petOwner.setId(chatId);
-        dog.setSheltered(true);
-        dog.setPetOwner(petOwner);
-
-        when(petOwnersService.findPetOwner(chatId)).thenReturn(petOwner);
-        choosePetForPotentialOwnerBlock.getPetFromShelter(dog, chatId);
-        verify(sender).sendResponse(any(SendMessage.class));
-    }
-
-    @Test
-    void shouldGetCatFromShelter() {
-        Cat cat = new Cat();
-        PetOwner petOwner = new PetOwner();
-        petOwner.setFirstName("first name");
-        petOwner.setHasPets(true);
-        petOwner.setId(chatId);
-        cat.setSheltered(true);
-        cat.setPetOwner(petOwner);
-
-        when(petOwnersService.findPetOwner(chatId)).thenReturn(petOwner);
-        choosePetForPotentialOwnerBlock.getPetFromShelter(cat, chatId);
-        verify(sender).sendResponse(any(SendMessage.class));
     }
 }

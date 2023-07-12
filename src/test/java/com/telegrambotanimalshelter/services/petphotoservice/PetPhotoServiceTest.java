@@ -46,11 +46,6 @@ class PetPhotoServiceTest {
     }
 
     @Test
-    @Disabled
-    void createNewFileIfNotExist() {
-    }
-
-    @Test
     void getPetPhotoIfPhotoIsNull() throws URISyntaxException, IOException {
         Animal animal1 = new Cat();
         animal1.setNickName("name");
