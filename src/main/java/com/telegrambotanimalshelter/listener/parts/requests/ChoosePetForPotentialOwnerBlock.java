@@ -78,13 +78,13 @@ public class ChoosePetForPotentialOwnerBlock<A extends Animal, R extends Report>
         cashedNoneShelteredAnimalsForChoosing.put(chatId, new ArrayList<>());
         switch (shelterType) {
             case DOGS_SHELTER -> cache().getCachedAnimals().stream().filter(
-                    animal -> animal instanceof Dog
+                    animal -> animal instanceof Dog && !animal.isSheltered()
             ).forEach(dog -> {
                 replyMarkup.addRow(dog.getNickName());
                 cashedNoneShelteredAnimalsForChoosing.get(chatId).add(dog);
             });
             case CATS_SHELTER -> cache().getCachedAnimals().stream().filter(
-                    animal -> animal instanceof Cat
+                    animal -> animal instanceof Cat && !animal.isSheltered()
             ).forEach(cat -> {
                 replyMarkup.addRow(cat.getNickName());
                 cashedNoneShelteredAnimalsForChoosing.get(chatId).add(cat);
