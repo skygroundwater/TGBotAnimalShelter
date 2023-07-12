@@ -48,11 +48,11 @@ public class ReportNotificationTimer<A extends Animal> {
         return cacheKeeper.getCache();
     }
 
-    @Scheduled(cron = "0 20 9 * * *")
+    @Scheduled(cron = "0 50 9 * * *")
     public void notificationToSendReport() {
-        StringBuilder stringBuilder = new StringBuilder();
         for (PetOwner petOwner : cache().getPetOwnersById().values()) {
             if (petOwner.isHasPets()) {
+                StringBuilder stringBuilder = new StringBuilder();
                 Long petOwnerId = petOwner.getId();
                 for (Dog dog : cacheKeeper.getDogByPetOwnerIdFromCache(petOwnerId)) {
                     if (!dog.isReported()) {

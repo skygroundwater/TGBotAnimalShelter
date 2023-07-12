@@ -34,7 +34,6 @@ public abstract class Animal {
     @Column(name = "about")
     private String about;
 
-//    @Lob
     @Column (name = "photo")
     private byte[] photo;
 
