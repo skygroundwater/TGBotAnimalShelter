@@ -48,7 +48,7 @@ public class ReportNotificationTimer<A extends Animal> {
         return cacheKeeper.getCache();
     }
 
-    @Scheduled(cron = "0 0 8 * * *")
+    @Scheduled(cron = "0 0 9 * * *")
     public void notificationToSendReport() {
         StringBuilder stringBuilder = new StringBuilder();
         for (PetOwner petOwner : cache().getPetOwnersById().values()) {
@@ -69,7 +69,7 @@ public class ReportNotificationTimer<A extends Animal> {
         }
     }
 
-    @Scheduled(cron = "0 50 7 * * *")
+    @Scheduled(cron = "0 50 8 * * *")
     public void resetReporting() {
         cacheKeeper.setAllAnimalsReportedToFalse();
     }

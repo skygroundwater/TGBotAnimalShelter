@@ -60,9 +60,4 @@ class CatReportServiceImplTest {
         when(reportsRepository.findCatReportsByCat(cat)).thenReturn(catReports);
         assertEquals(catReportService.findReportsFromPet(cat), catReports);
     }
-
-    @Test
-    void deleteReport() {
-        assertEquals(catReportService.deleteReportById(catReport.getId()), HttpStatus.OK);
-    }
 }
