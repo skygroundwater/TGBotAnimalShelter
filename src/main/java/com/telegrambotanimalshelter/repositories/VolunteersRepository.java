@@ -8,8 +8,10 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface VolunteerRepository extends JpaRepository<Volunteer, Long> {
+public interface VolunteersRepository extends JpaRepository<Volunteer, Long> {
 
     List<Volunteer> findVolunteersByIsFreeTrue();
+
+    Volunteer findByUserName(String userName);
 
 }

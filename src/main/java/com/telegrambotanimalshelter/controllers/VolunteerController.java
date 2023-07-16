@@ -1,7 +1,7 @@
 package com.telegrambotanimalshelter.controllers;
 
 import com.telegrambotanimalshelter.models.Volunteer;
-import com.telegrambotanimalshelter.services.volunteerservice.VolunteerService;
+import com.telegrambotanimalshelter.services.volunteerservice.VolunteersService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -17,10 +17,10 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/volunteer")
 public class VolunteerController {
 
-    private final VolunteerService volunteerService;
+    private final VolunteersService volunteersService;
 
-    public VolunteerController(VolunteerService volunteerService) {
-        this.volunteerService = volunteerService;
+    public VolunteerController(VolunteersService volunteersService) {
+        this.volunteersService = volunteersService;
     }
 
     @Operation(
@@ -48,7 +48,7 @@ public class VolunteerController {
     )
     @PostMapping
     public ResponseEntity<Volunteer> postVolunteer(@RequestBody Volunteer volunteer){
-        return ResponseEntity.ok(volunteerService.saveVolunteer(volunteer));
+        return ResponseEntity.ok(volunteersService.saveVolunteer(volunteer));
     }
 
     @Operation(
@@ -75,7 +75,7 @@ public class VolunteerController {
     )
     @GetMapping("/{id}")
     public ResponseEntity<Volunteer> findVolunteer(@Parameter(description = "id волонтера") @PathVariable Long id){
-        return ResponseEntity.ok(volunteerService.findVolunteer(id));
+        return ResponseEntity.ok(volunteersService.findVolunteer(id));
     }
 
     @Operation(
@@ -103,7 +103,7 @@ public class VolunteerController {
     )
     @PutMapping
     public ResponseEntity<Volunteer> putVolunteer(@RequestBody Volunteer volunteer){
-        return ResponseEntity.ok(volunteerService.putVolunteer(volunteer));
+        return ResponseEntity.ok(volunteersService.putVolunteer(volunteer));
     }
 
     @Operation(
@@ -131,6 +131,6 @@ public class VolunteerController {
     )
     @DeleteMapping
     public ResponseEntity<HttpStatus> deleteVolunteer(@RequestBody Volunteer volunteer){
-        return ResponseEntity.ok(volunteerService.deleteVolunteer(volunteer));
+        return ResponseEntity.ok(volunteersService.deleteVolunteer(volunteer));
     }
 }

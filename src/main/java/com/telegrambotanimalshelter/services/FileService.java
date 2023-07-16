@@ -12,5 +12,5 @@ public interface FileService<I extends AppImage> {
 
     List<DogImage> getAllDogImages();
 
-    List<CatImage> gatAllCatImages();
+    List<CatImage> getAllCatImages();
 }

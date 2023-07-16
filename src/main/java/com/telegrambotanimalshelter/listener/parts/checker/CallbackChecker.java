@@ -11,16 +11,13 @@ import com.telegrambotanimalshelter.exceptions.CallBackQueryNotRecognizedExcepti
 import com.telegrambotanimalshelter.exceptions.NotReturnedResponseException;
 import com.telegrambotanimalshelter.listener.parts.BecomingPetOwnerPart;
 import com.telegrambotanimalshelter.listener.parts.IntroductionPart;
-import com.telegrambotanimalshelter.listener.parts.requests.ChoosePetForPotentialOwnerBlock;
-import com.telegrambotanimalshelter.listener.parts.requests.ContactRequestBlock;
-import com.telegrambotanimalshelter.listener.parts.requests.ReportRequestBlock;
-import com.telegrambotanimalshelter.listener.parts.requests.VolunteerAndPetOwnerChat;
+import com.telegrambotanimalshelter.listener.parts.requests.ChoosePetBlock;
+import com.telegrambotanimalshelter.listener.parts.requests.ContactBlock;
+import com.telegrambotanimalshelter.listener.parts.requests.ReportBlock;
+import com.telegrambotanimalshelter.listener.parts.requests.Chat;
 import com.telegrambotanimalshelter.listener.parts.volunteerblock.VolunteerBlock;
-import com.telegrambotanimalshelter.models.PetOwner;
 import com.telegrambotanimalshelter.models.Shelter;
 import com.telegrambotanimalshelter.models.animals.Animal;
-import com.telegrambotanimalshelter.models.animals.Cat;
-import com.telegrambotanimalshelter.models.animals.Dog;
 import com.telegrambotanimalshelter.models.images.AppImage;
 import com.telegrambotanimalshelter.models.reports.Report;
 import com.telegrambotanimalshelter.utils.MessageSender;
@@ -41,11 +38,11 @@ import static com.telegrambotanimalshelter.utils.Constants.dogShelterName;
  */
 @Component
 public class CallbackChecker<A extends Animal, R extends Report, I extends AppImage> {
-    private final ContactRequestBlock<A, R> contactBlock;
+    private final ContactBlock<A, R> contactBlock;
 
-    private final ReportRequestBlock<A, R, I> reportRequestBlock;
+    private final ReportBlock<A, R, I> reportBlock;
 
-    private final VolunteerAndPetOwnerChat<A, R> chat;
+    private final Chat<A, R> chat;
 
     private final IntroductionPart introductionPart;
 
@@ -59,20 +56,20 @@ public class CallbackChecker<A extends Animal, R extends Report, I extends AppIm
 
     private final VolunteerBlock<A, R, I> volunteerBlock;
 
-    private final ChoosePetForPotentialOwnerBlock<A, R> choosePetForPotentialOwnerBlock;
+    private final ChoosePetBlock<A, R> choosePetBlock;
 
-    public CallbackChecker(ContactRequestBlock<A, R> contactBlock,
-                           ReportRequestBlock<A, R, I> reportRequestBlock,
-                           VolunteerAndPetOwnerChat<A, R> chat,
+    public CallbackChecker(ContactBlock<A, R> contactBlock,
+                           ReportBlock<A, R, I> reportBlock,
+                           Chat<A, R> chat,
                            IntroductionPart introductionPart,
                            BecomingPetOwnerPart becomingPart,
                            MessageSender<A> sender,
                            @Qualifier("dogShelter") Shelter dogShelter,
                            @Qualifier("catShelter") Shelter catShelter,
                            VolunteerBlock<A, R, I> volunteerBlock,
-                           ChoosePetForPotentialOwnerBlock<A, R> choosePetForPotentialOwnerBlock) {
+                           ChoosePetBlock<A, R> choosePetBlock) {
         this.contactBlock = contactBlock;
-        this.reportRequestBlock = reportRequestBlock;
+        this.reportBlock = reportBlock;
         this.chat = chat;
         this.introductionPart = introductionPart;
         this.becomingPart = becomingPart;
@@ -80,12 +77,14 @@ public class CallbackChecker<A extends Animal, R extends Report, I extends AppIm
         this.catShelter = catShelter;
         this.sender = sender;
         this.volunteerBlock = volunteerBlock;
-        this.choosePetForPotentialOwnerBlock = choosePetForPotentialOwnerBlock;
+        this.choosePetBlock = choosePetBlock;
     }
 
-    /** Если пользователь юзает одну из предложенных ботом кнопку, метод принимает параметр <b>callbackQuery</b> ({@link Update#callbackQuery()})
+    /**
+     * Если пользователь юзает одну из предложенных ботом кнопку, метод принимает параметр <b>callbackQuery</b> ({@link Update#callbackQuery()})
      * и, в зависимости от выбранной кнопки, бот выдает сообщение и список из последующих кнопок для дальнейшего взаимодействия. <br> <br>
      * <i> Все взаимодействия пользователя с кнопками проходят через эти методы: {@link CallbackChecker#callbackQueryCheck(CallbackQuery)} и {@link CallbackChecker#callBackQueryConstantCheck(CallbackQuery, Shelter)} </i>
+     *
      * @param callbackQuery
      * @see BecomingPetOwnerPart
      * @see IntroductionPart
@@ -104,8 +103,8 @@ public class CallbackChecker<A extends Animal, R extends Report, I extends AppIm
         }
 
         if ("_contacts".equals(data)) return Optional.ofNullable(contactBlock.sendMessageToTakeName(chatId));
-        if ("_report".equals(data)) return Optional.ofNullable(reportRequestBlock.startReportFromPetOwner(chatId));
-        if ("i_am_volunteer".equals(data)) return Optional.ofNullable(volunteerBlock.startWorkWithVolunteer(chatId));
+        if ("_report".equals(data)) return Optional.ofNullable(reportBlock.startReportFromPetOwner(chatId));
+        if ("i_am_volunteer".equals(data)) return Optional.ofNullable(volunteerBlock.authenticationByLoginAndPassword(chatId));
 
         if ("volunteer".equals(data)) {
             return Optional.ofNullable(chat.startChat(chatId, "Здравствуйте. С вами хочет поговорить усыновитель. " + callbackQuery.from().firstName()));
@@ -121,9 +120,11 @@ public class CallbackChecker<A extends Animal, R extends Report, I extends AppIm
         return Optional.empty();
     }
 
-    /** Если пользователь юзает одну из предложенных ботом кнопку, метод принимает параметр <b>callbackQuery</b> ({@link Update#callbackQuery()})
+    /**
+     * Если пользователь юзает одну из предложенных ботом кнопку, метод принимает параметр <b>callbackQuery</b> ({@link Update#callbackQuery()})
      * и, в зависимости от выбранной кнопки, бот выдает сообщение и список из последующих кнопок для дальнейшего взаимодействия. <br> <br>
      * <i> Все взаимодействия пользователя с кнопками проходят через эти методы: {@link CallbackChecker#callbackQueryCheck(CallbackQuery)} и {@link CallbackChecker#callBackQueryConstantCheck(CallbackQuery, Shelter)} </i>
+     *
      * @param callbackQuery
      * @see BecomingPetOwnerPart
      * @see IntroductionPart
@@ -146,13 +147,16 @@ public class CallbackChecker<A extends Animal, R extends Report, I extends AppIm
         if ((shelterName + "_adult").equals(data)) return becomingPart.homeForAdultPet(id, shelter);
         if ((shelterName + "_restricted").equals(data)) return becomingPart.homeForRestrictedPet(id, shelter);
         if ((shelterName + "_reasons_for_refusal").equals(data)) return becomingPart.reasonsForRefusal(id, shelter);
-        if ((shelterName + "_get_animal").equals(data)) return choosePetForPotentialOwnerBlock.startChoosingOneOfPets(id, shelter.getShelterType());
+        if ((shelterName + "_get_animal").equals(data))
+            return choosePetBlock.startChoosingOneOfPets(id, shelter.getShelterType());
         else throw new CallBackQueryNotRecognizedException();
     }
 
-    /** После приветственного сообщения из {@link MessageSender#sendStartMessage(Long)} и выбора одной из предложенных кнопок
+    /**
+     * После приветственного сообщения из {@link MessageSender#sendStartMessage(Long)} и выбора одной из предложенных кнопок
      * бот, в зависимости от выбора приюта, выводит его название ({@link Shelter#getName()}) и список последующих кнопок для взаимодействия с выбранным приютом. <br> <br>
      * <i> список выводимых кнопок в этом методе --> {@link CallbackChecker#shelterMenuMarkup(Shelter)} <i>
+     *
      * @param chatId
      * @param shelter
      */
@@ -160,7 +164,7 @@ public class CallbackChecker<A extends Animal, R extends Report, I extends AppIm
         SendMessage sendMessage = null;
         String shelterName = shelter.getName();
         ShelterType shelterType = shelter.getShelterType();
-        if(shelterType != null) {
+        if (shelterType != null) {
             if (shelter.getShelterType().equals(ShelterType.DOGS_SHELTER)) {
                 sendMessage = new SendMessage(chatId, "Это приют для собак " + shelterName);
                 sendMessage.replyMarkup(shelterMenuMarkup(shelter));
@@ -177,6 +181,7 @@ public class CallbackChecker<A extends Animal, R extends Report, I extends AppIm
 
     /**
      * Кнопки, выводимые для взаимодействия с пользователем, из метода {@link CallbackChecker#shelterMenu(Long, Shelter)}
+     *
      * @param shelter
      * @see MessageSender
      * @see IntroductionPart

@@ -5,7 +5,9 @@ import org.springframework.http.HttpStatus;
 
 import java.util.List;
 
-public interface VolunteerService {
+public interface VolunteersService {
+    Volunteer findByName(String name);
+
     Volunteer findVolunteer(Long id);
 
     boolean checkVolunteer(Long id);
@@ -20,5 +22,5 @@ public interface VolunteerService {
 
     Volunteer findFreeVolunteer();
 
-    List<Volunteer> gatAllVolunteers();
+    List<Volunteer> getAllVolunteers();
 }

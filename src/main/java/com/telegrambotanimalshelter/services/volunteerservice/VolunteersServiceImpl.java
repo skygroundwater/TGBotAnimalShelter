@@ -2,24 +2,32 @@ package com.telegrambotanimalshelter.services.volunteerservice;
 
 import com.telegrambotanimalshelter.exceptions.NotFoundInDataBaseException;
 import com.telegrambotanimalshelter.models.Volunteer;
-import com.telegrambotanimalshelter.repositories.VolunteerRepository;
+import com.telegrambotanimalshelter.repositories.VolunteersRepository;
+import lombok.Data;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-public class VolunteerServiceImpl implements VolunteerService {
+@Data
+public class VolunteersServiceImpl implements VolunteersService {
 
-    private final VolunteerRepository volunteerRepository;
+    private final VolunteersRepository volunteersRepository;
 
-    public VolunteerServiceImpl(VolunteerRepository volunteerRepository) {
-        this.volunteerRepository = volunteerRepository;
+    public VolunteersServiceImpl(VolunteersRepository volunteersRepository) {
+        this.volunteersRepository = volunteersRepository;
+    }
+
+    @Override
+    public Volunteer findByName(String name){
+        return volunteersRepository.findByUserName(name);
     }
 
     @Override
     public Volunteer findVolunteer(Long id) {
-        return volunteerRepository.findById(id).orElseThrow(() -> new NotFoundInDataBaseException("Волонтер не был найден"));
+        return volunteersRepository.findById(id).orElseThrow(
+                () -> new NotFoundInDataBaseException("Волонтер не был найден"));
     }
 
     @Override
@@ -33,18 +41,18 @@ public class VolunteerServiceImpl implements VolunteerService {
 
     @Override
     public Volunteer saveVolunteer(Volunteer volunteer) {
-        return volunteerRepository.save(volunteer);
+        return volunteersRepository.save(volunteer);
     }
 
     @Override
     public HttpStatus deleteVolunteer(Volunteer volunteer) {
-        volunteerRepository.delete(volunteer);
+        volunteersRepository.delete(volunteer);
         return HttpStatus.OK;
     }
 
     @Override
     public Volunteer putVolunteer(Volunteer volunteer) {
-        return volunteerRepository.save(volunteer);
+        return volunteersRepository.save(volunteer);
     }
 
     @Override
@@ -54,17 +62,17 @@ public class VolunteerServiceImpl implements VolunteerService {
         if (trueOrFalse) {
             volunteer.setPetOwner(null);
         }
-        return volunteerRepository.save(volunteer);
+        return volunteersRepository.save(volunteer);
     }
 
     @Override
     public Volunteer findFreeVolunteer() {
-        return volunteerRepository.findVolunteersByIsFreeTrue().stream().findAny()
+        return volunteersRepository.findVolunteersByIsFreeTrue().stream().findAny()
                 .orElseThrow(() -> new NotFoundInDataBaseException("Все волонтеры на данный момент заняты. Просим вас подождать"));
     }
 
     @Override
-    public List<Volunteer> gatAllVolunteers() {
-        return volunteerRepository.findAll();
+    public List<Volunteer> getAllVolunteers() {
+        return volunteersRepository.findAll();
     }
 }

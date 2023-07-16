@@ -2,7 +2,7 @@ package com.telegrambotanimalshelter.services.volunteerservice;
 
 import com.telegrambotanimalshelter.exceptions.NotFoundInDataBaseException;
 import com.telegrambotanimalshelter.models.Volunteer;
-import com.telegrambotanimalshelter.repositories.VolunteerRepository;
+import com.telegrambotanimalshelter.repositories.VolunteersRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -17,13 +17,13 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class VolunteerServiceImplTest {
+class VolunteersServiceImplTest {
 
     @InjectMocks
-    VolunteerServiceImpl volunteerService;
+    VolunteersServiceImpl volunteerService;
 
     @Mock
-    VolunteerRepository volunteerRepository;
+    VolunteersRepository volunteersRepository;
 
     Long id = 123L;
     Volunteer volunteer = new Volunteer();
@@ -31,21 +31,21 @@ class VolunteerServiceImplTest {
 
     @Test
     void findVolunteer() {
-        when(volunteerRepository.findById(id)).thenReturn(Optional.ofNullable(volunteer));
+        when(volunteersRepository.findById(id)).thenReturn(Optional.ofNullable(volunteer));
         assertEquals(volunteerService.findVolunteer(id), volunteer);
         assertThrows(NotFoundInDataBaseException.class, ()-> volunteerService.findVolunteer(0L));
     }
 
     @Test
     void checkVolunteer() {
-        when(volunteerRepository.findById(id)).thenReturn(Optional.ofNullable(volunteer));
+        when(volunteersRepository.findById(id)).thenReturn(Optional.ofNullable(volunteer));
         assertTrue(volunteerService.checkVolunteer(id));
         assertFalse(volunteerService.checkVolunteer(0L));
     }
 
     @Test
     void saveVolunteer() {
-        when(volunteerRepository.save(volunteer)).thenReturn(volunteer);
+        when(volunteersRepository.save(volunteer)).thenReturn(volunteer);
         assertEquals(volunteerService.saveVolunteer(volunteer), volunteer);
     }
 
@@ -56,7 +56,7 @@ class VolunteerServiceImplTest {
 
     @Test
     void putVolunteer() {
-        when(volunteerRepository.save(volunteer)).thenReturn(volunteer);
+        when(volunteersRepository.save(volunteer)).thenReturn(volunteer);
         assertEquals(volunteerService.putVolunteer(volunteer), volunteer);
     }
 
@@ -66,8 +66,8 @@ class VolunteerServiceImplTest {
         volunteer.setId(id);
         volunteer.setPetOwner(null);
 
-        when(volunteerRepository.findById(id)).thenReturn(Optional.ofNullable(volunteer));
-        when(volunteerRepository.save(volunteer)).thenReturn(volunteer);
+        when(volunteersRepository.findById(id)).thenReturn(Optional.ofNullable(volunteer));
+        when(volunteersRepository.save(volunteer)).thenReturn(volunteer);
         assertEquals(volunteerService.setFree(id, true), volunteer);
 
     }
@@ -76,16 +76,16 @@ class VolunteerServiceImplTest {
     void findFreeVolunteer() {
         List<Volunteer> notFreeVolunteers = List.of();
 
-        when(volunteerRepository.findVolunteersByIsFreeTrue()).thenReturn(this.volunteers);
+        when(volunteersRepository.findVolunteersByIsFreeTrue()).thenReturn(this.volunteers);
         assertEquals(volunteerService.findFreeVolunteer(), volunteer);
 
-        when(volunteerRepository.findVolunteersByIsFreeTrue()).thenReturn(notFreeVolunteers);
+        when(volunteersRepository.findVolunteersByIsFreeTrue()).thenReturn(notFreeVolunteers);
         assertThrows(NotFoundInDataBaseException.class, ()-> volunteerService.findFreeVolunteer());
     }
 
     @Test
     void gatAllVolunteers() {
-        when(volunteerRepository.findAll()).thenReturn(volunteers);
-        assertEquals(volunteerService.gatAllVolunteers(), volunteers);
+        when(volunteersRepository.findAll()).thenReturn(volunteers);
+        assertEquals(volunteerService.getAllVolunteers(), volunteers);
     }
 }

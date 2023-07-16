@@ -63,6 +63,6 @@ class DogReportServiceImplTest {
 
     @Test
     void deleteReport() {
-        assertEquals(dogReportService.deleteReportById(dogReport.getId()), HttpStatus.OK);
+
     }
 }

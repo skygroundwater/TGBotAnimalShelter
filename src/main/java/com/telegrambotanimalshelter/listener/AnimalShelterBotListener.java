@@ -5,10 +5,11 @@ import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
 import com.telegrambotanimalshelter.listener.parts.checker.CallbackChecker;
-import com.telegrambotanimalshelter.listener.parts.requests.ChoosePetForPotentialOwnerBlock;
-import com.telegrambotanimalshelter.listener.parts.requests.ContactRequestBlock;
-import com.telegrambotanimalshelter.listener.parts.requests.ReportRequestBlock;
-import com.telegrambotanimalshelter.listener.parts.requests.VolunteerAndPetOwnerChat;
+import com.telegrambotanimalshelter.listener.parts.requests.ChoosePetBlock;
+import com.telegrambotanimalshelter.listener.parts.requests.ContactBlock;
+import com.telegrambotanimalshelter.listener.parts.requests.ReportBlock;
+import com.telegrambotanimalshelter.listener.parts.requests.Chat;
+import com.telegrambotanimalshelter.listener.parts.volunteerblock.RegistrationBlock;
 import com.telegrambotanimalshelter.listener.parts.volunteerblock.VolunteerBlock;
 import com.telegrambotanimalshelter.models.animals.Animal;
 import com.telegrambotanimalshelter.models.images.AppImage;
@@ -27,9 +28,9 @@ public class AnimalShelterBotListener<A extends Animal, R extends Report, I exte
 
     private final TelegramBot telegramBot;
 
-    private final VolunteerAndPetOwnerChat<A, R> chat;
+    private final Chat<A, R> chat;
 
-    private final ContactRequestBlock<A, R> contactBlock;
+    private final ContactBlock<A, R> contactBlock;
 
     private final VolunteerBlock<A, R, I> volunteerBlock;
 
@@ -39,19 +40,21 @@ public class AnimalShelterBotListener<A extends Animal, R extends Report, I exte
 
     private final Logger logger;
 
-    private final ReportRequestBlock<A, R, I> reportRequestBlock;
+    private final ReportBlock<A, R, I> reportBlock;
 
-    private final ChoosePetForPotentialOwnerBlock<A, R> choosePetForOwnerBlock;
+    private final ChoosePetBlock<A, R> choosePetForOwnerBlock;
+
+    private final RegistrationBlock<A, R> registrationBlock;
 
     @Autowired
     public AnimalShelterBotListener(TelegramBot telegramBot,
-                                    VolunteerAndPetOwnerChat<A, R> chat,
+                                    Chat<A, R> chat,
                                     VolunteerBlock<A, R, I> volunteerBlock,
                                     CallbackChecker<A, R, I> checker,
                                     MessageSender<A> sender,
-                                    ReportRequestBlock<A, R, I> reportRequestBlock,
-                                    ContactRequestBlock<A, R> contactBlock,
-                                    Logger logger, ChoosePetForPotentialOwnerBlock<A, R> choosePetForOwnerBlock) {
+                                    ReportBlock<A, R, I> reportBlock,
+                                    ContactBlock<A, R> contactBlock,
+                                    Logger logger, ChoosePetBlock<A, R> choosePetForOwnerBlock, RegistrationBlock<A, R> registrationBlock) {
         this.telegramBot = telegramBot;
         this.chat = chat;
         this.volunteerBlock = volunteerBlock;
@@ -59,8 +62,9 @@ public class AnimalShelterBotListener<A extends Animal, R extends Report, I exte
         this.sender = sender;
         this.contactBlock = contactBlock;
         this.logger = logger;
-        this.reportRequestBlock = reportRequestBlock;
+        this.reportBlock = reportBlock;
         this.choosePetForOwnerBlock = choosePetForOwnerBlock;
+        this.registrationBlock = registrationBlock;
     }
 
     @PostConstruct
@@ -102,6 +106,10 @@ public class AnimalShelterBotListener<A extends Animal, R extends Report, I exte
                             проверкам статуса пользователя на данном этапе
                              */
 
+                            if(registrationBlock.isPetOwnerInRegistrationBlock(chatId)){
+                                registrationBlock.registrationBlock(chatId, message);
+                            }
+
                             /*
                             Сначала проверяем на статус записи контактов пользователя
                              */
@@ -112,8 +120,8 @@ public class AnimalShelterBotListener<A extends Animal, R extends Report, I exte
                             /*
                             Далее проверяем на статус записи отчета о питомце
                              */
-                            if (reportRequestBlock.checkReportRequestStatus(chatId)) {
-                                reportRequestBlock.reportFromPetOwnerBlock(chatId, message);
+                            if (reportBlock.checkReportRequestStatus(chatId)) {
+                                reportBlock.reportFromPetOwnerBlock(chatId, message);
                             }
                             /*
                             Далее проверяем, если это волонтёр, то сначала на то,
