@@ -70,7 +70,7 @@ public class CacheKeeper<A extends Animal, R extends Report> {
         fillImagesCache();
     }
 
-    public String fillAnimalsCache(){
+    public String fillAnimalsCache() {
         catService.getAllPets().forEach(
                 cat -> cache.getCachedAnimals().add((A) cat)
         );
@@ -87,18 +87,17 @@ public class CacheKeeper<A extends Animal, R extends Report> {
     }
 
     public String fillVolunteersCache() {
-        for (Volunteer volunteer : volunteersService.getAllVolunteers()) {
-            cache.getVolunteers().put(volunteer.getId(), volunteer);
-        }
+        volunteersService.getAllVolunteers().forEach(
+                volunteer -> cache.getVolunteers().put(volunteer.getId(), volunteer));
         return "Кеш заполнен волонтерами";
     }
 
     public String fillPetOwnersCache() {
-        for (PetOwner petOwner : petOwnersService.getAllPetOwners()) {
+        petOwnersService.getAllPetOwners().forEach(petOwner -> {
             cache.getPetOwnersById().put(petOwner.getId(), petOwner);
             cache.getCatsByPetOwnerId().put(petOwner.getId(), catService.findPetsByPetOwner(petOwner));
             cache.getDogsByPetOwnerId().put(petOwner.getId(), dogService.findPetsByPetOwner(petOwner));
-        }
+        });
         return "Кеш заполнен усыновителями и их животными";
     }
 
@@ -110,14 +109,6 @@ public class CacheKeeper<A extends Animal, R extends Report> {
             cache.getCashedReports().add((R) dogReport);
         }
         return "Кеш заполнен отчетами";
-    }
-
-    public List<Cat> getCatsByPetOwnerIdFromCache(Long petOwnerId) {
-        return cache.getCatsByPetOwnerId().get(petOwnerId);
-    }
-
-    public List<Dog> getDogByPetOwnerIdFromCache(Long petOwnerId) {
-        return cache.getDogsByPetOwnerId().get(petOwnerId);
     }
 
     public Volunteer findFreeVolunteer() {

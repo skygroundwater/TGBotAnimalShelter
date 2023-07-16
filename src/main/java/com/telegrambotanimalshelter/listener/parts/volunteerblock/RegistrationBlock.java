@@ -71,7 +71,7 @@ public class RegistrationBlock<A extends Animal, R extends Report> {
 
     public SendResponse startRegistration(Long chatId) {
         registeringPetOwnersId.put(chatId, new RegistrationHelperForPetOwner());
-        return sender.sendResponse(new SendMessage(chatId, "Следующим сообщением введите своё имя"));
+        return sender.sendResponse(new SendMessage(chatId, "Следующим сообщением введите логин"));
     }
 
     public SendResponse forcedStopRegistration(Long chatId) {

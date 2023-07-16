@@ -91,21 +91,26 @@ public class CallbackChecker<A extends Animal, R extends Report, I extends AppIm
      * @see MessageSender
      */
     public Optional<Object> callbackQueryCheck(CallbackQuery callbackQuery) {
-
         String data = callbackQuery.data();
         Long chatId = callbackQuery.from().id();
-
-        if ("cat_shelter".equals(data)) this.shelterMenu(chatId, catShelter);
-        if ("dog_shelter".equals(data)) this.shelterMenu(chatId, dogShelter);
-
+        if ("cat_shelter".equals(data)) {
+            this.shelterMenu(chatId, catShelter);
+        }
+        if ("dog_shelter".equals(data)) {
+            this.shelterMenu(chatId, dogShelter);
+        }
         if ("back".equals(data)) {
             sender.sendStartMessage(chatId);
         }
-
-        if ("_contacts".equals(data)) return Optional.ofNullable(contactBlock.sendMessageToTakeName(chatId));
-        if ("_report".equals(data)) return Optional.ofNullable(reportBlock.startReportFromPetOwner(chatId));
-        if ("i_am_volunteer".equals(data)) return Optional.ofNullable(volunteerBlock.authenticationByLoginAndPassword(chatId));
-
+        if ("_contacts".equals(data)) {
+            return Optional.ofNullable(contactBlock.sendMessageToTakeName(chatId));
+        }
+        if ("_report".equals(data)) {
+            return Optional.ofNullable(reportBlock.startReportFromPetOwner(chatId));
+        }
+        if ("i_am_volunteer".equals(data)) {
+            return Optional.ofNullable(volunteerBlock.authenticationByLoginAndPassword(chatId));
+        }
         if ("volunteer".equals(data)) {
             return Optional.ofNullable(chat.startChat(chatId, "Здравствуйте. С вами хочет поговорить усыновитель. " + callbackQuery.from().firstName()));
         }
@@ -147,8 +152,7 @@ public class CallbackChecker<A extends Animal, R extends Report, I extends AppIm
         if ((shelterName + "_adult").equals(data)) return becomingPart.homeForAdultPet(id, shelter);
         if ((shelterName + "_restricted").equals(data)) return becomingPart.homeForRestrictedPet(id, shelter);
         if ((shelterName + "_reasons_for_refusal").equals(data)) return becomingPart.reasonsForRefusal(id, shelter);
-        if ((shelterName + "_get_animal").equals(data))
-            return choosePetBlock.startChoosingOneOfPets(id, shelter.getShelterType());
+        if ((shelterName + "_get_animal").equals(data)) return choosePetBlock.startChoosingOneOfPets(id, shelter.getShelterType());
         else throw new CallBackQueryNotRecognizedException();
     }
 
@@ -162,15 +166,14 @@ public class CallbackChecker<A extends Animal, R extends Report, I extends AppIm
      */
     public SendResponse shelterMenu(Long chatId, Shelter shelter) {
         SendMessage sendMessage = null;
-        String shelterName = shelter.getName();
         ShelterType shelterType = shelter.getShelterType();
         if (shelterType != null) {
-            if (shelter.getShelterType().equals(ShelterType.DOGS_SHELTER)) {
-                sendMessage = new SendMessage(chatId, "Это приют для собак " + shelterName);
-                sendMessage.replyMarkup(shelterMenuMarkup(shelter));
-            } else if (shelter.getShelterType().equals(ShelterType.CATS_SHELTER)) {
-                sendMessage = new SendMessage(chatId, "Это приют для кошек " + shelterName);
-                sendMessage.replyMarkup(shelterMenuMarkup(shelter));
+            if (shelterType.equals(ShelterType.DOGS_SHELTER)) {
+                sendMessage = new SendMessage(chatId, "Это приют для собак " + shelter.getName())
+                        .replyMarkup(shelterMenuMarkup(shelter));
+            } else if (shelterType.equals(ShelterType.CATS_SHELTER)) {
+                sendMessage = new SendMessage(chatId, "Это приют для кошек " + shelter.getName())
+                        .replyMarkup(shelterMenuMarkup(shelter));
             }
             if (sendMessage != null) {
                 return sender.sendResponse(sendMessage);
@@ -188,11 +191,14 @@ public class CallbackChecker<A extends Animal, R extends Report, I extends AppIm
      * @see BecomingPetOwnerPart
      */
     public InlineKeyboardMarkup shelterMenuMarkup(Shelter shelter) {
-        String shelterName = shelter.getName();
         return new InlineKeyboardMarkup(
-                new InlineKeyboardButton("Узнать информацию о приюте").callbackData(shelterName + "_shelter_info"))
-                .addRow(new InlineKeyboardButton("Как взять животное из приюта").callbackData(shelterName + "_shelter_consultation"))
-                .addRow(new InlineKeyboardButton("Прислать отчет о питомце").callbackData("_report"))
-                .addRow(new InlineKeyboardButton("Обратиться к волонтеру").callbackData("volunteer"));
+                new InlineKeyboardButton("Узнать информацию о приюте")
+                        .callbackData(shelter.getName() + "_shelter_info"))
+                .addRow(new InlineKeyboardButton("Как взять животное из приюта")
+                        .callbackData(shelter.getName() + "_shelter_consultation"))
+                .addRow(new InlineKeyboardButton("Прислать отчет о питомце")
+                        .callbackData("_report"))
+                .addRow(new InlineKeyboardButton("Обратиться к волонтеру")
+                        .callbackData("volunteer"));
     }
 }

@@ -83,12 +83,12 @@ class DogsServiceImplTest {
         } catch (IOException e) {
             throw new FileProcessingException("Ошибка загрузки файла");
         }
-        when(dogsRepository.findDogsByNickName("name")).thenReturn(dog);
+        when(dogsRepository.findDogByNickName("name")).thenReturn(dog);
         when(dogsRepository.save(dog)).thenReturn(dog);
         dog.setNickName("name");
         dog.setPhoto(photo);
         dogsService.setPhoto("name", photo);
-        verify(dogsRepository).findDogsByNickName(any());
+        verify(dogsRepository).findDogByNickName(any());
         verify(dogsRepository).save(any());
 
     }
@@ -104,13 +104,13 @@ class DogsServiceImplTest {
             throw new FileProcessingException("Ошибка загрузки файла");
         }
         dog.setPhoto(photo);
-        when(dogsRepository.findDogsByNickName("name")).thenReturn(dog);
+        when(dogsRepository.findDogByNickName("name")).thenReturn(dog);
         assertEquals(dogsService.getPhoto("name").length, photo.length);
     }
 
     @Test
     void findPetByName() {
-        when(dogsRepository.findDogsByNickName("name")).thenReturn(dog);
+        when(dogsRepository.findDogByNickName("name")).thenReturn(dog);
         assertEquals(dogsService.findPetByName("name"), dog);
     }
 

@@ -37,6 +37,14 @@ public abstract class Animal {
     @Column (name = "photo")
     private byte[] photo;
 
+    public Animal(String nickname, boolean sheltered, String about, byte[] photo) {
+        this.nickName = nickname;
+        this.sheltered = sheltered;
+        this.registeredAt = LocalDateTime.now();
+        this.about = about;
+        this.photo = photo;
+    }
+
     public Animal(String nickname, boolean sheltered, LocalDateTime registeredAt, String about, byte[] photo) {
         this.nickName = nickname;
         this.sheltered = sheltered;

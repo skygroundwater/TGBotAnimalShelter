@@ -2,15 +2,21 @@ package com.telegrambotanimalshelter.listener.parts.requests;
 
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
+import com.pengrad.telegrambot.request.SendMessage;
+import com.pengrad.telegrambot.response.SendResponse;
 import com.telegrambotanimalshelter.listener.parts.keeper.Cache;
 import com.telegrambotanimalshelter.listener.parts.keeper.CacheKeeper;
 import com.telegrambotanimalshelter.models.PetOwner;
-import com.telegrambotanimalshelter.models.Volunteer;
 import com.telegrambotanimalshelter.models.animals.Animal;
 import com.telegrambotanimalshelter.models.reports.Report;
 import com.telegrambotanimalshelter.services.petownerservice.PetOwnersService;
 import com.telegrambotanimalshelter.utils.MessageSender;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.stereotype.Component;
+
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Сущность, отвечающая за взаимодействие с пользователем
@@ -24,18 +30,32 @@ public class ContactBlock<A extends Animal, R extends Report> {
 
     private final MessageSender<A> sender;
 
-    private final CacheKeeper<A, R> cacheKeeper;
+    private final CacheKeeper<A, R> keeper;
 
-    private final PetOwnersService petOwnersService;
-
-    public ContactBlock(MessageSender<A> sender, PetOwnersService petOwnersService, CacheKeeper<A, R> cacheKeeper) {
+    public ContactBlock(MessageSender<A> sender,
+                        CacheKeeper<A, R> keeper) {
         this.sender = sender;
-        this.petOwnersService = petOwnersService;
-        this.cacheKeeper = cacheKeeper;
+        this.keeper = keeper;
     }
 
     private Cache<A, R> cache() {
-        return cacheKeeper.getCache();
+        return keeper.getCache();
+    }
+
+    private static final ConcurrentMap<Long, ContactRequestHelper> helpers = new ConcurrentHashMap<>();
+
+    @Getter
+    @Setter
+    static class ContactRequestHelper {
+
+        private String firstName;
+
+        private String lastName;
+
+        private String phoneNumber;
+
+        public ContactRequestHelper() {
+        }
     }
 
     /**
@@ -46,30 +66,21 @@ public class ContactBlock<A extends Animal, R extends Report> {
      * @param chatId  личный id пользователя
      * @param message сообщение от пользователя
      */
-    public PetOwner contactsRequestBlock(Long chatId, Message message) {
-        String text = message.text();
-        String preFix = text.split(" ")[0];
-        String info = text.substring(preFix.length());
-        switch (preFix) {
-            case "Имя:" -> {
-                return sendMessageToTakeSecondName(chatId, info);
-            }
-            case "Фамилия:" -> {
-                return sendMessageToTakeNumberOfPhone(chatId, info);
-            }
-            case "Телефон:" -> {
-                return saveContacts(chatId, info);
-            }
-            case "/break" -> {
+    public SendResponse contactsRequestBlock(Long chatId, Message message) {
+        String info = message.text();
+        ContactRequestHelper helper = helpers.get(chatId);
+        if (!info.isEmpty()) {
+            if (info.equals("/break")) {
                 return forcedStopContactRequest(chatId);
             }
-            default -> {
-                sender.sendMessage(chatId,
-                        "Вы находитесь в блоке записи контактных данных. " +
-                                "Чтобы выйти из него отправьте команду /break");
-                return cache().getPetOwnersById().get(chatId);
-            }
-        }
+        } else return sender.sendResponse(new SendMessage(chatId, "Вы прислали не валидное сообщение"));
+        if (helper.getFirstName() == null && helper.getLastName() == null && helper.getPhoneNumber() == null) {
+            return sendMessageToTakeSecondName(chatId, info);
+        } else if (helper.getFirstName() != null && helper.getLastName() == null && helper.getPhoneNumber() == null) {
+            return sendMessageToTakeNumberOfPhone(chatId, info);
+        } else if (helper.getFirstName() != null && helper.getLastName() != null && helper.getPhoneNumber() == null) {
+            return saveContacts(chatId, info);
+        } else return sender.sendResponse(new SendMessage(chatId, "Произошла ошибка"));
     }
 
     /**
@@ -84,7 +95,7 @@ public class ContactBlock<A extends Animal, R extends Report> {
      * @see PetOwnersService#savePotentialPetOwner(Update)
      */
     public PetOwner savePotentialPetOwner(Update update) {
-        PetOwner savedPetOwner = petOwnersService.savePotentialPetOwner(update);
+        PetOwner savedPetOwner = keeper.getPetOwnersService().savePotentialPetOwner(update);
         return cache().getPetOwnersById().put(savedPetOwner.getId(), savedPetOwner);
     }
 
@@ -115,9 +126,11 @@ public class ContactBlock<A extends Animal, R extends Report> {
      * пользователя на то, является ли он на данный момент
      * в блоке записи контактов.
      */
-    public PetOwner sendMessageToTakeName(Long chatId) {
-        sender.sendMessage(chatId, "Введите ваше имя после префикса *Имя: * \uD83E\uDEAA Не забудьте пробел после двоеточия.");
-        return cache().getPetOwnersById().put(chatId, petOwnersService.setPetOwnerContactRequest(chatId, true));
+    public SendResponse sendMessageToTakeName(Long chatId) {
+        helpers.put(chatId, new ContactRequestHelper());
+        cache().getPetOwnersById().put(chatId, keeper.getPetOwnersService()
+                .setPetOwnerContactRequest(chatId, true));
+        return sender.sendResponse(new SendMessage(chatId, "Введите следующим сообщением ваше имя \uD83E\uDEAA"));
     }
 
     /**
@@ -128,10 +141,13 @@ public class ContactBlock<A extends Animal, R extends Report> {
      * @param chatId    личный id пользователя
      * @param firstName имя, отправленное пользователем
      */
-    private PetOwner sendMessageToTakeSecondName(Long chatId, String firstName) {
-        cache().getPetOwnersById().get(chatId).setFirstName(firstName);
-        sender.sendMessage(chatId, "Введите вашу Фамилию после префикса *Фамилия: * \uD83E\uDEAA Не забудьте пробел после двоеточия.");
-        return cache().getPetOwnersById().get(chatId);
+    private SendResponse sendMessageToTakeSecondName(Long chatId, String firstName) {
+        helpers.forEach((aLong, contactRequestHelper) -> {
+            if (aLong.equals(chatId)) {
+                contactRequestHelper.setFirstName(firstName);
+            }
+        });
+        return sender.sendResponse(new SendMessage(chatId, "Введите следующим сообщением вашу Фамилию \uD83E\uDEAA"));
     }
 
     /**
@@ -142,10 +158,13 @@ public class ContactBlock<A extends Animal, R extends Report> {
      * @param chatId   личный id пользователя
      * @param lastName фамилия, отправленная пользователем
      */
-    private PetOwner sendMessageToTakeNumberOfPhone(Long chatId, String lastName) {
-        cache().getPetOwnersById().get(chatId).setLastName(lastName);
-        sender.sendMessage(chatId, "Введите ваш номер телефона после префикса *Телефон: * \uD83E\uDEAA Не забудьте пробел после двоеточия.");
-        return cache().getPetOwnersById().get(chatId);
+    private SendResponse sendMessageToTakeNumberOfPhone(Long chatId, String lastName) {
+        helpers.forEach((aLong, contactRequestHelper) -> {
+            if (aLong.equals(chatId)) {
+                contactRequestHelper.setLastName(lastName);
+            }
+        });
+        return sender.sendResponse(new SendMessage(chatId, "Введите следующим сообщением ваш номер телефона \uD83E\uDEAA"));
     }
 
     /**
@@ -158,21 +177,28 @@ public class ContactBlock<A extends Animal, R extends Report> {
      * И также сохраняем пользователя с новыми значениями переменных
      * в кеш.
      */
-    private PetOwner saveContacts(Long chatId, String phoneNumber) {
-        PetOwner petOwner = cache().getPetOwnersById().get(chatId);
-        petOwner.setPhoneNumber(phoneNumber);
-        petOwner.setContactRequest(false);
-        cache().getPetOwnersById().put(petOwner.getId(), petOwner);
-        if (cache().getVolunteers().containsKey(chatId)) {
-            Volunteer volunteer = cache().getVolunteers().get(chatId);
-            volunteer.setFirstName(petOwner.getFirstName());
-            volunteer.setLastName(petOwner.getLastName());
-            cacheKeeper.getVolunteersService().putVolunteer(volunteer);
-        }
-        petOwnersService.putPetOwner(petOwner);
+    private SendResponse saveContacts(Long chatId, String phoneNumber) {
+        ContactRequestHelper helper = helpers.get(chatId);
+        helpers.remove(chatId);
+        cache().getPetOwnersById().forEach(
+                (aLong, petOwner) -> {
+                    if (aLong.equals(chatId)) {
+                        petOwner.setFirstName(helper.firstName);
+                        petOwner.setLastName(helper.lastName);
+                        petOwner.setPhoneNumber(phoneNumber);
+                        petOwner.setContactRequest(false);
+                        keeper.getPetOwnersService().putPetOwner(petOwner);
+                    }
+                });
+        cache().getVolunteers().forEach((aLong, volunteer) -> {
+            if (aLong.equals(chatId)) {
+                volunteer.setFirstName(helper.firstName);
+                volunteer.setLastName(helper.lastName);
+                keeper.getVolunteersService().putVolunteer(volunteer);
+            }
+        });
         sender.sendMessage(chatId, "Ваши контакты успешно записаны. Можете продолжить работу с нашим ботом.");
-        sender.sendStartMessage(chatId);
-        return petOwner;
+        return sender.sendStartMessage(chatId);
     }
 
     /**
@@ -184,11 +210,11 @@ public class ContactBlock<A extends Animal, R extends Report> {
      * И также сохраняем пользователя с новыми значениями переменных
      * в кеш и базу данных.
      */
-    private PetOwner forcedStopContactRequest(Long chatId) {
-        sender.sendStartMessage(chatId);
-        return cache().getPetOwnersById()
-                .put(chatId, petOwnersService
+    private SendResponse forcedStopContactRequest(Long chatId) {
+        cache().getPetOwnersById()
+                .put(chatId, keeper.getPetOwnersService()
                         .setPetOwnerContactRequest(
                                 chatId, false));
+        return sender.sendStartMessage(chatId);
     }
 }

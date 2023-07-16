@@ -3,10 +3,10 @@ package com.telegrambotanimalshelter.models;
 import com.telegrambotanimalshelter.enums.Role;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
-import lombok.*;
-import org.hibernate.Hibernate;
-
-import java.util.Objects;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @Table(schema = "public", name = "volunteers")
@@ -65,10 +65,26 @@ public class Volunteer {
     @Column(name = "is_enabled")
     private boolean isEnabled;
 
+    public Volunteer(Long id, String link,  String firstName,
+                     String lastName, String userName,
+                     boolean isFree, boolean inOffice,
+                     boolean isCheckingReports, PetOwner petOwner){
+        this.id = id;
+        this.link = link;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.userName = userName;
+        this.isFree = isFree;
+        this.inOffice = inOffice;
+        this.checkingReports = isCheckingReports;
+        this.petOwner = petOwner;
+    }
+
     public Volunteer(){
         nonCredentialsExpired = true;
         nonExpired = true;
         nonLocked = true;
+        isEnabled = true;
         inOffice = false;
         isFree = true;
         checkingReports = false;
