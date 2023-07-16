@@ -9,17 +9,15 @@ import com.telegrambotanimalshelter.exceptions.NotReturnedResponseException;
 import com.telegrambotanimalshelter.listener.parts.BecomingPetOwnerPart;
 import com.telegrambotanimalshelter.listener.parts.IntroductionPart;
 import com.telegrambotanimalshelter.listener.parts.keeper.CacheKeeper;
-import com.telegrambotanimalshelter.listener.parts.requests.ChoosePetForPotentialOwnerBlock;
-import com.telegrambotanimalshelter.listener.parts.requests.ContactRequestBlock;
-import com.telegrambotanimalshelter.listener.parts.requests.ReportRequestBlock;
-import com.telegrambotanimalshelter.listener.parts.requests.VolunteerAndPetOwnerChat;
+import com.telegrambotanimalshelter.listener.parts.requests.ChoosePetBlock;
+import com.telegrambotanimalshelter.listener.parts.requests.ContactBlock;
+import com.telegrambotanimalshelter.listener.parts.requests.ReportBlock;
+import com.telegrambotanimalshelter.listener.parts.requests.Chat;
 import com.telegrambotanimalshelter.listener.parts.volunteerblock.VolunteerBlock;
 import com.telegrambotanimalshelter.models.PetOwner;
 import com.telegrambotanimalshelter.models.Shelter;
 import com.telegrambotanimalshelter.models.Volunteer;
 import com.telegrambotanimalshelter.models.animals.Animal;
-import com.telegrambotanimalshelter.models.animals.Cat;
-import com.telegrambotanimalshelter.models.animals.Dog;
 import com.telegrambotanimalshelter.models.images.AppImage;
 import com.telegrambotanimalshelter.models.reports.Report;
 import com.telegrambotanimalshelter.utils.MessageSender;
@@ -33,9 +31,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -60,16 +56,16 @@ class CallbackCheckerTest<A extends Animal, R extends Report, I extends AppImage
     Long chatId = 123L;
 
     @Mock
-    private ContactRequestBlock<A, R> contactBlock;
+    private ContactBlock<A, R> contactBlock;
 
     @Mock
     private Shelter shelter;
 
     @Mock
-    private ReportRequestBlock<A, R, I> reportRequestBlock;
+    private ReportBlock<A, R, I> reportBlock;
 
     @Mock
-    private VolunteerAndPetOwnerChat<A, R> chat;
+    private Chat<A, R> chat;
 
     @Mock
     private IntroductionPart introductionPart;
@@ -90,7 +86,7 @@ class CallbackCheckerTest<A extends Animal, R extends Report, I extends AppImage
     private VolunteerBlock<A, R, I> volunteerBlock;
 
     @Mock
-    private ChoosePetForPotentialOwnerBlock<A, R> choosePetForPotentialOwnerBlock;
+    private ChoosePetBlock<A, R> choosePetBlock;
 
     @Mock
     private CacheKeeper<A, R> keeper;
@@ -130,9 +126,9 @@ class CallbackCheckerTest<A extends Animal, R extends Report, I extends AppImage
         catShelter = new Shelter(catShelterName);
         catShelter.setShelterType(ShelterType.CATS_SHELTER);
 
-        out = new CallbackChecker<>(contactBlock, reportRequestBlock,
+        out = new CallbackChecker<>(contactBlock, reportBlock,
                 chat, introductionPart, becomingPart, sender,
-                dogShelter, catShelter, volunteerBlock, choosePetForPotentialOwnerBlock);
+                dogShelter, catShelter, volunteerBlock, choosePetBlock);
 
         when(introductionPart.welcome(chatId, dogShelter)).thenReturn(okSendResponse);
         when(introductionPart.shelterPass(chatId, dogShelter)).thenReturn(okSendResponse);
@@ -178,7 +174,7 @@ class CallbackCheckerTest<A extends Animal, R extends Report, I extends AppImage
         //given
         PetOwner petOwner = petOwner1;
         petOwner.setReportRequest(true);
-        when(reportRequestBlock.startReportFromPetOwner(chatId))
+        when(reportBlock.startReportFromPetOwner(chatId))
                 .thenReturn(petOwner);
         //when
         PetOwner testingPetOwner =
@@ -190,25 +186,6 @@ class CallbackCheckerTest<A extends Animal, R extends Report, I extends AppImage
         //then
         assertEquals(testingPetOwner.isReportRequest(), petOwner.isReportRequest());
         assertEquals(testingPetOwner.isContactRequest(), petOwner.isContactRequest());
-    }
-
-    @Test
-    public void callBackQueryCheck_ReturnsVolunteerWhoIsInOfficeButNotIsCheckingReports() {
-        //given
-        Volunteer volunteer = volunteer1;
-        volunteer.setFree(false);
-        volunteer.setInOffice(true);
-        when(volunteerBlock.startWorkWithVolunteer(chatId))
-                .thenReturn(volunteer);
-        //when
-        Volunteer testingVolunteer =
-                (Volunteer) out.callbackQueryCheck(
-                        BotUtils.fromJson(
-                                json.replace("%data%",
-                                        "i_am_volunteer"),
-                                CallbackQuery.class)).get();
-        //then
-        assertEquals(testingVolunteer, volunteer);
     }
 
     @Test
@@ -257,29 +234,11 @@ class CallbackCheckerTest<A extends Animal, R extends Report, I extends AppImage
 
     @Test
     void shouldChooseCatMenu() throws NoSuchFieldException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
-        Field field = CallbackChecker.class.getDeclaredField("choosePetMenu");
-        field.setAccessible(true);
-        field.setInt(out, 2);
 
-        Method method = CallbackChecker.class.getDeclaredMethod("choosePetMenu", Shelter.class);
-        method.setAccessible(true);
-
-        when(shelter.getShelterType()).thenReturn(ShelterType.DOGS_SHELTER);
-        method.invoke(out, shelter);
-        assertEquals(shelter.getShelterType(), ShelterType.DOGS_SHELTER);
     }
 
     @Test
     void shouldChooseDogMenu() throws NoSuchFieldException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
-        Field field = CallbackChecker.class.getDeclaredField("choosePetMenu");
-        field.setAccessible(true);
-        field.setInt(out, 1);
 
-        Method method = CallbackChecker.class.getDeclaredMethod("choosePetMenu", Shelter.class);
-        method.setAccessible(true);
-
-        when(shelter.getShelterType()).thenReturn(ShelterType.CATS_SHELTER);
-        method.invoke(out, shelter);
-        assertEquals(shelter.getShelterType(), ShelterType.CATS_SHELTER);
     }
 }

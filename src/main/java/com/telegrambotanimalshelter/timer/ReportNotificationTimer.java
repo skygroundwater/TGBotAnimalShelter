@@ -21,6 +21,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class ReportNotificationTimer<A extends Animal> {
@@ -70,8 +71,22 @@ public class ReportNotificationTimer<A extends Animal> {
     }
 
     @Scheduled(cron = "0 50 8 * * *")
-    public void resetReporting() {
-        cacheKeeper.setAllAnimalsReportedToFalse();
+    public String setAllAnimalsReportedToFalse() {
+        for (Map.Entry<Long, List<Cat>> entry :
+                cacheKeeper.getCache().getCatsByPetOwnerId().entrySet()) {
+            for (Cat cat : entry.getValue()) {
+                cat.setReported(false);
+                cacheKeeper.getCatService().putPet(cat);
+            }
+        }
+        for (Map.Entry<Long, List<Dog>> entry :
+                cacheKeeper.getCache().getDogsByPetOwnerId().entrySet()) {
+            for (Dog dog : entry.getValue()) {
+                dog.setReported(false);
+                cacheKeeper.getDogService().putPet(dog);
+            }
+        }
+        return "У всех животных в базе данных и кеше обновлен статус об отчете";
     }
 
     private void checkLastReportFromPet(Long chatId, A animal) {

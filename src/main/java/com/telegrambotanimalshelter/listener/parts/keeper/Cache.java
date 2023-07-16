@@ -15,25 +15,25 @@ import lombok.Data;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 @Component
 @Data
 public class Cache<A extends Animal, R extends Report> {
 
-    private Map<Long, PetOwner> petOwnersById;
+    private ConcurrentMap<Long, PetOwner> petOwnersById;
 
-    private Map<Long, Volunteer> volunteers;
+    private ConcurrentMap<Long, Volunteer> volunteers;
 
-    private Map<Long, List<Cat>> catsByPetOwnerId;
+    private ConcurrentMap<Long, List<Cat>> catsByPetOwnerId;
 
-    private Map<Long, List<Dog>> dogsByPetOwnerId;
+    private ConcurrentMap<Long, List<Dog>> dogsByPetOwnerId;
 
-    private Map<Long, List<CatReport>> catReportsByCatId;
+    private ConcurrentMap<Long, List<CatReport>> catReportsByCatId;
 
-    private Map<Long, List<DogReport>> dogReportsByDogId;
+    private ConcurrentMap<Long, List<DogReport>> dogReportsByDogId;
 
     private List<R> cashedReports;
 
@@ -41,9 +41,9 @@ public class Cache<A extends Animal, R extends Report> {
 
     private List<DogReport> cachedDogReports;
 
-    private Map<Long, R> actualReportByPetOwnerId;
+    private ConcurrentMap<Long, R> actualReportByPetOwnerId;
 
-    private Map<Long, A> actualPetsInReportProcess;
+    private ConcurrentMap<Long, A> actualPetsInReportProcess;
 
     private List<A> cachedAnimals;
 
@@ -53,14 +53,14 @@ public class Cache<A extends Animal, R extends Report> {
 
     @PostConstruct
     public void init() {
-        this.volunteers = new HashMap<>();
-        this.petOwnersById = new HashMap<>();
-        this.catsByPetOwnerId = new HashMap<>();
-        this.dogsByPetOwnerId = new HashMap<>();
-        this.catReportsByCatId = new HashMap<>();
-        this.dogReportsByDogId = new HashMap<>();
-        this.actualReportByPetOwnerId = new HashMap<>();
-        this.actualPetsInReportProcess = new HashMap<>();
+        this.volunteers = new ConcurrentHashMap<>();
+        this.petOwnersById = new ConcurrentHashMap<>();
+        this.catsByPetOwnerId = new ConcurrentHashMap<>();
+        this.dogsByPetOwnerId = new ConcurrentHashMap<>();
+        this.catReportsByCatId = new ConcurrentHashMap<>();
+        this.dogReportsByDogId = new ConcurrentHashMap<>();
+        this.actualReportByPetOwnerId = new ConcurrentHashMap<>();
+        this.actualPetsInReportProcess = new ConcurrentHashMap<>();
         this.cashedReports = new ArrayList<>();
         this.catImages = new ArrayList<>();
         this.dogImages = new ArrayList<>();

@@ -1,6 +1,8 @@
 package com.telegrambotanimalshelter.models;
 
+import com.telegrambotanimalshelter.enums.Role;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
 import org.hibernate.Hibernate;
 
@@ -8,7 +10,6 @@ import java.util.Objects;
 
 @Entity
 @Table(schema = "public", name = "volunteers")
-@NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
@@ -43,5 +44,34 @@ public class Volunteer {
     @OneToOne
     @JoinColumn(name = "petowner_id", referencedColumnName = "id")
     private PetOwner petOwner;
+
+    @NotEmpty(message = "password should be filled")
+    @Column(name = "password")
+    private String password;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role")
+    private Role role;
+
+    @Column(name = "non_expired")
+    private boolean nonExpired;
+
+    @Column(name = "non_locked")
+    private boolean nonLocked;
+
+    @Column(name = "non_credentials_expired")
+    private boolean nonCredentialsExpired;
+
+    @Column(name = "is_enabled")
+    private boolean isEnabled;
+
+    public Volunteer(){
+        nonCredentialsExpired = true;
+        nonExpired = true;
+        nonLocked = true;
+        inOffice = false;
+        isFree = true;
+        checkingReports = false;
+    }
 
 }

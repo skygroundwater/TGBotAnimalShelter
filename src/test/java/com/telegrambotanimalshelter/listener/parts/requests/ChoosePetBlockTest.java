@@ -3,7 +3,6 @@ package com.telegrambotanimalshelter.listener.parts.requests;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.request.SendPhoto;
 import com.telegrambotanimalshelter.exceptions.NotFoundInDataBaseException;
-import com.telegrambotanimalshelter.models.PetOwner;
 import com.telegrambotanimalshelter.models.animals.Animal;
 import com.telegrambotanimalshelter.models.animals.Cat;
 import com.telegrambotanimalshelter.models.animals.Dog;
@@ -22,8 +21,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.util.List;
 
@@ -32,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class ChoosePetForPotentialOwnerBlockTest<A extends Animal, R extends Report> {
+class ChoosePetBlockTest<A extends Animal, R extends Report> {
 
     String name = "Name";
     Long chatId = 123L;
@@ -54,7 +51,7 @@ class ChoosePetForPotentialOwnerBlockTest<A extends Animal, R extends Report> {
     List<Dog> dogs;
 
     @InjectMocks
-    ChoosePetForPotentialOwnerBlock<A, R> choosePetForPotentialOwnerBlock;
+    ChoosePetBlock<A, R> choosePetBlock;
 
     @Test
     void shouldGetDogByNameFromUserRequest() {
@@ -62,7 +59,7 @@ class ChoosePetForPotentialOwnerBlockTest<A extends Animal, R extends Report> {
         dog.setNickName(name);
 
         when(dogsRepository.findDogsByNickName(name)).thenReturn(dog);
-        assertEquals(dog, choosePetForPotentialOwnerBlock.getDogByNameFromUserRequest(name, chatId));
+        assertEquals(dog, choosePetBlock.getDogByNameFromUserRequest(name, chatId));
     }
 
     @Test
@@ -71,7 +68,7 @@ class ChoosePetForPotentialOwnerBlockTest<A extends Animal, R extends Report> {
         when(dogsRepository.findDogsByNickName(name)).thenReturn(null);
 
         NotFoundInDataBaseException exception = assertThrows(NotFoundInDataBaseException.class,
-                () -> choosePetForPotentialOwnerBlock.getDogByNameFromUserRequest(name, chatId));
+                () -> choosePetBlock.getDogByNameFromUserRequest(name, chatId));
         assertEquals("Собаки с таким именем нет в базе или задан неверный запрос", exception.getMessage());
         verify(sender).sendResponse(any(SendMessage.class));
     }
@@ -82,7 +79,7 @@ class ChoosePetForPotentialOwnerBlockTest<A extends Animal, R extends Report> {
         cat.setNickName(name);
 
         when(catsRepository.findCatsByNickName(name)).thenReturn(cat);
-        assertEquals(cat, choosePetForPotentialOwnerBlock.getCatByNameFromUserRequest(name, chatId));
+        assertEquals(cat, choosePetBlock.getCatByNameFromUserRequest(name, chatId));
     }
 
     @Test
@@ -90,7 +87,7 @@ class ChoosePetForPotentialOwnerBlockTest<A extends Animal, R extends Report> {
         when(catsRepository.findCatsByNickName(name)).thenReturn(null);
 
         NotFoundInDataBaseException exception = assertThrows(NotFoundInDataBaseException.class,
-                () -> choosePetForPotentialOwnerBlock.getCatByNameFromUserRequest(name, chatId));
+                () -> choosePetBlock.getCatByNameFromUserRequest(name, chatId));
         assertEquals("Кошки с таким именем нет в базе или задан неверный запрос", exception.getMessage());
         verify(sender).sendResponse(any(SendMessage.class));
     }
@@ -100,7 +97,7 @@ class ChoosePetForPotentialOwnerBlockTest<A extends Animal, R extends Report> {
         Animal animal = new Dog();
         animal.setAbout("about");
 
-        choosePetForPotentialOwnerBlock.getAnimalInfo(animal, chatId);
+        choosePetBlock.getAnimalInfo(animal, chatId);
         verify(sender).sendResponse(any(SendMessage.class));
     }
 
@@ -108,14 +105,14 @@ class ChoosePetForPotentialOwnerBlockTest<A extends Animal, R extends Report> {
     void shouldGetAnimalInfoIfNotExist() {
         Animal animal = new Dog();
 
-        choosePetForPotentialOwnerBlock.getAnimalInfo(animal, chatId);
+        choosePetBlock.getAnimalInfo(animal, chatId);
         verify(sender).sendResponse(any(SendMessage.class));
     }
 
     @Test
     void shouldGetAnimalInfoIfNull() {
 
-        choosePetForPotentialOwnerBlock.getAnimalInfo(null, chatId);
+        choosePetBlock.getAnimalInfo(null, chatId);
         verify(sender).sendResponse(any(SendMessage.class));
     }
 
@@ -124,8 +121,8 @@ class ChoosePetForPotentialOwnerBlockTest<A extends Animal, R extends Report> {
         Animal animal = new Dog();
         animal.setNickName("animal");
         when(petPhotoService.getPetPhoto(animal, animal.getNickName()))
-                .thenReturn(new File(ChoosePetForPotentialOwnerBlockTest.class.getResource("photo").toURI()));
-        choosePetForPotentialOwnerBlock.getPetPhotoFromShelter(animal, chatId);
+                .thenReturn(new File(ChoosePetBlockTest.class.getResource("photo").toURI()));
+        choosePetBlock.getPetPhotoFromShelter(animal, chatId);
         verify(sender).sendResponse(any(SendPhoto.class));
 
     }
@@ -136,7 +133,7 @@ class ChoosePetForPotentialOwnerBlockTest<A extends Animal, R extends Report> {
         animal.setNickName("animal");
         when(petPhotoService.getPetPhoto(animal, animal.getNickName()))
                 .thenReturn(null);
-        choosePetForPotentialOwnerBlock.getPetPhotoFromShelter(animal, chatId);
+        choosePetBlock.getPetPhotoFromShelter(animal, chatId);
         verify(sender).sendResponse(any(SendMessage.class));
 
     }

@@ -1,6 +1,5 @@
 package com.telegrambotanimalshelter.listener.parts.requests;
 
-import com.pengrad.telegrambot.model.Update;
 import com.telegrambotanimalshelter.exceptions.NotFoundInDataBaseException;
 import com.telegrambotanimalshelter.listener.parts.keeper.Cache;
 import com.telegrambotanimalshelter.listener.parts.keeper.CacheKeeper;
@@ -9,31 +8,25 @@ import com.telegrambotanimalshelter.models.Volunteer;
 import com.telegrambotanimalshelter.models.animals.Animal;
 import com.telegrambotanimalshelter.models.reports.Report;
 import com.telegrambotanimalshelter.services.petownerservice.PetOwnersService;
-import com.telegrambotanimalshelter.services.volunteerservice.VolunteerService;
+import com.telegrambotanimalshelter.services.volunteerservice.VolunteersService;
 import com.telegrambotanimalshelter.utils.MessageSender;
 import org.springframework.stereotype.Component;
 
 /**
  * Сущность, отвечающая за взаимодействие пользователя
- * с волонтером, посредством их обоюдным общением внутри телеграм бота
+ * с волонтером, посредством их обоюдного общением внутри телеграм бота
  *
  * @param <A>
  * @param <R>
  */
 @Component
-public class VolunteerAndPetOwnerChat<A extends Animal, R extends Report> {
-
-    private final PetOwnersService petOwnersService;
-
-    private final VolunteerService volunteerService;
+public class Chat<A extends Animal, R extends Report> {
 
     private final MessageSender<A> sender;
 
     private final CacheKeeper<A, R> cacheKeeper;
 
-    public VolunteerAndPetOwnerChat(PetOwnersService petOwnersService, VolunteerService volunteerService, MessageSender<A> sender, CacheKeeper<A, R> cacheKeeper) {
-        this.petOwnersService = petOwnersService;
-        this.volunteerService = volunteerService;
+    public Chat(MessageSender<A> sender, CacheKeeper<A, R> cacheKeeper) {
         this.sender = sender;
         this.cacheKeeper = cacheKeeper;
     }
@@ -42,6 +35,13 @@ public class VolunteerAndPetOwnerChat<A extends Animal, R extends Report> {
         return cacheKeeper.getCache();
     }
 
+    private VolunteersService volunteersService(){
+        return cacheKeeper.getVolunteersService();
+    }
+
+    private PetOwnersService petOwnersService(){
+        return cacheKeeper.getPetOwnersService();
+    }
 
     /**
      * Метод проверяет является ли пользователь в данный
@@ -87,13 +87,15 @@ public class VolunteerAndPetOwnerChat<A extends Animal, R extends Report> {
             try {
                 Volunteer volunteer = cacheKeeper.findFreeVolunteer();
                 //назначем поля усыновителю в базе данных и одновременно возвращаем его из метода
-                PetOwner petOwner = petOwnersService.setPetOwnerToVolunteerChat(chatId, volunteer, true);
+                PetOwner petOwner = petOwnersService()
+                        .setPetOwnerToVolunteerChat(chatId, volunteer, true);
                 cache().getPetOwnersById().put(petOwner.getId(), petOwner);
                 //также назначаем поля волонтеру
                 volunteer.setPetOwner(petOwner);
                 volunteer.setFree(false);
                 //и схораняем его в базу данных
-                cache().getVolunteers().put(volunteer.getId(), volunteerService.putVolunteer(volunteer));
+                cache().getVolunteers().put(volunteer.getId(),
+                        volunteersService().putVolunteer(volunteer));
                 //отправляем сообщения волонтеру и усыновителю,
                 // что они находятся в чате друг с другом
                 String info = "С вами будет общаться волонтёр " + volunteer.getFirstName();
@@ -133,14 +135,14 @@ public class VolunteerAndPetOwnerChat<A extends Animal, R extends Report> {
                 //через усыновителя находим волонтера и применяем метод из сервиса
                 Volunteer volunteer = cache().getVolunteers()
                         .put(petOwner.getVolunteer().getId(),
-                                volunteerService.setFree(
+                                volunteersService().setFree(
                                         petOwner.getVolunteer().getId(), true));
                 //назначаем усыновителю новые значения полей
                 petOwner.setVolunteerChat(false);
                 petOwner.setVolunteer(null);
                 //кладём усыновителя обратно в базу
                 cache().getPetOwnersById().put(petOwner.getId(),
-                        petOwnersService.putPetOwner(petOwner));
+                        petOwnersService().putPetOwner(petOwner));
                 sender.sendMessage(petOwner.getId(), "Вы закончили чат");
                 sender.sendMessage(volunteer.getId(), "Вы закончили чат");
                 sender.sendStartMessage(petOwner.getId());
@@ -151,13 +153,15 @@ public class VolunteerAndPetOwnerChat<A extends Animal, R extends Report> {
                 Volunteer volunteer = cache().getVolunteers().get(volunteerId);
                 //через волонтера находим усыновителя в базе и применяем метод из сервиса
                 PetOwner petOwner = cache().getPetOwnersById()
-                        .put(volunteer.getPetOwner().getId(), petOwnersService.setPetOwnerToVolunteerChat(
+                        .put(volunteer.getPetOwner().getId(), petOwnersService()
+                                .setPetOwnerToVolunteerChat(
                                 volunteer.getPetOwner().getId(), null, false));
                 //назначаем волонтеру новые значения полей
                 volunteer.setPetOwner(null);
                 volunteer.setFree(true);
                 //кладём волонтера обратно в базу
-                cache().getVolunteers().put(volunteer.getId(), volunteerService.putVolunteer(volunteer));
+                cache().getVolunteers().put(volunteer.getId(),
+                        volunteersService().putVolunteer(volunteer));
                 sender.sendMessage(volunteer.getId(), "Вы закончили чат");
                 sender.sendMessage(petOwner.getId(), "Вы закончили чат");
                 sender.sendStartMessage(petOwner.getId());

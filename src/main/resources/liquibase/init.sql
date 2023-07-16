@@ -20,7 +20,10 @@ create table petowners
     report_request_chat  boolean default false not null,
     volunteer_chat       boolean default false not null,
     volunteer_id         bigint,
-    phone_number         varchar(255)
+    phone_number         varchar(255),
+    choosing_pet         boolean,
+    looking_about_pet    boolean,
+    is_registering       boolean
 );
 
 alter table petowners
@@ -28,20 +31,25 @@ alter table petowners
 
 create table volunteers
 (
-    id               bigint               not null
+    id                      bigint               not null
         constraint volunteer_pk
             primary key,
-    link             varchar(255),
-    first_name       varchar(255),
-    last_name        varchar(255),
-    username         varchar(255),
-    is_free          boolean default true not null,
-    petowner_id      bigint
+    link                    varchar(255),
+    first_name              varchar(255),
+    last_name               varchar(255),
+    username                varchar(255),
+    password                varchar,
+    is_free                 boolean default true not null,
+    petowner_id             bigint
         constraint volunteers_petowners_null_fk
             references petowners
             on update set null on delete set null,
-    checking_reports boolean default false,
-    in_office        boolean default false
+    checking_reports        boolean default false,
+    in_office               boolean default false,
+    non_expired             boolean,
+    non_locked              boolean,
+    non_credentials_expired boolean,
+    is_enabled              boolean
 );
 
 alter table volunteers
@@ -211,16 +219,22 @@ alter table images.dog_images
 
 --changeset oleg:2
 
-alter table animals.cats add about varchar(1000);
-alter table animals.cats add photo bytea;
-alter table animals.cats add sheltered boolean;
+alter table animals.cats
+    add about varchar(1000);
+alter table animals.cats
+    add photo bytea;
+alter table animals.cats
+    add sheltered boolean;
 
 alter table animals.cats
     owner to postgres;
 
-alter table animals.dogs add about varchar(1000);
-alter table animals.dogs add photo bytea;
-alter table animals.dogs add sheltered boolean;
+alter table animals.dogs
+    add about varchar(1000);
+alter table animals.dogs
+    add photo bytea;
+alter table animals.dogs
+    add sheltered boolean;
 
 alter table animals.cats
     owner to postgres;

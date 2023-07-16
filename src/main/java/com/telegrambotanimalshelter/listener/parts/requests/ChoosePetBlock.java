@@ -10,7 +10,6 @@ import com.telegrambotanimalshelter.exceptions.NotFoundInDataBaseException;
 import com.telegrambotanimalshelter.listener.parts.keeper.Cache;
 import com.telegrambotanimalshelter.listener.parts.keeper.CacheKeeper;
 import com.telegrambotanimalshelter.models.PetOwner;
-import com.telegrambotanimalshelter.models.Shelter;
 import com.telegrambotanimalshelter.models.animals.Animal;
 import com.telegrambotanimalshelter.models.animals.Cat;
 import com.telegrambotanimalshelter.models.animals.Dog;
@@ -28,7 +27,7 @@ import java.io.File;
 import java.util.*;
 
 @Component
-public class ChoosePetForPotentialOwnerBlock<A extends Animal, R extends Report> {
+public class ChoosePetBlock<A extends Animal, R extends Report> {
     private final MessageSender<A> sender;
 
     private final CatsServiceImpl catsService;
@@ -47,9 +46,9 @@ public class ChoosePetForPotentialOwnerBlock<A extends Animal, R extends Report>
 
     private Map<Long, A> showingAnimalsByPetOwnerID;
 
-    public ChoosePetForPotentialOwnerBlock(MessageSender<A> sender,
-                                           CatsServiceImpl catsService, DogsServiceImpl dogsService, CatsRepository catsRepository,
-                                           DogsRepository dogsRepository, PetOwnersService petOwnersService, CacheKeeper<A, R> cacheKeeper, PetPhotoService petPhotoService) {
+    public ChoosePetBlock(MessageSender<A> sender,
+                          CatsServiceImpl catsService, DogsServiceImpl dogsService, CatsRepository catsRepository,
+                          DogsRepository dogsRepository, PetOwnersService petOwnersService, CacheKeeper<A, R> cacheKeeper, PetPhotoService petPhotoService) {
         this.sender = sender;
         this.catsService = catsService;
         this.dogsService = dogsService;

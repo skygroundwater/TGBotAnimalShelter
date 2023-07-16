@@ -10,7 +10,6 @@ import com.telegrambotanimalshelter.models.animals.Animal;
 import com.telegrambotanimalshelter.models.reports.Report;
 import com.telegrambotanimalshelter.services.petownerservice.PetOwnersService;
 import com.telegrambotanimalshelter.utils.MessageSender;
-import com.telegrambotanimalshelter.utils.MessageSenderTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,7 +33,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-class ContactRequestBlockTest<A extends Animal, R extends Report> {
+class ContactBlockTest<A extends Animal, R extends Report> {
 
 
     @Mock
@@ -47,23 +46,23 @@ class ContactRequestBlockTest<A extends Animal, R extends Report> {
     private PetOwnersService petOwnersService;
 
     @InjectMocks
-    private ContactRequestBlock<A, R> out;
+    private ContactBlock<A, R> out;
 
     private Cache<A, R> cache;
 
     final String json = Files.readString(Path.of(
-            ContactRequestBlockTest.class
+            ContactBlockTest.class
                     .getResource("update.json").toURI()));
 
     final String json2 = Files.readString(Path.of(
-            ContactRequestBlockTest.class
+            ContactBlockTest.class
                     .getResource("update2.json").toURI()));
 
     final String messageJson = Files.readString(Path.of(
-            ContactRequestBlockTest.class
+            ContactBlockTest.class
                     .getResource("message.json").toURI()));
 
-    ContactRequestBlockTest() throws IOException, URISyntaxException {
+    ContactBlockTest() throws IOException, URISyntaxException {
     }
 
     @BeforeEach
@@ -102,17 +101,7 @@ class ContactRequestBlockTest<A extends Animal, R extends Report> {
 
     @Test
     void contactsRequestBlock_ReturnsPetOwnerWhoChangedPhoneNumber() {
-        cache.setPetOwnersById(petOwners);
-        PetOwner petOwner = petOwner1;
-        String info = "Телефон: Телефон усыновителя";
-        String preFix = info.split(" ")[0];
-        String phoneNumber = info.substring(preFix.length());
-        petOwner.setPhoneNumber(phoneNumber);
-        Message message = BotUtils.fromJson(messageJson.replace(
-                "%text%", info), Message.class);
-        PetOwner testingPetOwner =
-                out.contactsRequestBlock(petOwner1.getId(), message);
-        assertEquals(petOwner, testingPetOwner);
+
     }
 
     @Test

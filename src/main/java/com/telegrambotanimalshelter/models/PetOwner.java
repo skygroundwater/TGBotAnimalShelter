@@ -57,6 +57,9 @@ public class PetOwner {
     @Column(name = "volunteer_chat")
     private boolean volunteerChat;
 
+    @Column(name = "is_registering")
+    private boolean isRegistering;
+
     @OneToOne
     @JoinColumn(name = "volunteer_id", referencedColumnName = "id")
     private Volunteer volunteer;
@@ -89,6 +92,7 @@ public class PetOwner {
         this.contactRequest = false;
         this.reportRequest = false;
         this.volunteerChat = false;
+        this.isRegistering = false;
     }
 
     @Override

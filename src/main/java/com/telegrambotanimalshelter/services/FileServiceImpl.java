@@ -73,7 +73,7 @@ public class FileServiceImpl<I extends AppImage> implements FileService<I> {
     }
 
     @Override
-    public List<CatImage> gatAllCatImages() {
+    public List<CatImage> getAllCatImages() {
         return catImagesRepository.findAll();
     }
 

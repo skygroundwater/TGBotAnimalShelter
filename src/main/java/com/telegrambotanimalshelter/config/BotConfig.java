@@ -20,7 +20,7 @@ import static com.telegrambotanimalshelter.utils.Constants.*;
 
 @Configuration
 @Data
-public class Config {
+public class BotConfig {
 
     @Value("${bot.name}")
     String botName;

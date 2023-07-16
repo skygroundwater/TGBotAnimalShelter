@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
  * @param <R>
  */
 @Component
-public class ContactRequestBlock<A extends Animal, R extends Report> {
+public class ContactBlock<A extends Animal, R extends Report> {
 
     private final MessageSender<A> sender;
 
@@ -28,13 +28,13 @@ public class ContactRequestBlock<A extends Animal, R extends Report> {
 
     private final PetOwnersService petOwnersService;
 
-    public ContactRequestBlock(MessageSender<A> sender, PetOwnersService petOwnersService, CacheKeeper<A, R> cacheKeeper) {
+    public ContactBlock(MessageSender<A> sender, PetOwnersService petOwnersService, CacheKeeper<A, R> cacheKeeper) {
         this.sender = sender;
         this.petOwnersService = petOwnersService;
         this.cacheKeeper = cacheKeeper;
     }
 
-    private Cache<A, R> cache(){
+    private Cache<A, R> cache() {
         return cacheKeeper.getCache();
     }
 
@@ -84,7 +84,8 @@ public class ContactRequestBlock<A extends Animal, R extends Report> {
      * @see PetOwnersService#savePotentialPetOwner(Update)
      */
     public PetOwner savePotentialPetOwner(Update update) {
-            return petOwnersService.savePotentialPetOwner(update);
+        PetOwner savedPetOwner = petOwnersService.savePotentialPetOwner(update);
+        return cache().getPetOwnersById().put(savedPetOwner.getId(), savedPetOwner);
     }
 
     /**
@@ -162,11 +163,11 @@ public class ContactRequestBlock<A extends Animal, R extends Report> {
         petOwner.setPhoneNumber(phoneNumber);
         petOwner.setContactRequest(false);
         cache().getPetOwnersById().put(petOwner.getId(), petOwner);
-        if(cache().getVolunteers().containsKey(chatId)){
+        if (cache().getVolunteers().containsKey(chatId)) {
             Volunteer volunteer = cache().getVolunteers().get(chatId);
             volunteer.setFirstName(petOwner.getFirstName());
             volunteer.setLastName(petOwner.getLastName());
-            cacheKeeper.getVolunteerService().putVolunteer(volunteer);
+            cacheKeeper.getVolunteersService().putVolunteer(volunteer);
         }
         petOwnersService.putPetOwner(petOwner);
         sender.sendMessage(chatId, "Ваши контакты успешно записаны. Можете продолжить работу с нашим ботом.");

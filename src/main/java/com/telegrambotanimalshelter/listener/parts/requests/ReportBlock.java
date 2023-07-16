@@ -36,7 +36,7 @@ import java.util.List;
  * @param <I>
  */
 @Component
-public class ReportRequestBlock<A extends Animal, R extends Report, I extends AppImage> {
+public class ReportBlock<A extends Animal, R extends Report, I extends AppImage> {
 
     private final MessageSender<A> sender;
 
@@ -48,27 +48,26 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
 
     private final FileService<I> fileService;
 
-    private final CacheKeeper<A, R> cacheKeeper;
+    private final CacheKeeper<A, R> keeper;
 
     private HashMap<Long, ArrayList<A>> cashedNoneReportedPetNames;
 
-
-    public ReportRequestBlock(MessageSender<A> sender, PetOwnersService petOwnersService,
-                              @Qualifier("catReportServiceImpl") ReportService<CatReport, Cat, CatImage> catReportService,
-                              @Qualifier("dogReportServiceImpl") ReportService<DogReport, Dog, DogImage> dogReportService,
-                              FileService<I> fileService,
-                              CacheKeeper<A, R> cacheKeeper) {
+    public ReportBlock(MessageSender<A> sender, PetOwnersService petOwnersService,
+                       @Qualifier("catReportServiceImpl") ReportService<CatReport, Cat, CatImage> catReportService,
+                       @Qualifier("dogReportServiceImpl") ReportService<DogReport, Dog, DogImage> dogReportService,
+                       FileService<I> fileService,
+                       CacheKeeper<A, R> keeper) {
         this.sender = sender;
         this.petOwnersService = petOwnersService;
         this.catReportService = catReportService;
         this.dogReportService = dogReportService;
         this.fileService = fileService;
-        this.cacheKeeper = cacheKeeper;
+        this.keeper = keeper;
         this.cashedNoneReportedPetNames = new HashMap<>();
     }
 
     private Cache<A, R> cache() {
-        return cacheKeeper.getCache();
+        return keeper.getCache();
     }
 
     /**
@@ -148,14 +147,14 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
         берем из держателя кеша котов и собак пользователя
         и добавляем их имена к клавиатуре, предоставляя выбор
          */
-        for (Cat cat : cacheKeeper.getCatsByPetOwnerIdFromCache(chatId)) {
+        for (Cat cat : keeper.getCatsByPetOwnerIdFromCache(chatId)) {
             if (!cat.isReported()) {
                 choosePetMarkup.addRow(cat.getNickName());
                 // сохраняем кошку в кеше
                 cashedNoneReportedPetNames.get(chatId).add((A) cat);
             }
         }
-        for (Dog dog : cacheKeeper.getDogByPetOwnerIdFromCache(chatId)) {
+        for (Dog dog : keeper.getDogByPetOwnerIdFromCache(chatId)) {
             if (!dog.isReported()) {
                 choosePetMarkup.addRow(dog.getNickName());
                 // сохраняем собаку в кеше
@@ -171,7 +170,7 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
     }
 
     /**
-     * В этом метода решается, начинать работу с
+     * В этом методе решается, начинать работу с
      * пользователем по отправке отчета или нет.
      *
      * @param chatId личный id пользователя
@@ -185,7 +184,7 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
         PetOwner petOwner = cache().getPetOwnersById().get(chatId);
         if (petOwner != null && petOwner.isHasPets()) {
             petOwner = cache().getPetOwnersById().put(chatId,
-                    petOwnersService.setPetOwnerReportRequest(chatId, true));
+                    keeper.getPetOwnersService().setPetOwnerReportRequest(chatId, true));
             chooseAnyPetMessages(chatId);
         } else sender.sendMessage(chatId, "У вас нет животных");
         return petOwner;
@@ -210,15 +209,35 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
                 if (animal instanceof Dog) {
                     //в кеше создаем сущность отчета и наполнять
                     //его будем по мере прохождения этапов блока
-                    cacheKeeper.createReportForAnimal(chatId, animal);
+                    createReportForAnimal(chatId, animal);
                     return true;
                 } else if (animal instanceof Cat) {
-                    cacheKeeper.createReportForAnimal(chatId, animal);
+                    createReportForAnimal(chatId, animal);
                     return true;
                 }
             }
         }
         return false;
+    }
+
+
+    public PetOwner createReportForAnimal(Long chatId, A animal) {
+        PetOwner petOwner = cache().getPetOwnersById().get(chatId);
+        if (animal instanceof Cat cat) {
+            CatReport catReport = CatReport.builder().cat(cat)
+                    .petOwner(petOwner).images(new ArrayList<>()).build();
+            catReport.setPetOwner(petOwner);
+            CatReport catReportWithId = keeper.getCatReportService().putReport(catReport);
+            cache().getActualReportByPetOwnerId().put(chatId, (R) catReportWithId);
+            cache().getActualPetsInReportProcess().put(chatId, animal);
+        } else if (animal instanceof Dog dog) {
+            DogReport dogReport = DogReport.builder().dog(dog).petOwner(petOwner).images(new ArrayList<>()).build();
+            dogReport.setPetOwner(petOwner);
+            DogReport dogReportWithId = keeper.getDogReportService().putReport(dogReport);
+            cache().getActualReportByPetOwnerId().put(chatId, (R) dogReportWithId);
+            cache().getActualPetsInReportProcess().put(chatId, animal);
+        }
+        return petOwner;
     }
 
     /**
@@ -286,16 +305,16 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
         sender.sendMessage(chatId, "Вы прервали отправку отчета. Пожалуйста, не забудьте отправить его позже.");
         R report = cache().getActualReportByPetOwnerId().remove(chatId);
         if (report instanceof CatReport catReport) {
-            catReportService.deleteReportById(catReport.getId());
+            keeper.getCatReportService().deleteReportById(catReport.getId());
         } else if (report instanceof DogReport dogReport) {
-            dogReportService.deleteReportById(dogReport.getId());
+            keeper.getDogReportService().deleteReportById(dogReport.getId());
         }
         breakReport(chatId);
     }
 
     private void breakReport(Long chatId) {
         cache().getPetOwnersById().put(chatId,
-                petOwnersService.setPetOwnerReportRequest(chatId, false));
+                keeper.getPetOwnersService().setPetOwnerReportRequest(chatId, false));
     }
 
     /**
@@ -321,12 +340,12 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
             catReport.setCopiedPetOwnerId(chatId);
             Cat cat = (Cat) cache().getActualPetsInReportProcess().remove(chatId);
             cat.setReported(true);
-            cacheKeeper.getCatService().putPet(cat);
+            keeper.getCatService().putPet(cat);
             catReport.setCopiedAnimalId(cat.getId());
             catImage.setCat(cat);
             catImage.setCatReport(catReport);
             catImage.setCopiedReportId(catReport.getId());
-            catReportService.putReport(catReport);
+            keeper.getCatReportService().putReport(catReport);
             cache().getCashedReports().add((R) catReport);
             cache().getCatImages().add(catImage);
         } else if (report instanceof DogReport dogReport) {
@@ -334,12 +353,12 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
             dogReport.setCopiedPetOwnerId(chatId);
             Dog dog = (Dog) cache().getActualPetsInReportProcess().remove(chatId);
             dog.setReported(true);
-            cacheKeeper.getDogService().putPet(dog);
+            keeper.getDogService().putPet(dog);
             dogReport.setCopiedAnimalId(dog.getId());
             dogImage.setDog(dog);
             dogImage.setDogReport(dogReport);
             dogImage.setCopiedReportId(dogReport.getId());
-            dogReportService.putReport(dogReport);
+            keeper.getDogReportService().putReport(dogReport);
             cache().getCashedReports().add((R) dogReport);
             cache().getDogImages().add(dogImage);
         }
@@ -385,7 +404,7 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
     private void sendMessageToTakeCommonStatus(Long chatId, String diet) {
         sender.sendMessage(chatId, "Мы уже близки к завершению. Поделитесь общим состоянием животного.\n" +
                 " Как его самочувствие и процесс привыкания к новому месту? Префикс *Состояние: *");
-        cacheKeeper.getCache().getActualReportByPetOwnerId().get(chatId).setDiet(diet);
+        cache().getActualReportByPetOwnerId().get(chatId).setDiet(diet);
     }
 
     /**
@@ -404,7 +423,7 @@ public class ReportRequestBlock<A extends Animal, R extends Report, I extends Ap
                 Как идет процесс восчпитания? Может быть, животное стало проявлять
                  новые черты в своем поведении? Префикс *Изменения: *
                 """);
-        cacheKeeper.getCache().getActualReportByPetOwnerId().get(chatId).setCommonDescriptionOfStatus(commonStatus);
+        cache().getActualReportByPetOwnerId().get(chatId).setCommonDescriptionOfStatus(commonStatus);
     }
 
     /**

@@ -28,6 +28,7 @@ import static com.telegrambotanimalshelter.services.mapper.CatMapper.convertToCa
 public class CatController {
 
     private final PetService<Cat> catsService;
+
     private final ModelMapper modelMapper;
 
     private final PetPhotoService petPhotoService;
