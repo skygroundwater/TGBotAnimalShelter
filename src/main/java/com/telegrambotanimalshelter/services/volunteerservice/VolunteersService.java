@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 import java.util.List;
 
 public interface VolunteersService {
-    Volunteer findByName(String name);
+    Volunteer findByUserName(String name);
 
     Volunteer findVolunteer(Long id);
 

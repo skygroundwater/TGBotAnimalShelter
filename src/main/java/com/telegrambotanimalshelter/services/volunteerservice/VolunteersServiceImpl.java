@@ -20,7 +20,7 @@ public class VolunteersServiceImpl implements VolunteersService {
     }
 
     @Override
-    public Volunteer findByName(String name){
+    public Volunteer findByUserName(String name){
         return volunteersRepository.findByUserName(name);
     }
 

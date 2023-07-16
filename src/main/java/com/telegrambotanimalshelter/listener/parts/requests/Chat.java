@@ -24,23 +24,23 @@ public class Chat<A extends Animal, R extends Report> {
 
     private final MessageSender<A> sender;
 
-    private final CacheKeeper<A, R> cacheKeeper;
+    private final CacheKeeper<A, R> keeper;
 
-    public Chat(MessageSender<A> sender, CacheKeeper<A, R> cacheKeeper) {
+    public Chat(MessageSender<A> sender, CacheKeeper<A, R> keeper) {
         this.sender = sender;
-        this.cacheKeeper = cacheKeeper;
+        this.keeper = keeper;
     }
 
     private Cache<A, R> cache() {
-        return cacheKeeper.getCache();
+        return keeper.getCache();
     }
 
     private VolunteersService volunteersService(){
-        return cacheKeeper.getVolunteersService();
+        return keeper.getVolunteersService();
     }
 
     private PetOwnersService petOwnersService(){
-        return cacheKeeper.getPetOwnersService();
+        return keeper.getPetOwnersService();
     }
 
     /**
@@ -85,7 +85,7 @@ public class Chat<A extends Animal, R extends Report> {
         //поэтому находим сначала любого свободного волонтера
         if (checkUserForVolunteerStatus(chatId)) {
             try {
-                Volunteer volunteer = cacheKeeper.findFreeVolunteer();
+                Volunteer volunteer = keeper.findFreeVolunteer();
                 //назначем поля усыновителю в базе данных и одновременно возвращаем его из метода
                 PetOwner petOwner = petOwnersService()
                         .setPetOwnerToVolunteerChat(chatId, volunteer, true);

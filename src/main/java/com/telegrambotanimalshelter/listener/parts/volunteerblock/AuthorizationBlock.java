@@ -70,23 +70,23 @@ public class AuthorizationBlock<A extends Animal, R extends Report> {
 
     public boolean checkAuthorization(Long chatId) {
         AuthorizationModel authorizationModel = authorizationMap.get(chatId);
-        if(authorizationModel != null) {
+        if (authorizationModel != null) {
             return authorizationModel.isAuthenticating;
-        }
-        else return false;
+        } else return false;
     }
 
-    public SendResponse startAuthentication(Volunteer volunteer){
+    public SendResponse startAuthentication(Volunteer volunteer) {
         volunteer.setInOffice(true);
         volunteer.setFree(false);
-        cache().getVolunteers().put(volunteer.getId(), volunteer);
-        keeper.getVolunteersService().putVolunteer(volunteer);
+        cache().getVolunteers().put(volunteer.getId(),
+                keeper.getVolunteersService().putVolunteer(volunteer));
         authorizationMap.put(volunteer.getId(), new AuthorizationModel(true,
                 volunteer.getUserName(), volunteer.getPassword()));
-        return sender.sendResponse(new SendMessage(volunteer.getId(), "Следующим сообщением введите ваш логин"));
+        return sender.sendResponse(new SendMessage(
+                volunteer.getId(), "Следующим сообщением введите ваш логин"));
     }
 
-    public SendResponse authenticationBlock(Long chatId, Message message){
+    public SendResponse authenticationBlock(Long chatId, Message message) {
         AuthorizationModel authorizationModel = authorizationMap.get(chatId);
         if (authorizationModel != null) {
             if (message.text().equals("Остановить аутентификацию")) {

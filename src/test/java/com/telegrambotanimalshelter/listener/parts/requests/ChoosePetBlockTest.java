@@ -58,14 +58,14 @@ class ChoosePetBlockTest<A extends Animal, R extends Report> {
         Dog dog = new Dog();
         dog.setNickName(name);
 
-        when(dogsRepository.findDogsByNickName(name)).thenReturn(dog);
+        when(dogsRepository.findDogByNickName(name)).thenReturn(dog);
         assertEquals(dog, choosePetBlock.getDogByNameFromUserRequest(name, chatId));
     }
 
     @Test
     void shouldThrowExceptionWhenNotFoundDogByNameFromUserRequest() {
 
-        when(dogsRepository.findDogsByNickName(name)).thenReturn(null);
+        when(dogsRepository.findDogByNickName(name)).thenReturn(null);
 
         NotFoundInDataBaseException exception = assertThrows(NotFoundInDataBaseException.class,
                 () -> choosePetBlock.getDogByNameFromUserRequest(name, chatId));

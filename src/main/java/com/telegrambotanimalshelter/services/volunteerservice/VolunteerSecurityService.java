@@ -17,7 +17,7 @@ public class VolunteerSecurityService implements UserDetailsService {
     }
 
     public Volunteer checkByUsername(String username) {
-        return volunteersService.findByName(username);
+        return volunteersService.findByUserName(username);
     }
 
     @Override

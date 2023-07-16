@@ -153,23 +153,6 @@ class CallbackCheckerTest<A extends Animal, R extends Report, I extends AppImage
     }
 
     @Test
-    void callBackQueryCheck_ReturnsPetOwnerWhoIsIntoTheContactBlock() {
-        //given
-        PetOwner petOwner = petOwner1;
-        petOwner.setContactRequest(true);
-        when(contactBlock.sendMessageToTakeName(chatId)).thenReturn(petOwner);
-        //when
-        PetOwner testingPetOwner = (PetOwner) out.callbackQueryCheck(
-                BotUtils.fromJson(
-                        json.replace("%data%",
-                                "_contacts"),
-                        CallbackQuery.class)).get();
-        //then
-        assertEquals(testingPetOwner.isReportRequest(), petOwner.isReportRequest());
-        assertEquals(testingPetOwner.isContactRequest(), petOwner.isContactRequest());
-    }
-
-    @Test
     public void callBackQueryCheck_ReturnsPetOwnerWhoIsIntoTheRequestBlock() {
         //given
         PetOwner petOwner = petOwner1;

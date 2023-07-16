@@ -40,27 +40,16 @@ public class ReportBlock<A extends Animal, R extends Report, I extends AppImage>
 
     private final MessageSender<A> sender;
 
-    private final PetOwnersService petOwnersService;
-
-    private final ReportService<CatReport, Cat, CatImage> catReportService;
-
-    private final ReportService<DogReport, Dog, DogImage> dogReportService;
-
     private final FileService<I> fileService;
 
     private final CacheKeeper<A, R> keeper;
 
     private HashMap<Long, ArrayList<A>> cashedNoneReportedPetNames;
 
-    public ReportBlock(MessageSender<A> sender, PetOwnersService petOwnersService,
-                       @Qualifier("catReportServiceImpl") ReportService<CatReport, Cat, CatImage> catReportService,
-                       @Qualifier("dogReportServiceImpl") ReportService<DogReport, Dog, DogImage> dogReportService,
+    public ReportBlock(MessageSender<A> sender,
                        FileService<I> fileService,
                        CacheKeeper<A, R> keeper) {
         this.sender = sender;
-        this.petOwnersService = petOwnersService;
-        this.catReportService = catReportService;
-        this.dogReportService = dogReportService;
         this.fileService = fileService;
         this.keeper = keeper;
         this.cashedNoneReportedPetNames = new HashMap<>();
@@ -147,14 +136,14 @@ public class ReportBlock<A extends Animal, R extends Report, I extends AppImage>
         берем из держателя кеша котов и собак пользователя
         и добавляем их имена к клавиатуре, предоставляя выбор
          */
-        for (Cat cat : keeper.getCatsByPetOwnerIdFromCache(chatId)) {
+        for (Cat cat : cache().getCatsByPetOwnerId().get(chatId)) {
             if (!cat.isReported()) {
                 choosePetMarkup.addRow(cat.getNickName());
                 // сохраняем кошку в кеше
                 cashedNoneReportedPetNames.get(chatId).add((A) cat);
             }
         }
-        for (Dog dog : keeper.getDogByPetOwnerIdFromCache(chatId)) {
+        for (Dog dog : cache().getDogsByPetOwnerId().get(chatId)) {
             if (!dog.isReported()) {
                 choosePetMarkup.addRow(dog.getNickName());
                 // сохраняем собаку в кеше

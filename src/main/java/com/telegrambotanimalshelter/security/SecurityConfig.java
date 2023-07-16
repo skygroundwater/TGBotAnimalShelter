@@ -36,9 +36,16 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> {
 
-                    auth.requestMatchers("").hasRole("ADMIN");
+                    auth.requestMatchers(
+                            "/dogs",
+                            "/dogs" + "/{id}",
+                            "/dogs" + "/put",
+                            "/dogs" + "/photo" + "/{name}").hasRole("VOLUNTEER");
 
-                    auth.requestMatchers("").hasAnyRole("ADMIN", "VOLUNTEER");
+                    auth.requestMatchers("/cats",
+                            "/cats" + "/{id}",
+                            "/cats" + "/put",
+                            "/cats" + "/photo" + "/{name}").hasRole("VOLUNTEER");
 
                 }).httpBasic(Customizer.withDefaults()).build();
 
