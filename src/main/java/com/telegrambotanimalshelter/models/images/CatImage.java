@@ -28,6 +28,8 @@ public class CatImage extends AppImage{
     @JoinColumn(name = "report_id")
     private CatReport catReport;
 
-
+    public CatImage(Long copiedReportId){
+        super(copiedReportId);
+    }
 
 }

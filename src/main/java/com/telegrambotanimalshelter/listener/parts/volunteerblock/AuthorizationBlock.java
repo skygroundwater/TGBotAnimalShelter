@@ -41,7 +41,7 @@ public class AuthorizationBlock<A extends Animal, R extends Report> {
     @Getter
     @Setter
     @AllArgsConstructor
-    static class AuthorizationModel {
+    private static class AuthorizationModel {
 
         private boolean isAuthenticating;
 

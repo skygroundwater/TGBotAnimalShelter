@@ -1,5 +1,6 @@
 package com.telegrambotanimalshelter.services;
 
+import com.pengrad.telegrambot.model.Document;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.PhotoSize;
 import com.telegrambotanimalshelter.exceptions.UploadFileException;
@@ -47,8 +48,14 @@ public class FileServiceImpl<I extends AppImage> implements FileService<I> {
 
 
     @Override
-    public I processDoc(I image, Message message) {
-        PhotoSize photoSize = Arrays.stream(message.photo()).toList().get(2);
+    public AppImage processDoc(AppImage image, Message message) {
+        PhotoSize photoSize;
+        Document document = message.document();
+        if(document != null){
+            photoSize = document.thumb();
+        }else {
+            photoSize = Arrays.stream(message.photo()).toList().get(2);
+        }
         if (photoSize != null) {
             String fileId = photoSize.fileId();
             ResponseEntity<String> response = getFilePath(fileId);

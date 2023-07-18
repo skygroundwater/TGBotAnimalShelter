@@ -27,4 +27,8 @@ public class DogImage extends AppImage{
     @JoinColumn(name = "report_id")
     private DogReport dogReport;
 
+    public DogImage(Long copiedReportId){
+        super(copiedReportId);
+    }
+
 }

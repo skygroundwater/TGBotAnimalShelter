@@ -13,6 +13,7 @@ import com.telegrambotanimalshelter.models.Volunteer;
 import com.telegrambotanimalshelter.models.animals.Animal;
 import com.telegrambotanimalshelter.models.reports.Report;
 import com.telegrambotanimalshelter.utils.MessageSender;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -43,7 +44,8 @@ public class RegistrationBlock<A extends Animal, R extends Report> {
 
     @Setter
     @Getter
-    static class RegistrationHelperForPetOwner {
+    @AllArgsConstructor
+    private static class RegistrationHelperForPetOwner {
         private boolean changedLogin;
         private boolean changedPassword;
         private String login;
@@ -75,21 +77,26 @@ public class RegistrationBlock<A extends Animal, R extends Report> {
     }
 
     public SendResponse forcedStopRegistration(Long chatId) {
-        PetOwner petOwner = cache().getPetOwnersById().get(chatId);
-        petOwner.setRegistering(false);
-        keeper.getPetOwnersService().putPetOwner(petOwner);
-        registeringPetOwnersId.remove(chatId);
-        sender.sendResponse(new SendMessage(chatId, "Вы не решились стать волонтёром"));
+        cache().getPetOwnersById().forEach((aLong, petOwner) -> {
+            if (aLong.equals(chatId)) {
+                petOwner.setRegistering(false);
+                keeper.getPetOwnersService().putPetOwner(petOwner);
+                registeringPetOwnersId.remove(chatId);
+                sender.sendResponse(new SendMessage(chatId, "Вы не решились стать волонтёром"));
+            }
+        });
         return sender.sendStartMessage(chatId);
     }
 
     public SendResponse registrationBlock(Long chatId, Message message) {
         String text = message.text();
         switch (text) {
-            case "Стать волонтёром":
+            case "Стать волонтёром" -> {
                 return startRegistration(chatId);
-            case "Не хочу быть волонтёром":
+            }
+            case "Не хочу быть волонтёром" -> {
                 return forcedStopRegistration(chatId);
+            }
         }
         RegistrationHelperForPetOwner helper
                 = registeringPetOwnersId.get(chatId);
@@ -105,11 +112,13 @@ public class RegistrationBlock<A extends Animal, R extends Report> {
         return sender.sendResponse(new SendMessage(chatId, "какой-то косяк"));
     }
 
-
     public SendResponse login(Long chatId, String login) {
-        RegistrationHelperForPetOwner helper = registeringPetOwnersId.get(chatId);
-        helper.setLogin(login);
-        helper.setChangedLogin(true);
+        registeringPetOwnersId.forEach((aLong, helper) -> {
+            if (aLong.equals(chatId)) {
+                helper.setLogin(login);
+                helper.setChangedLogin(true);
+            }
+        });
         return sender.sendResponse(new SendMessage(chatId, "Следующим сообщением введите пароль")
                 .replyMarkup(regMarkup()));
     }
@@ -121,9 +130,11 @@ public class RegistrationBlock<A extends Animal, R extends Report> {
     }
 
     public SendResponse password(Long chatId, String password) {
-        RegistrationHelperForPetOwner helper
-                = registeringPetOwnersId.get(chatId);
-        helper.setPassword(password);
+        registeringPetOwnersId.forEach((aLong, helper) -> {
+            if (aLong.equals(chatId)) {
+                helper.setPassword(password);
+            }
+        });
         return sender.sendResponse(new SendMessage(
                 chatId, "Введите повторно пароль для подтверждения")
                 .replyMarkup(regMarkup()));
@@ -134,6 +145,7 @@ public class RegistrationBlock<A extends Animal, R extends Report> {
                 = registeringPetOwnersId.get(chatId);
         String password = helper.getPassword();
         if (password.equals(passwordForConfirm)) {
+            helper.setChangedPassword(true);
             return stopRegistration(chatId, helper);
         }
         return sender.sendResponse(new SendMessage(chatId,
@@ -143,21 +155,25 @@ public class RegistrationBlock<A extends Animal, R extends Report> {
 
     private SendResponse stopRegistration(Long chatId,
                                           RegistrationHelperForPetOwner helper) {
-        helper.setChangedPassword(true);
-        PetOwner registeredPetOwnerLikeVolunteer = cache().getPetOwnersById().get(chatId);
-        registeredPetOwnerLikeVolunteer.setRegistering(false);
-        cache().getPetOwnersById().put(chatId, keeper.getPetOwnersService()
-                .putPetOwner(registeredPetOwnerLikeVolunteer));
-        Volunteer volunteer = new Volunteer();
-        volunteer.setFirstName(registeredPetOwnerLikeVolunteer.getFirstName());
-        volunteer.setLastName(registeredPetOwnerLikeVolunteer.getLastName());
-        volunteer.setId(registeredPetOwnerLikeVolunteer.getId());
-        volunteer.setUserName(helper.login);
-        volunteer.setRole(Role.ROLE_VOLUNTEER);
-        volunteer.setPassword(encoder.encode(helper.password));
-        cache().getVolunteers().put(volunteer.getId(), volunteer);
-        keeper.getVolunteersService().saveVolunteer(volunteer);
-        sender.sendResponse(new SendMessage(chatId, "Вы успешно прошли регистрацию"));
+        cache().getPetOwnersById().forEach((aLong, petOwner) -> {
+                    if (aLong.equals(chatId)) {
+                        petOwner.setRegistering(false);
+                        keeper.getPetOwnersService()
+                                .putPetOwner(petOwner);
+                        cache().getVolunteers().put(petOwner.getId(),
+                                keeper.getVolunteersService()
+                                        .saveVolunteer(Volunteer.builder()
+                                                .firstName(petOwner.getFirstName())
+                                                .lastName(petOwner.getLastName())
+                                                .id(petOwner.getId())
+                                                .userName(helper.getLogin())
+                                                .role(Role.ROLE_VOLUNTEER)
+                                                .password(encoder.encode(helper.getPassword()))
+                                                .build()));
+                        sender.sendResponse(new SendMessage(chatId, "Вы успешно прошли регистрацию"));
+                    }
+                }
+        );
         return sender.sendStartMessage(chatId);
     }
 }

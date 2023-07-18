@@ -24,4 +24,8 @@ public abstract class AppImage {
     @Column(name = "copied_report_id")
     private Long copiedReportId;
 
+    public AppImage(Long copiedReportId){
+        this.copiedReportId = copiedReportId;
+    }
+
 }

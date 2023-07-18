@@ -216,7 +216,7 @@ public class CheckReportsBlock<A extends Animal, R extends Report> {
                     .append("\n\n");
         } else if (report instanceof CatReport) {
             stringBuilder
-                    .append("Отчет о собачке от ")
+                    .append("Отчет о кошке от ")
                     .append(cache().getPetOwnersById()
                             .get(report.getCopiedPetOwnerId())
                             .getFirstName())
