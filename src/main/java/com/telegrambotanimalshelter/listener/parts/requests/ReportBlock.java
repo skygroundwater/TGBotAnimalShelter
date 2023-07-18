@@ -17,15 +17,11 @@ import com.telegrambotanimalshelter.models.reports.CatReport;
 import com.telegrambotanimalshelter.models.reports.DogReport;
 import com.telegrambotanimalshelter.models.reports.Report;
 import com.telegrambotanimalshelter.services.FileService;
-import com.telegrambotanimalshelter.services.petownerservice.PetOwnersService;
-import com.telegrambotanimalshelter.services.reportservice.ReportService;
 import com.telegrambotanimalshelter.utils.MessageSender;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 /**
  * Сущность, отвечающая за взаимодействие с пользователем
@@ -195,15 +191,10 @@ public class ReportBlock<A extends Animal, R extends Report, I extends AppImage>
     public boolean checkIsMessageANameOfPet(Long chatId, Message message) {
         for (A animal : cashedNoneReportedPetNames.get(chatId)) {
             if (animal.getNickName().equals(message.text())) {
-                if (animal instanceof Dog) {
-                    //в кеше создаем сущность отчета и наполнять
-                    //его будем по мере прохождения этапов блока
-                    createReportForAnimal(chatId, animal);
-                    return true;
-                } else if (animal instanceof Cat) {
-                    createReportForAnimal(chatId, animal);
-                    return true;
-                }
+                //в кеше создаем сущность отчета и наполнять
+                //его будем по мере прохождения этапов блока
+                createReportForAnimal(chatId, animal);
+                return true;
             }
         }
         return false;
@@ -213,17 +204,20 @@ public class ReportBlock<A extends Animal, R extends Report, I extends AppImage>
     public PetOwner createReportForAnimal(Long chatId, A animal) {
         PetOwner petOwner = cache().getPetOwnersById().get(chatId);
         if (animal instanceof Cat cat) {
-            CatReport catReport = CatReport.builder().cat(cat)
-                    .petOwner(petOwner).images(new ArrayList<>()).build();
-            catReport.setPetOwner(petOwner);
-            CatReport catReportWithId = keeper.getCatReportService().putReport(catReport);
-            cache().getActualReportByPetOwnerId().put(chatId, (R) catReportWithId);
+            cache().getActualReportByPetOwnerId().put(chatId,
+                    (R) keeper.getCatReportService().putReport(
+                            CatReport.builder().cat(cat)
+                                    .petOwner(petOwner)
+                                    .images(new ArrayList<>())
+                                    .build()));
             cache().getActualPetsInReportProcess().put(chatId, animal);
         } else if (animal instanceof Dog dog) {
-            DogReport dogReport = DogReport.builder().dog(dog).petOwner(petOwner).images(new ArrayList<>()).build();
-            dogReport.setPetOwner(petOwner);
-            DogReport dogReportWithId = keeper.getDogReportService().putReport(dogReport);
-            cache().getActualReportByPetOwnerId().put(chatId, (R) dogReportWithId);
+            cache().getActualReportByPetOwnerId().put(chatId,
+                    (R) keeper.getDogReportService().putReport(
+                            DogReport.builder().dog(dog)
+                                    .petOwner(petOwner)
+                                    .images(new ArrayList<>())
+                                    .build()));
             cache().getActualPetsInReportProcess().put(chatId, animal);
         }
         return petOwner;
@@ -240,29 +234,26 @@ public class ReportBlock<A extends Animal, R extends Report, I extends AppImage>
      * @return true или false
      */
     public boolean checkIsMessageAPhoto(Long chatId, Message message) {
-        if (message.photo() != null) {
+        if (message.photo() != null || message.document() != null) {
             /*
             берем активную сущность отчета пользователя из кеша
              */
             R report = cache().getActualReportByPetOwnerId().get(chatId);
+            report.setCopiedPetOwnerId(chatId);
             /*
             осуществляем проверку сущности отчета на соответствие
             отчета для кота или же для собаки.
             далее производим манипуляции по его наполнению
              */
             if (report instanceof CatReport catReport) {
-                List<CatImage> images = catReport.getImages();
-                CatImage catImage = new CatImage();
-                catImage.setCopiedReportId(catReport.getId());
-                images.add((CatImage) fileService.processDoc((I) catImage, message));
-                catReport.setImages(images);
+                catReport.getImages().add(
+                        (CatImage) fileService.processDoc(
+                                new CatImage(catReport.getId()), message));
                 return true;
             } else if (report instanceof DogReport dogReport) {
-                List<DogImage> images = dogReport.getImages();
-                DogImage dogImage = new DogImage();
-                dogImage.setCopiedReportId(dogReport.getId());
-                images.add((DogImage) fileService.processDoc((I) dogImage, message));
-                dogReport.setImages(images);
+                dogReport.getImages().add(
+                        (DogImage) fileService.processDoc(
+                                new DogImage(dogReport.getId()), message));
                 return true;
             }
         }
@@ -303,7 +294,8 @@ public class ReportBlock<A extends Animal, R extends Report, I extends AppImage>
 
     private void breakReport(Long chatId) {
         cache().getPetOwnersById().put(chatId,
-                keeper.getPetOwnersService().setPetOwnerReportRequest(chatId, false));
+                keeper.getPetOwnersService()
+                        .setPetOwnerReportRequest(chatId, false));
     }
 
     /**
@@ -318,39 +310,39 @@ public class ReportBlock<A extends Animal, R extends Report, I extends AppImage>
      */
     private void stopReport(Long chatId, String behavioralChanges) {
         //получаем отчет из кеша и заполняем в нем переменную behavioralChanges
-        R report = cache().getActualReportByPetOwnerId().get(chatId);
-        report.setBehavioralChanges(behavioralChanges);
         /*
         производим проверку соответствия отчета к определенному классу
         и производим манипуляции с данными для привязок и сохранения в базу данных
          */
-        if (report instanceof CatReport catReport) {
-            CatImage catImage = (catReport.getImages().get(0));
-            catReport.setCopiedPetOwnerId(chatId);
-            Cat cat = (Cat) cache().getActualPetsInReportProcess().remove(chatId);
-            cat.setReported(true);
-            keeper.getCatService().putPet(cat);
-            catReport.setCopiedAnimalId(cat.getId());
-            catImage.setCat(cat);
-            catImage.setCatReport(catReport);
-            catImage.setCopiedReportId(catReport.getId());
-            keeper.getCatReportService().putReport(catReport);
-            cache().getCashedReports().add((R) catReport);
-            cache().getCatImages().add(catImage);
-        } else if (report instanceof DogReport dogReport) {
-            DogImage dogImage = (dogReport.getImages().get(0));
-            dogReport.setCopiedPetOwnerId(chatId);
-            Dog dog = (Dog) cache().getActualPetsInReportProcess().remove(chatId);
-            dog.setReported(true);
-            keeper.getDogService().putPet(dog);
-            dogReport.setCopiedAnimalId(dog.getId());
-            dogImage.setDog(dog);
-            dogImage.setDogReport(dogReport);
-            dogImage.setCopiedReportId(dogReport.getId());
-            keeper.getDogReportService().putReport(dogReport);
-            cache().getCashedReports().add((R) dogReport);
-            cache().getDogImages().add(dogImage);
-        }
+        cache().getActualReportByPetOwnerId().computeIfPresent(chatId, (aLong, rpt) -> {
+            rpt.setBehavioralChanges(behavioralChanges);
+            A animal = cache().getActualPetsInReportProcess().remove(chatId);
+            animal.setReported(true);
+            if (rpt instanceof CatReport catReport) {
+                catReport.getImages().stream().findFirst().ifPresent(image -> {
+                    animal.setPhoto(image.getFileAsArrayOfBytes());
+                    Cat cat = keeper.getCatService().putPet((Cat) animal);
+                    catReport.setCopiedAnimalId(cat.getId());
+                    image.setCat(cat);
+                    image.setCatReport(catReport);
+                    cache().getCatImages().add(image);
+                    cache().getCashedReports().add(
+                            (R) keeper.getCatReportService().putReport(catReport));
+                });
+            } else if (rpt instanceof DogReport dogReport) {
+                Dog dog = keeper.getDogService().putPet((Dog) animal);
+                dogReport.getImages().stream().findFirst().ifPresent(image -> {
+                    animal.setPhoto(image.getFileAsArrayOfBytes());
+                    dogReport.setCopiedAnimalId(dog.getId());
+                    image.setDog(dog);
+                    image.setDogReport(dogReport);
+                    cache().getDogImages().add(image);
+                    cache().getCashedReports().add(
+                            (R) keeper.getDogReportService().putReport(dogReport));
+                });
+            }
+            return rpt;
+        });
         //отправляем ответ и обновляем данные о пользователе в кеше и в базе данных
         sender.sendMessage(chatId, "Спасибо Вам за ваш отчет. Если будет что-то не так - волонтёр отпишетися вам. Желаем удачи.");
         breakReport(chatId);

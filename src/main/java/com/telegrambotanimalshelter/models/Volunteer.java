@@ -3,10 +3,7 @@ package com.telegrambotanimalshelter.models;
 import com.telegrambotanimalshelter.enums.Role;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 @Entity
 @Table(schema = "public", name = "volunteers")
@@ -14,14 +11,13 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
+@NoArgsConstructor
+@Builder
 public class Volunteer {
 
     @Id
     @Column(name = "id")
     private Long id;
-
-    @Column(name = "link")
-    private String link;
 
     @Column(name = "first_name")
     private String firstName;
@@ -33,13 +29,16 @@ public class Volunteer {
     private String userName;
 
     @Column(name = "is_free")
-    private boolean isFree;
+    @Builder.Default
+    private boolean isFree = true;
 
     @Column(name = "checking_reports")
-    private boolean checkingReports;
+    @Builder.Default
+    private boolean checkingReports = false;
 
     @Column(name = "in_office")
-    private boolean inOffice;
+    @Builder.Default
+    private boolean inOffice = false;
 
     @OneToOne
     @JoinColumn(name = "petowner_id", referencedColumnName = "id")
@@ -54,40 +53,40 @@ public class Volunteer {
     private Role role;
 
     @Column(name = "non_expired")
-    private boolean nonExpired;
+    @Builder.Default
+    private boolean nonExpired = true;
 
     @Column(name = "non_locked")
-    private boolean nonLocked;
+    @Builder.Default
+    private boolean nonLocked = true;
 
     @Column(name = "non_credentials_expired")
-    private boolean nonCredentialsExpired;
+    @Builder.Default
+    private boolean nonCredentialsExpired = true;
 
     @Column(name = "is_enabled")
-    private boolean isEnabled;
+    @Builder.Default
+    private boolean isEnabled = true;
 
-    public Volunteer(Long id, String link,  String firstName,
-                     String lastName, String userName,
-                     boolean isFree, boolean inOffice,
-                     boolean isCheckingReports, PetOwner petOwner){
+
+    public Volunteer(Long id, String firstName,
+                     String lastName, String userName, PetOwner petOwner) {
         this.id = id;
-        this.link = link;
         this.firstName = firstName;
         this.lastName = lastName;
         this.userName = userName;
-        this.isFree = isFree;
-        this.inOffice = inOffice;
-        this.checkingReports = isCheckingReports;
         this.petOwner = petOwner;
+        this.inOffice = false;
+        this.checkingReports = false;
     }
 
-    public Volunteer(){
-        nonCredentialsExpired = true;
-        nonExpired = true;
-        nonLocked = true;
-        isEnabled = true;
-        inOffice = false;
-        isFree = true;
-        checkingReports = false;
+    public Volunteer(Long id, String firstName,
+                     String lastName, String userName) {
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.userName = userName;
+        this.inOffice = false;
+        this.checkingReports = false;
     }
-
 }

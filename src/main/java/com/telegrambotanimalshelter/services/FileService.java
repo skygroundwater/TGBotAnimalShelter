@@ -8,7 +8,7 @@ import com.telegrambotanimalshelter.models.images.DogImage;
 import java.util.List;
 
 public interface FileService<I extends AppImage> {
-    I processDoc(I image, Message message);
+    AppImage processDoc(AppImage image, Message message);
 
     List<DogImage> getAllDogImages();
 

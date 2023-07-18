@@ -34,7 +34,6 @@ create table volunteers
     id                      bigint               not null
         constraint volunteer_pk
             primary key,
-    link                    varchar(255),
     first_name              varchar(255),
     last_name               varchar(255),
     username                varchar(255),
@@ -44,6 +43,7 @@ create table volunteers
         constraint volunteers_petowners_null_fk
             references petowners
             on update set null on delete set null,
+    role                    varchar(25),
     checking_reports        boolean default false,
     in_office               boolean default false,
     non_expired             boolean,
