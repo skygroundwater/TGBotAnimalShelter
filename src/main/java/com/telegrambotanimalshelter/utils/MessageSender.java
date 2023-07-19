@@ -4,6 +4,7 @@ import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.CallbackQuery;
 import com.pengrad.telegrambot.model.request.*;
 import com.pengrad.telegrambot.request.SendChatAction;
+import com.pengrad.telegrambot.request.SendDocument;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.request.SendPhoto;
 import com.pengrad.telegrambot.response.SendResponse;
@@ -78,6 +79,15 @@ public class MessageSender<A extends Animal> {
     public SendResponse sendResponse(SendMessage sendMessage) {
         sendMessage.parseMode(ParseMode.Markdown);
         SendResponse sendResponse = telegramBot.execute(sendMessage);
+        if (!sendResponse.isOk()) {
+            logger.error("Error during sending message: {}", sendResponse.message());
+        }
+        return sendResponse;
+    }
+
+    public SendResponse sendResponse(SendDocument sendDocument) {
+        sendDocument.parseMode(ParseMode.Markdown);
+        SendResponse sendResponse = telegramBot.execute(sendDocument);
         if (!sendResponse.isOk()) {
             logger.error("Error during sending message: {}", sendResponse.message());
         }

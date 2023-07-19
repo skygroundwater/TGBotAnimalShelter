@@ -52,26 +52,54 @@ public class FileServiceImpl<I extends AppImage> implements FileService<I> {
         PhotoSize photoSize;
         Document document = message.document();
         if(document != null){
-            photoSize = document.thumb();
-        }else {
+            return processDocument(image, document);
+        }else if(message.photo().length != 0){
             photoSize = Arrays.stream(message.photo()).toList().get(2);
-        }
-        if (photoSize != null) {
-            String fileId = photoSize.fileId();
-            ResponseEntity<String> response = getFilePath(fileId);
-            if (response.getStatusCode() == HttpStatus.OK) {
-                JSONObject jsonObject = new JSONObject(response.getBody());
-                String filePath = String.valueOf(jsonObject.getJSONObject("result").getString("file_path"));
-                byte[] fileInByte = downloadFile(filePath);
-                image.setFileSize(photoSize.fileSize());
-                image.setTelegramFileId(photoSize.fileId());
-                image.setFileAsArrayOfBytes(fileInByte);
-                return image;
-            }
+            return processPhotoSize(image, photoSize);
         } else {
             throw new UploadFileException("Ошибка ответа от телеграмма");
         }
-        return null;
+    }
+
+    private AppImage processDocument(AppImage image, Document document) {
+        String fileId = document.fileId();
+        ResponseEntity<String> response = getFilePath(fileId);
+        if (response.getStatusCode() == HttpStatus.OK) {
+            JSONObject jsonObject = new JSONObject(response.getBody());
+            String filePath = String.valueOf(jsonObject.getJSONObject("result")
+                    .getString("file_path"));
+            byte[] fileInByte = downloadFile(filePath);
+            image.setFileSize(document.fileSize());
+            image.setTelegramFileId(fileId);
+            image.setFileAsArrayOfBytes(fileInByte);
+            if (image instanceof CatImage catImage) {
+                catImagesRepository.save(catImage);
+            } else if (image instanceof DogImage dogImage) {
+                dogImagesRepository.save(dogImage);
+            }
+            return image;
+        }
+        return image;
+    }
+
+    private AppImage processPhotoSize(AppImage image, PhotoSize photoSize){
+        ResponseEntity<String> response = getFilePath(photoSize.fileId());
+        if (response.getStatusCode() == HttpStatus.OK) {
+            JSONObject jsonObject = new JSONObject(response.getBody());
+            String filePath = String.valueOf(jsonObject.getJSONObject("result")
+                    .getString("file_path"));
+            byte[] fileInByte = downloadFile(filePath);
+            image.setFileSize(photoSize.fileSize());
+            image.setTelegramFileId(photoSize.fileId());
+            image.setFileAsArrayOfBytes(fileInByte);
+            if(image instanceof CatImage catImage){
+                catImagesRepository.save(catImage);
+            }else if(image instanceof DogImage dogImage){
+                dogImagesRepository.save(dogImage);
+            }
+            return image;
+        }
+        return image;
     }
 
     @Override

@@ -1,14 +1,13 @@
 package com.telegrambotanimalshelter.listener.parts.volunteerblock;
 
 import com.pengrad.telegrambot.model.request.ReplyKeyboardMarkup;
+import com.pengrad.telegrambot.request.SendDocument;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.request.SendPhoto;
 import com.telegrambotanimalshelter.listener.parts.keeper.Cache;
 import com.telegrambotanimalshelter.listener.parts.keeper.CacheKeeper;
 import com.telegrambotanimalshelter.models.Volunteer;
 import com.telegrambotanimalshelter.models.animals.Animal;
-import com.telegrambotanimalshelter.models.images.CatImage;
-import com.telegrambotanimalshelter.models.images.DogImage;
 import com.telegrambotanimalshelter.models.reports.CatReport;
 import com.telegrambotanimalshelter.models.reports.DogReport;
 import com.telegrambotanimalshelter.models.reports.Report;
@@ -16,7 +15,6 @@ import com.telegrambotanimalshelter.utils.MessageSender;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Stream;
@@ -92,51 +90,47 @@ public class CheckReportsBlock<A extends Animal, R extends Report> {
     }
 
     public Volunteer volunteerAcceptReport(Long volunteerId, R report) {
-        cache().getCashedReports().remove(report);
-        report.setCheckedByVolunteer(true);
-        cache().getCashedReports().add(report);
-        if (report instanceof DogReport dogReport) {
-            keeper.getDogReportService().putReport(dogReport);
-        } else if (report instanceof CatReport catReport) {
-            keeper.getCatReportService().putReport(catReport);
-        }
-        Volunteer volunteer = cache().getVolunteers().get(volunteerId);
-        volunteer.setCheckingReports(false);
-        return cache().getVolunteers().put(volunteerId, volunteer);
+        return cache().getVolunteers().computeIfPresent(volunteerId, (key, volunteer) -> {
+            cache().getCachedReports().forEach(rpt -> {
+                if (report.equals(rpt)) {
+                    rpt.setCheckedByVolunteer(true);
+                    if (rpt instanceof DogReport dogReport) {
+                        keeper.getDogReportService().putReport(dogReport);
+                    } else if (rpt instanceof CatReport catReport) {
+                        keeper.getCatReportService().putReport(catReport);
+                    }
+                }
+            });
+            volunteer.setCheckingReports(false);
+            return volunteer;
+        });
     }
 
     public Volunteer volunteerRejectReport(Long volunteerId, R report) {
-        cache().getCashedReports().remove(report);
-        if (report instanceof DogReport dogReport) {
-            cache().getDogsByPetOwnerId().get(dogReport.getCopiedPetOwnerId())
-                    .stream()
-                    .filter(d -> d.getId()
-                            .equals(dogReport.getCopiedAnimalId()))
-                    .findFirst()
-                    .ifPresent(dog -> {
-                        dog.setReported(false);
-                        keeper.getDogService().putPet(dog);
-                    });
-            keeper.getDogReportService().deleteReportById(dogReport.getId());
-        } else if (report instanceof CatReport catReport) {
-            cache().getCatsByPetOwnerId().get(catReport.getCopiedPetOwnerId())
-                    .stream()
-                    .filter(c -> c.getId()
-                            .equals(catReport.getCopiedAnimalId()))
-                    .findFirst()
-                    .ifPresent(cat -> {
-                        cat.setReported(false);
-                        keeper.getCatService().putPet(cat);
-                    });
-            keeper.getCatReportService().deleteReportById(catReport.getId());
-        }
-        cache().getVolunteers().entrySet().stream().peek(entry -> {
-            if (entry.getKey().equals(volunteerId)) {
-                entry.setValue(Stream.of(entry.getValue()).peek(vol ->
-                        vol.setCheckingReports(false)).findFirst().get());
+        return cache().getVolunteers().computeIfPresent(volunteerId, (aLong, volunteer) -> {
+            cache().getCachedReports().remove(report);
+            if (report instanceof DogReport dogReport) {
+                cache().getDogsByPetOwnerId().get(dogReport.getCopiedPetOwnerId()).forEach(dog -> {
+                            if (dog.getId().equals(dogReport.getCopiedAnimalId())) {
+                                dog.setReported(false);
+                                keeper.getDogService().putPet(dog);
+                                keeper.getDogReportService().deleteReportById(dogReport.getId());
+                            }
+                        }
+                );
+            } else if (report instanceof CatReport catReport) {
+                cache().getCatsByPetOwnerId().get(catReport.getCopiedPetOwnerId())
+                        .forEach(cat -> {
+                            if (cat.getId().equals(catReport.getCopiedAnimalId())) {
+                                cat.setReported(false);
+                                keeper.getCatService().putPet(cat);
+                                keeper.getCatReportService().deleteReportById(catReport.getId());
+                            }
+                        });
             }
+            volunteer.setCheckingReports(false);
+            return volunteer;
         });
-        return cache().getVolunteers().get(volunteerId);
     }
 
     public void forcedStopCheckReport(Long chatId) {
@@ -154,25 +148,20 @@ public class CheckReportsBlock<A extends Animal, R extends Report> {
     }
 
     private void checkNoneCheckedReportsFromCacheKeeper(Long chatId) {
-        List<R> reports = cache().getCashedReports()
-                .stream().filter(r -> !r.isCheckedByVolunteer()).toList();
-        if (reports.isEmpty()) {
-            sender.sendResponse(new SendMessage(chatId,
-                    "На данный момент отчетов усыновители не предоставляли")
-                    .replyMarkup(volunteerKeyboardInOffice()));
-            Volunteer volunteer = cache().getVolunteers().get(chatId);
-            volunteer.setCheckingReports(false);
-            cache().getVolunteers().put(chatId, volunteer);
-        } else {
-            for (R report : reports) {
-                if (!report.getCopiedPetOwnerId().equals(chatId)) {
-                    if (!report.isCheckedByVolunteer()) {
-                        sendMessageWithUncheckedReportForVolunteer(chatId, report);
-                        return;
-                    }
+        cache().getCachedReports().forEach(rpt -> {
+            if (!rpt.isCheckedByVolunteer()) {
+                if (!rpt.getCopiedPetOwnerId().equals(chatId)) {
+                    sendMessageWithUncheckedReportForVolunteer(chatId, rpt);
                 }
             }
-            sender.sendMessage(chatId, "На данный момент отчетов усыновители не предоставляли");
+        });
+        if (!cachedCheckingReports.containsKey(chatId)) {
+            cache().getVolunteers().forEach((aLong, volunteer) -> {
+                if (aLong.equals(chatId)) {
+                    volunteer.setCheckingReports(false);
+                    sender.sendMessage(chatId, "На данный момент отчетов усыновители не предоставляли");
+                }
+            });
         }
     }
 
@@ -183,55 +172,45 @@ public class CheckReportsBlock<A extends Animal, R extends Report> {
     }
 
     private void sendReportPhoto(Long chatId, R report) {
-        SendPhoto sendPhoto;
         if (report instanceof CatReport catReport) {
-            Optional<CatImage> catImage = cache().getCatImages()
-                    .stream()
-                    .filter(image -> image.getCopiedReportId()
-                            .equals(catReport.getId()))
-                    .findFirst();
-            if (catImage.isPresent()) {
-                sendPhoto = new SendPhoto(chatId, catImage.get().getFileAsArrayOfBytes());
-                sender.sendResponse(sendPhoto);
-            }
+            cache().getCatImages().forEach(catImage -> {
+                if (catImage.getCopiedReportId().equals(catReport.getId())) {
+                    sender.sendResponse(new SendPhoto(chatId, catImage.getFileAsArrayOfBytes()));
+                }
+            });
         } else if (report instanceof DogReport dogReport) {
-            Optional<DogImage> dogImage = cache().getDogImages().stream()
-                    .filter(image -> image.getCopiedReportId()
-                            .equals(dogReport.getId())).findFirst();
-            if (dogImage.isPresent()) {
-                sendPhoto = new SendPhoto(chatId, dogImage.get().getFileAsArrayOfBytes());
-                sender.sendResponse(sendPhoto);
-            }
+            cache().getDogImages().forEach(dogImage -> {
+                if (dogImage.getCopiedReportId().equals(dogReport.getId())) {
+                    sender.sendResponse(new SendPhoto(chatId, dogImage.getFileAsArrayOfBytes()));
+                }
+            });
         }
     }
 
     private void sendReportInfoByText(Long chatId, R report) {
-        StringBuilder stringBuilder = new StringBuilder();
-        if (report instanceof DogReport) {
-            stringBuilder
-                    .append("Отчет о собачке от ")
-                    .append(cache().getPetOwnersById()
-                            .get(report.getCopiedPetOwnerId())
-                            .getFirstName())
-                    .append("\n\n");
-        } else if (report instanceof CatReport) {
-            stringBuilder
-                    .append("Отчет о кошке от ")
-                    .append(cache().getPetOwnersById()
-                            .get(report.getCopiedPetOwnerId())
-                            .getFirstName())
-                    .append("\n\n");
-        }
-        stringBuilder.append("*Диета питомца:* ")
-                .append(report.getDiet())
-                .append("\n\n").append("*Состояние питомца:* ")
-                .append(report.getCommonDescriptionOfStatus())
-                .append("\n\n").append("*Изменения: *")
-                .append(report.getBehavioralChanges());
-        SendMessage sendMessage =
-                new SendMessage(chatId, stringBuilder.toString());
-        sendMessage.replyMarkup(volunteerKeyboardWhileCheckingReport());
-        sender.sendResponse(sendMessage);
+        cache().getPetOwnersById().forEach((aLong, petOwner) -> {
+            if (aLong.equals(report.getCopiedPetOwnerId())) {
+                String catOrDog = null;
+                if (report instanceof DogReport) {
+                    catOrDog = "собачке";
+                } else if (report instanceof CatReport) {
+                    catOrDog = "кошке";
+                }
+                String info = String.format("""
+                                Отчёт о %s от %s
+                                                                
+                                *Диета питомца:* %s
+
+                                 *Состояние питомца:* %s
+
+                                 *Изменения:* %s""",
+                        catOrDog, petOwner.getFirstName(),
+                        report.getDiet(), report.getCommonDescriptionOfStatus(),
+                        report.getBehavioralChanges());
+                sender.sendResponse(new SendMessage(chatId, info)
+                        .replyMarkup(volunteerKeyboardWhileCheckingReport()));
+            }
+        });
     }
 
     private ReplyKeyboardMarkup volunteerKeyboardWhileCheckingReport() {

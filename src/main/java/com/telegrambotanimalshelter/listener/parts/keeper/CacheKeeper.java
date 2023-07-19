@@ -1,7 +1,6 @@
 package com.telegrambotanimalshelter.listener.parts.keeper;
 
 import com.telegrambotanimalshelter.exceptions.NotFoundInDataBaseException;
-import com.telegrambotanimalshelter.models.PetOwner;
 import com.telegrambotanimalshelter.models.Volunteer;
 import com.telegrambotanimalshelter.models.animals.Animal;
 import com.telegrambotanimalshelter.models.animals.Cat;
@@ -103,10 +102,10 @@ public class CacheKeeper<A extends Animal, R extends Report> {
 
     public String fillReportsCache() {
         for (CatReport catReport : catReportService.getAllReports()) {
-            cache.getCashedReports().add((R) catReport);
+            cache.getCachedReports().add((R) catReport);
         }
         for (DogReport dogReport : dogReportService.getAllReports()) {
-            cache.getCashedReports().add((R) dogReport);
+            cache.getCachedReports().add((R) dogReport);
         }
         return "Кеш заполнен отчетами";
     }

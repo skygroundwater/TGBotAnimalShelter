@@ -35,7 +35,7 @@ public class Cache<A extends Animal, R extends Report> {
 
     private ConcurrentMap<Long, List<DogReport>> dogReportsByDogId;
 
-    private List<R> cashedReports;
+    private List<R> cachedReports;
 
     private List<CatReport> cachedCatReports;
 
@@ -61,7 +61,7 @@ public class Cache<A extends Animal, R extends Report> {
         this.dogReportsByDogId = new ConcurrentHashMap<>();
         this.actualReportByPetOwnerId = new ConcurrentHashMap<>();
         this.actualPetsInReportProcess = new ConcurrentHashMap<>();
-        this.cashedReports = new ArrayList<>();
+        this.cachedReports = new ArrayList<>();
         this.catImages = new ArrayList<>();
         this.dogImages = new ArrayList<>();
         this.cachedAnimals = new ArrayList<>();

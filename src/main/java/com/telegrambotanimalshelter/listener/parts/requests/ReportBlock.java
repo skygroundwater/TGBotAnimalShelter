@@ -326,7 +326,7 @@ public class ReportBlock<A extends Animal, R extends Report, I extends AppImage>
                     image.setCat(cat);
                     image.setCatReport(catReport);
                     cache().getCatImages().add(image);
-                    cache().getCashedReports().add(
+                    cache().getCachedReports().add(
                             (R) keeper.getCatReportService().putReport(catReport));
                 });
             } else if (rpt instanceof DogReport dogReport) {
@@ -337,7 +337,7 @@ public class ReportBlock<A extends Animal, R extends Report, I extends AppImage>
                     image.setDog(dog);
                     image.setDogReport(dogReport);
                     cache().getDogImages().add(image);
-                    cache().getCashedReports().add(
+                    cache().getCachedReports().add(
                             (R) keeper.getDogReportService().putReport(dogReport));
                 });
             }
